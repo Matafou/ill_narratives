@@ -8,7 +8,7 @@ Variable A: Type.
 Reserved Notation "x ⊸ y" (at level 60, no associativity).
 Reserved Notation "x ⊕ y" (at level 60, no associativity).
 Reserved Notation "x ⊗ y" (at level 60, no associativity).
-Reserved Notation "x '|-' y" (at level 70, no associativity).
+(* Reserved Notation "x '|-' y" (at level 70, no associativity). *)
 Reserved Notation "x ⊢ y" (at level 70, no associativity).
 Reserved Notation "! x" (at level 50, no associativity).
 Reserved Notation "x & y" (at level 80, no associativity).
@@ -35,7 +35,8 @@ Notation "0" := Zero : ILL_scope.
 Notation  "! A" := (Bang A) : ILL_scope.
 Notation  "A & B" := (And A B) : ILL_scope.
 Notation  "⊤" := T : ILL_scope.
-
+Notation Φ := (Formula).
+Set Printing Width 100.
 Open Scope ILL_scope.
 Definition env := list Formula.
 
@@ -113,6 +114,6 @@ Inductive ILL_proof : env -> Formula -> Prop :=
   forall Γ Γ' p, same_env Γ Γ' -> 
     ILL_proof Γ p -> ILL_proof Γ' p 
 where 
- " x |- y " := (ILL_proof x y) .
+ " x ⊢ y " := (ILL_proof x y) .
 
 End S.
