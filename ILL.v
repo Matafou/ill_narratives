@@ -4,6 +4,16 @@ Section S.
 
 Variable A: Type.
 
+Reserved Notation "x ⊸ y" (at level 60, no associativity).
+Reserved Notation "x ⊕ y" (at level 60, no associativity).
+Reserved Notation "x ⊗ y" (at level 60, no associativity).
+Reserved Notation "x '|-' y" (at level 70, no associativity).
+Reserved Notation "x ⊢ y" (at level 70, no associativity).
+Reserved Notation "! x" (at level 50, no associativity).
+Reserved Notation "x & y" (at level 80, no associativity).
+Reserved Notation "⊤" (at level 10, no associativity).
+(* Reserved Notation "⊥" (at level 80, no associativity). *)
+
 Inductive Formula : Type := 
 | Proposition : A -> Formula
 | Implies : Formula -> Formula -> Formula 
@@ -13,9 +23,19 @@ Inductive Formula : Type :=
 | Zero : Formula 
 | Bang : Formula -> Formula
 | And : Formula -> Formula  -> Formula 
-| T : Formula
-  .
+| T : Formula.
 
+
+Notation "A ⊸ B" := (Implies A B) : ILL_scope.
+Notation  "A ⊕ B" := (Oplus A B) : ILL_scope.
+Notation  "A ⊗ B" := (Otimes A B) : ILL_scope.
+Notation "1" := One : ILL_scope.
+Notation "0" := Zero : ILL_scope.
+Notation  "! A" := (Bang A) : ILL_scope.
+Notation  "A & B" := (And A B) : ILL_scope.
+Notation  "⊤" := T : ILL_scope.
+
+Open Scope ILL_scope.
 Definition env := list Formula.
 
 Inductive same_env : env -> env -> Prop := 
@@ -26,75 +46,76 @@ Inductive same_env : env -> env -> Prop :=
 
 Inductive ILL_proof : env -> Formula -> Prop := 
 | Id : forall p, ILL_proof (p::nil) p
-| Cut : forall Gamma Delta p q,  ILL_proof Gamma p -> ILL_proof (p::Delta) q -> ILL_proof (Delta++Gamma) q
+| Cut : forall Γ Δ p q,  ILL_proof Γ p -> ILL_proof (p::Δ) q -> ILL_proof (Δ++Γ) q
 | Impl_R : 
-  forall Gamma p q, 
-    ILL_proof (p::Gamma) q -> ILL_proof Gamma (Implies p q)
+  forall Γ p q, 
+    ILL_proof (p::Γ) q -> ILL_proof Γ (Implies p q)
 | Impl_L : 
-  forall Gamma Delta p q r, 
-    ILL_proof Gamma p -> ILL_proof (q::Delta) r -> 
-    ILL_proof (Implies p q::Delta++Gamma)  r
+  forall Γ Δ p q r, 
+    ILL_proof Γ p -> ILL_proof (q::Δ) r -> 
+    ILL_proof (Implies p q::Δ++Γ)  r
 | Times_R :
-  forall Gamma Delta p q, 
-    ILL_proof Gamma p -> ILL_proof Delta q -> 
-    ILL_proof (Gamma++Delta) (Otimes p q) 
+  forall Γ Δ p q, 
+    ILL_proof Γ p -> ILL_proof Δ q -> 
+    ILL_proof (Γ++Δ) (Otimes p q) 
 | Times_L : 
-  forall Gamma p q r, 
-    ILL_proof (q::p::Gamma) r -> 
-    ILL_proof ((Otimes p q)::Gamma) r
+  forall Γ p q r, 
+    ILL_proof (q::p::Γ) r -> 
+    ILL_proof ((Otimes p q)::Γ) r
 | One_R : ILL_proof nil One
 | One_L : 
-  forall Gamma p, 
-    ILL_proof Gamma p -> 
-    ILL_proof (One::Gamma) p 
+  forall Γ p, 
+    ILL_proof Γ p -> 
+    ILL_proof (One::Γ) p 
 | And_R : 
-  forall Gamma p q, 
-    ILL_proof Gamma p -> 
-    ILL_proof Gamma q ->
-    ILL_proof Gamma (And p q)
+  forall Γ p q, 
+    ILL_proof Γ p -> 
+    ILL_proof Γ q ->
+    ILL_proof Γ (And p q)
 | And_L_1 : 
-  forall Gamma p q r,
-    ILL_proof (p::Gamma) r ->
-    ILL_proof ((And p q):: Gamma) r
+  forall Γ p q r,
+    ILL_proof (p::Γ) r ->
+    ILL_proof ((And p q):: Γ) r
 | And_L_2 : 
-  forall Gamma p q r,
-    ILL_proof (q::Gamma) r ->
-    ILL_proof ((And p q)::Gamma) r
+  forall Γ p q r,
+    ILL_proof (q::Γ) r ->
+    ILL_proof ((And p q)::Γ) r
 | Oplus_R : 
-  forall Gamma p q r, 
-  ILL_proof (p::Gamma) r -> 
-  ILL_proof (q::Gamma) r -> 
-  ILL_proof ((Oplus p q)::Gamma) r
+  forall Γ p q r, 
+  ILL_proof (p::Γ) r -> 
+  ILL_proof (q::Γ) r -> 
+  ILL_proof ((Oplus p q)::Γ) r
 | Oplus_L_1 : 
-  forall Gamma p q, 
-  ILL_proof Gamma p -> 
-  ILL_proof Gamma (Oplus p q)
+  forall Γ p q, 
+  ILL_proof Γ p -> 
+  ILL_proof Γ (Oplus p q)
 | Oplus_L_2 : 
-  forall Gamma p q, 
-  ILL_proof Gamma q -> 
-  ILL_proof Gamma (Oplus p q)
-| T_ : forall Gamma, ILL_proof Gamma T
-| Zero_ : forall Gamma p, ILL_proof (Zero::Gamma) p
+  forall Γ p q, 
+  ILL_proof Γ q -> 
+  ILL_proof Γ (Oplus p q)
+| T_ : forall Γ, ILL_proof Γ T
+| Zero_ : forall Γ p, ILL_proof (Zero::Γ) p
 | Bang_ : (* a verifier *)
-  forall Gamma p, 
-    ILL_proof (List.map (fun p => Bang p) Gamma) p -> 
-    ILL_proof (List.map (fun p => Bang p) Gamma) (Bang p)
+  forall Γ p, 
+    ILL_proof (List.map (fun p => Bang p) Γ) p -> 
+    ILL_proof (List.map (fun p => Bang p) Γ) (Bang p)
 | Bang_D : 
-  forall Gamma p q,
-    ILL_proof (p::Gamma) q -> 
-    ILL_proof (Bang p::Gamma) q
+  forall Γ p q,
+    ILL_proof (p::Γ) q -> 
+    ILL_proof (Bang p::Γ) q
 | Bang_C : 
-  forall Gamma p q, 
-    ILL_proof (Bang p::Bang p::Gamma) q -> 
-    ILL_proof (Bang p::Gamma) q
+  forall Γ p q, 
+    ILL_proof (Bang p::Bang p::Γ) q -> 
+    ILL_proof (Bang p::Γ) q
 | Bang_W : 
-  forall Gamma p q, 
-    ILL_proof Gamma q -> 
-    ILL_proof (Bang p::Gamma) q
+  forall Γ p q, 
+    ILL_proof Γ q -> 
+    ILL_proof (Bang p::Γ) q
 
 | Reorder : 
-  forall Gamma Gamma' p, same_env Gamma Gamma' -> 
-    ILL_proof Gamma p -> ILL_proof Gamma' p 
-.
+  forall Γ Γ' p, same_env Γ Γ' -> 
+    ILL_proof Γ p -> ILL_proof Γ' p 
+where 
+ " x |- y " := (ILL_proof x y) .
 
 End S.
