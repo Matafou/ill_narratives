@@ -1,4 +1,5 @@
 Require Import List.
+Require Import Permutation.
 
 Section S. 
 
@@ -38,11 +39,7 @@ Notation  "⊤" := T : ILL_scope.
 Open Scope ILL_scope.
 Definition env := list Formula.
 
-Inductive same_env : env -> env -> Prop := 
-| Same_nil : same_env nil nil 
-| Same_cons : forall x Gamma Delta_1 Delta_2, 
-  same_env Gamma (Delta_1++Delta_2) -> 
-  same_env (x::Gamma) (Delta_1++x::Delta_2).
+Definition same_env := @Permutation Formula.
 
 Inductive ILL_proof : env -> Formula -> Prop := 
 | Id : forall p, ILL_proof (p::nil) p
