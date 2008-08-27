@@ -28,9 +28,9 @@ Module Type ILL_sig(Vars : OrderedType).
   Reserved Notation "⊤" (at level 10, no associativity).
   Reserved Notation "∪" (at level 60, right associativity).
   Reserved Notation "∅" (at level 10, no associativity).
-  Reserved Notation "{ a ; .. ; b }" (at level 60).
+(*   Reserved Notation "{ a ; .. ; b }" (at level 60). *)
 
-
+  (** Le type des formules, les atomes sont dénotés par [Proposition]. *)
   Inductive formula : Type := 
   | Proposition : Vars.t -> formula
   | Implies : formula -> formula -> formula 
@@ -45,7 +45,7 @@ Module Type ILL_sig(Vars : OrderedType).
   Declare Module FormulaOrdered : OrderedType with Definition t:= formula.
   Declare  Module Import FormulaMultiSet : multiset.S(FormulaOrdered).
 
-
+  (** Les notations classiques  *)
   Notation "A ⊸ B" := (Implies A B) : ILL_scope.
   Notation  "A ⊕ B" := (Oplus A B) : ILL_scope.
   Notation  "A ⊗ B" := (Otimes A B) : ILL_scope.
@@ -54,38 +54,35 @@ Module Type ILL_sig(Vars : OrderedType).
   Notation  "! A" := (Bang A) : ILL_scope.
   Notation  "A & B" := (And A B) : ILL_scope.
   Notation  "⊤" := Top : ILL_scope.
-  Notation Φ := (formula).
   Set Printing Width 100.
   Open Scope ILL_scope.
   Notation "∅" := empty.
   Infix "∪" := union (at level 60, right associativity).
-  Notation "{ a , b }" := (add a b) (at level 60, right associativity).
+  Notation " a :: b " := (add a b) (at level 60, right associativity).
   Notation "{ a , .. , b }" := (add a .. (add b empty) ..).
-
-
   
   Definition env := FormulaMultiSet.t.
 
-  Inductive ILL_proof : env → Φ → Prop :=
+  Inductive ILL_proof : env → formula → Prop :=
     Id : ∀ p Gamma, eq Gamma {p} → Gamma ⊢ p
-  | Cut : ∀ Ω Γ Δ p q, Γ ⊢ p → {p, Δ} ⊢ q → eq Ω (Δ ∪ Γ) → Ω ⊢ q
-  | Impl_R : ∀ Γ p q, {p, Γ} ⊢ q → Γ ⊢ p ⊸ q
-  | Impl_L : ∀ Ω Γ Δ p q r, Γ ⊢ p → {q, Δ} ⊢ r → eq Ω ({p ⊸ q, Δ ∪ Γ}) → Ω ⊢ r
+  | Cut : ∀ Ω Γ Δ p q, Γ ⊢ p → p::Δ ⊢ q → eq Ω (Δ ∪ Γ) → Ω ⊢ q
+  | Impl_R : ∀ Γ p q, p::Γ ⊢ q → Γ ⊢ p ⊸ q
+  | Impl_L : ∀ Ω Γ Δ p q r, Γ ⊢ p → q::Δ ⊢ r → eq Ω (p ⊸ q :: Δ ∪ Γ) → Ω ⊢ r
   | Times_R : ∀ Ω Γ Δ p q , Γ ⊢ p → Δ ⊢ q → eq Ω (Γ ∪ Δ) → Ω ⊢ p ⊗ q
-  | Times_L : ∀ Ω Γ p q r , {q, {p, Γ}} ⊢ r → eq Ω ({p ⊗ q, Γ}) → Ω ⊢ r
+  | Times_L : ∀ Ω Γ p q r , q :: p :: Γ ⊢ r → eq Ω (p ⊗ q :: Γ) → Ω ⊢ r
   | One_R : ∀ Ω, eq Ω (∅) → Ω ⊢ 1
-  | One_L : ∀ Ω Γ p , Γ ⊢ p → eq Ω ({1, Γ}) → Ω ⊢ p
+  | One_L : ∀ Ω Γ p , Γ ⊢ p → eq Ω (1 :: Γ) → Ω ⊢ p
   | And_R : ∀ Γ p q , Γ ⊢ p → Γ ⊢ q → Γ ⊢ (p & q)
-  | And_L_1 : ∀ Ω Γ p q r , {p, Γ} ⊢ r → eq Ω ({p & q, Γ}) → Ω ⊢ r
-  | And_L_2 : ∀ Ω Γ p q r , {q, Γ} ⊢ r → eq Ω ({p & q, Γ}) → Ω ⊢ r
-  | Oplus_L : ∀ Ω Γ p q r , {p, Γ} ⊢ r → {q, Γ} ⊢ r → eq Ω ({p ⊕ q, Γ}) → Ω ⊢ r
+  | And_L_1 : ∀ Ω Γ p q r , p::Γ ⊢ r → eq Ω ((p & q) :: Γ) → Ω ⊢ r
+  | And_L_2 : ∀ Ω Γ p q r , q::Γ ⊢ r → eq Ω ((p & q) :: Γ) → Ω ⊢ r
+  | Oplus_L : ∀ Ω Γ p q r , p :: Γ ⊢ r → q :: Γ ⊢ r → eq Ω (p ⊕ q :: Γ) → Ω ⊢ r
   | Oplus_R_1 : ∀ Γ p q , Γ ⊢ p → Γ ⊢ p ⊕ q
   | Oplus_R_2 : ∀ Γ p q , Γ ⊢ q → Γ ⊢ p ⊕ q 
   | T_ : ∀ Γ, Γ ⊢ ⊤
   | Zero_ : ∀ Γ p , mem 0 Γ = true → Γ ⊢ p
-  | Bang_D : ∀ Ω Γ p q , {p, Γ} ⊢ q → eq Ω ({!p, Γ}) → Ω ⊢ q
-  | Bang_C : ∀ Ω Γ p q , {!p, {!p, Γ}} ⊢ q → eq Ω ({!p, Γ}) → Ω ⊢ q
-  | Bang_W : ∀ Ω Γ p q , Γ ⊢ q → eq Ω ({!p, Γ}) → Ω ⊢ q
+  | Bang_D : ∀ Ω Γ p q , p :: Γ ⊢ q → eq Ω (!p :: Γ) → Ω ⊢ q
+  | Bang_C : ∀ Ω Γ p q , !p :: !p :: Γ ⊢ q → eq Ω (!p :: Γ) → Ω ⊢ q
+  | Bang_W : ∀ Ω Γ p q , Γ ⊢ q → eq Ω (!p :: Γ) → Ω ⊢ q
     where " x ⊢ y " := (ILL_proof x y) : ILL_scope.
 
 End ILL_sig.
@@ -95,23 +92,17 @@ Module PaperProofs(Vars : OrderedType).
   Declare Module Import M : ILL_sig(Vars).
   Import FormulaMultiSet.
   Parameters vD vP vR vS : Vars.t.
-  Notation "'D'" := (Proposition vD).
-  Notation "'P'" := (Proposition vP).
-  Notation "'R'":= (Proposition vR).
-  Notation "'S'" := (Proposition vS).
-(*   Local Notation " a ∪ .. ∪ b " := (union (a .. (union b empty) .. )). *)
+  Local Notation "'D'" := (Proposition vD).
+  Local Notation "'P'" := (Proposition vP).
+  Local Notation "'R'":= (Proposition vR).
+  Local Notation "'S'" := (Proposition vS).
 
   Hypothesis D_neq_P : not (Vars.eq vD vP).
   Hypothesis D_neq_R : not (Vars.eq vD vR).
   Hypothesis D_neq_S : not (Vars.eq vD vS).
-
   Hypothesis P_neq_R : not (Vars.eq vP vR).
   Hypothesis P_neq_S : not (Vars.eq vP vS).
-
   Hypothesis R_neq_S : not (Vars.eq vR vS).
-
-  Definition env := Eval vm_compute in
-    add D (add (P & 1) (add (R & 1) (add (D ⊸ (((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)) empty))).
 
   Add Relation t eq
   reflexivity proved by eq_refl
@@ -207,10 +198,15 @@ Module PaperProofs(Vars : OrderedType).
         end
     end.
 
-  Lemma Copy_Proof_from_figure_1 : env ⊢ ((S ⊗ D) ⊕ D).
+
+  Definition env := Eval vm_compute in
+    add D (add (P & 1) (add (R & 1) (add (D ⊸ (((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)) empty))).
+
+  Lemma Copy_Proof_from_figure_1:
+  {D, P & 1, R & 1, D ⊸ (((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)} ⊢ ((S ⊗ D) ⊕ D).
   Proof.
     vm_compute.
-    apply Impl_L with (Δ:= { P&1 , { R&1, ∅ }}) (Γ:= {D,∅})
+    apply Impl_L with (Δ:= {(P&1) , (R&1) }) (Γ:= {D})
       (p:=D) (q:=(((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)) ;
       [ | | prove_multiset_eq ].
     constructor;prove_multiset_eq.
@@ -221,13 +217,13 @@ Module PaperProofs(Vars : OrderedType).
     and_l_2 R 1.
     one_l.
     apply Oplus_R_1.
-    apply Times_R with (Γ:= {P, { (P ⊸ S), ∅ }}) (Δ:= { D, ∅});[ | | prove_multiset_eq].
-    apply Impl_L with (Γ:= {P , empty}) (Δ:=∅) (p:=P) (q:=S); [ | | prove_multiset_eq].
+    apply Times_R with (Γ:= {P, (P ⊸ S) }) (Δ:= {D});[ | | prove_multiset_eq].
+    apply Impl_L with (Γ:= {P}) (Δ:=∅) (p:=P) (q:=S); [ | | prove_multiset_eq].
     constructor;prove_multiset_eq.
     constructor;prove_multiset_eq.
     constructor;prove_multiset_eq.
     and_l_1 R 1.
-    apply Impl_L with (Γ:={R,∅}) (Δ:= {D, {(P & 1), ∅ }}) (p:=R) (q:=(1 ⊕ (P ⊸ S)))
+    apply Impl_L with (Γ:={R}) (Δ:= {D, P & 1 }) (p:=R) (q:=(1 ⊕ (P ⊸ S)))
       ;[ | | prove_multiset_eq].
     constructor;prove_multiset_eq.
     oplus_l 1 (P ⊸ S).
@@ -238,8 +234,8 @@ Module PaperProofs(Vars : OrderedType).
     constructor;prove_multiset_eq.
     and_l_1 (P) 1.
     apply Oplus_R_1.
-    apply Times_R with (Γ:={ P, { (P ⊸ S) ,∅}}) (Δ:={D, ∅});[ | | prove_multiset_eq].
-    apply Impl_L with (Γ:={P, ∅}) (Δ:=∅) (p:=P) (q:=S);[ | | prove_multiset_eq].
+    apply Times_R with (Γ:={ P , P ⊸ S}) (Δ:={D});[ | | prove_multiset_eq].
+    apply Impl_L with (Γ:={P}) (Δ:=∅) (p:=P) (q:=S);[ | | prove_multiset_eq].
     constructor;prove_multiset_eq.
     constructor;prove_multiset_eq.
     constructor;prove_multiset_eq.
