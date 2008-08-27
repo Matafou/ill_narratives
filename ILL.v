@@ -14,8 +14,11 @@ ensuite il suffit de taper la commande latex correspondante.
 *)
 Require Import multiset.
 Require Import OrderedType.
+Require Import Utf8_core.
+
 
 Module Type ILL_sig(Vars : OrderedType).
+
   Reserved Notation "x ⊸ y" (at level 60, no associativity).
   Reserved Notation "x ⊕ y" (at level 60, no associativity).
   Reserved Notation "x ⊗ y" (at level 60, no associativity).
@@ -23,6 +26,9 @@ Module Type ILL_sig(Vars : OrderedType).
   Reserved Notation "! x" (at level 50, no associativity).
   Reserved Notation "x & y" (at level 80, no associativity).
   Reserved Notation "⊤" (at level 10, no associativity).
+  Reserved Notation "∪" (at level 60, right associativity).
+  Reserved Notation "∅" (at level 10, no associativity).
+  Reserved Notation "{ a ; .. ; b }" (at level 60).
 
 
   Inductive formula : Type := 
@@ -36,6 +42,9 @@ Module Type ILL_sig(Vars : OrderedType).
   | And : formula -> formula  -> formula 
   | Top : formula.
 
+  Declare Module FormulaOrdered : OrderedType with Definition t:= formula.
+  Declare  Module Import FormulaMultiSet : multiset.S(FormulaOrdered).
+
 
   Notation "A ⊸ B" := (Implies A B) : ILL_scope.
   Notation  "A ⊕ B" := (Oplus A B) : ILL_scope.
@@ -48,91 +57,36 @@ Module Type ILL_sig(Vars : OrderedType).
   Notation Φ := (formula).
   Set Printing Width 100.
   Open Scope ILL_scope.
+  Notation "∅" := empty.
+  Infix "∪" := union (at level 60, right associativity).
+  Notation "{ a , b }" := (add a b) (at level 60, right associativity).
+  Notation "{ a , .. , b }" := (add a .. (add b empty) ..).
 
-  Declare Module FormulaOrdered : OrderedType with Definition t:= formula.
-  Declare  Module Import FormulaMultiSet : multiset.S(FormulaOrdered).
+
   
   Definition env := FormulaMultiSet.t.
 
-  Inductive ILL_proof : env -> formula -> Prop := 
-  | Id : forall p Gamma, eq Gamma (add p empty) -> ILL_proof Gamma  p
-  | Cut : forall env Γ Δ p q,  ILL_proof Γ p -> ILL_proof (add p Δ) q -> 
-    eq env (union Δ Γ) -> ILL_proof env q
-  | Impl_R : 
-    forall Γ p q, 
-      ILL_proof (add p Γ) q -> ILL_proof Γ (Implies p q)
-  | Impl_L : 
-    forall env Γ Δ p q r, 
-      ILL_proof Γ p -> ILL_proof (add q Δ) r -> 
-      eq env (add (Implies p q) (union Δ Γ)) -> ILL_proof env  r
-  | Times_R :
-    forall env Γ Δ p q, 
-      ILL_proof Γ p -> ILL_proof Δ q -> 
-      eq env (union Γ Δ) ->
-      ILL_proof env (Otimes p q) 
-  | Times_L : 
-    forall env Γ p q r, 
-      ILL_proof (add q (add p Γ)) r -> 
-      eq env (add (Otimes p q) Γ) -> 
-      ILL_proof env r
-  | One_R : forall env, eq env empty -> ILL_proof env One
-  | One_L : 
-    forall env Γ p, 
-      ILL_proof Γ p -> 
-      eq env (add One Γ) ->
-      ILL_proof env p 
-  | And_R : 
-    forall Γ p q, 
-      ILL_proof Γ p -> 
-      ILL_proof Γ q ->
-      ILL_proof Γ (And p q)
-  | And_L_1 : 
-    forall env Γ p q r,
-      ILL_proof (add p Γ) r ->
-      eq env (add (And p q) Γ) ->
-      ILL_proof env r
-  | And_L_2 : 
-    forall env Γ p q r,
-      ILL_proof (add q Γ) r ->
-      eq env (add (And p q) Γ) ->
-      ILL_proof env r
-  | Oplus_L : 
-    forall env Γ p q r, 
-      ILL_proof (add p Γ) r -> 
-      ILL_proof (add q Γ) r -> 
-      eq env (add (Oplus p q) Γ) ->
-      ILL_proof env r
-  | Oplus_R_1 : 
-    forall Γ p q, 
-      ILL_proof Γ p -> 
-      ILL_proof Γ (Oplus p q)
-  | Oplus_R_2 : 
-    forall Γ p q, 
-      ILL_proof Γ q -> 
-      ILL_proof Γ (Oplus p q)
-  | T_ : forall Γ,  ILL_proof Γ Top
-  | Zero_ : forall  Γ p, mem Zero Γ = true -> ILL_proof Γ p
-(*  | Bang_ : (* a verifier *)
-    forall Γ p, 
-      ILL_proof (List.map (fun p => Bang p) Γ) p -> 
-      ILL_proof (List.map (fun p => Bang p) Γ) (Bang p)*)
-  | Bang_D : 
-    forall env Γ p q,
-      ILL_proof (add p Γ) q -> 
-      eq env (add (Bang p) Γ) ->
-      ILL_proof env q
-  | Bang_C : 
-    forall env Γ p q, 
-      ILL_proof (add (Bang p) (add (Bang p) Γ)) q -> 
-      eq env (add (Bang p) Γ) ->
-      ILL_proof env q
-  | Bang_W : 
-    forall env Γ p q, 
-      ILL_proof Γ q -> 
-      eq env (add (Bang p) Γ) ->
-      ILL_proof env q
- .
-
+  Inductive ILL_proof : env → Φ → Prop :=
+    Id : ∀ p Gamma, eq Gamma {p} → Gamma ⊢ p
+  | Cut : ∀ Ω Γ Δ p q, Γ ⊢ p → {p, Δ} ⊢ q → eq Ω (Δ ∪ Γ) → Ω ⊢ q
+  | Impl_R : ∀ Γ p q, {p, Γ} ⊢ q → Γ ⊢ p ⊸ q
+  | Impl_L : ∀ Ω Γ Δ p q r, Γ ⊢ p → {q, Δ} ⊢ r → eq Ω ({p ⊸ q, Δ ∪ Γ}) → Ω ⊢ r
+  | Times_R : ∀ Ω Γ Δ p q , Γ ⊢ p → Δ ⊢ q → eq Ω (Γ ∪ Δ) → Ω ⊢ p ⊗ q
+  | Times_L : ∀ Ω Γ p q r , {q, {p, Γ}} ⊢ r → eq Ω ({p ⊗ q, Γ}) → Ω ⊢ r
+  | One_R : ∀ Ω, eq Ω (∅) → Ω ⊢ 1
+  | One_L : ∀ Ω Γ p , Γ ⊢ p → eq Ω ({1, Γ}) → Ω ⊢ p
+  | And_R : ∀ Γ p q , Γ ⊢ p → Γ ⊢ q → Γ ⊢ (p & q)
+  | And_L_1 : ∀ Ω Γ p q r , {p, Γ} ⊢ r → eq Ω ({p & q, Γ}) → Ω ⊢ r
+  | And_L_2 : ∀ Ω Γ p q r , {q, Γ} ⊢ r → eq Ω ({p & q, Γ}) → Ω ⊢ r
+  | Oplus_L : ∀ Ω Γ p q r , {p, Γ} ⊢ r → {q, Γ} ⊢ r → eq Ω ({p ⊕ q, Γ}) → Ω ⊢ r
+  | Oplus_R_1 : ∀ Γ p q , Γ ⊢ p → Γ ⊢ p ⊕ q
+  | Oplus_R_2 : ∀ Γ p q , Γ ⊢ q → Γ ⊢ p ⊕ q 
+  | T_ : ∀ Γ, Γ ⊢ ⊤
+  | Zero_ : ∀ Γ p , mem 0 Γ = true → Γ ⊢ p
+  | Bang_D : ∀ Ω Γ p q , {p, Γ} ⊢ q → eq Ω ({!p, Γ}) → Ω ⊢ q
+  | Bang_C : ∀ Ω Γ p q , {!p, {!p, Γ}} ⊢ q → eq Ω ({!p, Γ}) → Ω ⊢ q
+  | Bang_W : ∀ Ω Γ p q , Γ ⊢ q → eq Ω ({!p, Γ}) → Ω ⊢ q
+    where " x ⊢ y " := (ILL_proof x y) : ILL_scope.
 
 End ILL_sig.
 
@@ -140,36 +94,33 @@ End ILL_sig.
 Module PaperProofs(Vars : OrderedType).
   Declare Module Import M : ILL_sig(Vars).
   Import FormulaMultiSet.
-  Variable D P R S : Vars.t.
-  Hypothesis D_neq_P : not (Vars.eq D P).
-  Hypothesis D_neq_R : not (Vars.eq D R).
-  Hypothesis D_neq_S : not (Vars.eq D S).
+  Parameters vD vP vR vS : Vars.t.
+  Notation "'D'" := (Proposition vD).
+  Notation "'P'" := (Proposition vP).
+  Notation "'R'":= (Proposition vR).
+  Notation "'S'" := (Proposition vS).
+(*   Local Notation " a ∪ .. ∪ b " := (union (a .. (union b empty) .. )). *)
 
-  Hypothesis P_neq_R : not (Vars.eq P R).
-  Hypothesis P_neq_S : not (Vars.eq P S).
+  Hypothesis D_neq_P : not (Vars.eq vD vP).
+  Hypothesis D_neq_R : not (Vars.eq vD vR).
+  Hypothesis D_neq_S : not (Vars.eq vD vS).
 
-  Hypothesis R_neq_S : not (Vars.eq R S).
+  Hypothesis P_neq_R : not (Vars.eq vP vR).
+  Hypothesis P_neq_S : not (Vars.eq vP vS).
 
-  Definition P_and_one := And (Proposition P) One.
-  Definition R_and_one := And (Proposition R) One.
-  Definition S_times_D := Otimes (Proposition S) (Proposition D).
-  Definition S_times_D_plus_D := Oplus S_times_D (Proposition D).
-  Definition P_implies_S := Implies (Proposition P) (Proposition S).
-  Definition One_plus_P_implies_S := Eval vm_compute in 1⊕P_implies_S .
-  Definition R_implies_One_plus_P_implies_S := Eval vm_compute in  Implies (Proposition R) One_plus_P_implies_S.
-  Definition P_implies_S_plus_R_implies_One_plus_P_implies_S := Eval vm_compute in P_implies_S ⊕ R_implies_One_plus_P_implies_S.
-  Definition P_implies_S_plus_R_implies_One_plus_P_implies_S_times_D := Eval vm_compute in 
-    P_implies_S_plus_R_implies_One_plus_P_implies_S ⊗ (Proposition D).
-  Definition D_implies_P_implies_S_plus_R_implies_One_plus_P_implies_S_times_D := Eval vm_compute in 
-    Implies (Proposition D) P_implies_S_plus_R_implies_One_plus_P_implies_S_times_D.
+  Hypothesis R_neq_S : not (Vars.eq vR vS).
 
-  Definition env := Eval vm_compute in add (Proposition D) (add P_and_one (add R_and_one (add D_implies_P_implies_S_plus_R_implies_One_plus_P_implies_S_times_D empty))).
+  Definition env := Eval vm_compute in
+    add D (add (P & 1) (add (R & 1) (add (D ⊸ (((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)) empty))).
 
   Add Relation t eq
   reflexivity proved by eq_refl
   symmetry proved by eq_sym
-  transitivity proved by eq_trans as eq_rel.
-  Add Morphism add with signature (FormulaOrdered.eq ==> FormulaMultiSet.eq ==> FormulaMultiSet.eq) as add_morph.
+    transitivity proved by eq_trans as eq_rel.
+
+  Add Morphism add
+    with signature (FormulaOrdered.eq ==> FormulaMultiSet.eq ==> FormulaMultiSet.eq)
+      as add_morph.
   Proof.
     exact add_morph_eq.
   Qed.
@@ -180,16 +131,22 @@ Module PaperProofs(Vars : OrderedType).
     transitivity proved by FormulaOrdered.eq_trans
       as fo_eq_rel.
 
-  Add Morphism union with signature (FormulaMultiSet.eq==> FormulaMultiSet.eq ==> FormulaMultiSet.eq) as union_morph.
+  Add Morphism union
+    with signature (FormulaMultiSet.eq==> FormulaMultiSet.eq ==> FormulaMultiSet.eq)
+      as union_morph.
   Proof.
     exact union_morph_eq.
-  Qed
-.
+  Qed.
   
   Ltac prove_multiset_eq := 
     vm_compute;
-    repeat (setoid_rewrite union_rec_left||setoid_rewrite union_empty_left || setoid_rewrite union_empty_right);
-      complete ( repeat (reflexivity || match goal with 
+    repeat (
+      setoid_rewrite union_rec_left
+        ||setoid_rewrite union_empty_left
+          || setoid_rewrite union_empty_right);
+    complete (
+      repeat (reflexivity
+        || match goal with 
              | |- eq (add ?phi ?env) (add ?phi ?env') => 
                setoid_replace env with env';[reflexivity|]
              | |- eq (add ?phi _) ?env => 
@@ -197,7 +154,7 @@ Module PaperProofs(Vars : OrderedType).
                  | context[(add ?phi' (add phi ?env))] => 
                    setoid_rewrite (add_comm phi' phi env)
                end 
-           end)). 
+           end)).
 
   Ltac and_l_1  p' q'  := 
     match goal with 
@@ -250,43 +207,39 @@ Module PaperProofs(Vars : OrderedType).
         end
     end.
 
-  Lemma Copy_Proof_from_figure_1 : ILL_proof env S_times_D_plus_D.
+  Lemma Copy_Proof_from_figure_1 : env ⊢ ((S ⊗ D) ⊕ D).
   Proof.
     vm_compute.
-    apply Impl_L with 
-      (Δ:=add P_and_one (add R_and_one empty)) 
-      (Γ:=add (Proposition D) empty) 
-      (p:=Proposition D) 
-      (q:=P_implies_S_plus_R_implies_One_plus_P_implies_S_times_D) ;
+    apply Impl_L with (Δ:= { P&1 , { R&1, ∅ }}) (Γ:= {D,∅})
+      (p:=D) (q:=(((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)) ;
       [ | | prove_multiset_eq ].
     constructor;prove_multiset_eq.
     vm_compute.
-    times_l ((Proposition P ⊸ Proposition S) ⊕ (Proposition R ⊸ (1 ⊕ (Proposition P ⊸ Proposition S)))) (Proposition D).
-    oplus_l (Proposition P ⊸ Proposition S) (Proposition R ⊸ (1 ⊕ (Proposition P ⊸ Proposition S))).
-    and_l_1 (Proposition P) 1.
-    and_l_2 (Proposition R) 1.
+    times_l ((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) D.
+    oplus_l (P ⊸ S) (R ⊸ (1 ⊕ (P ⊸ S))).
+    and_l_1 P 1.
+    and_l_2 R 1.
     one_l.
     apply Oplus_R_1.
-    apply Times_R with (Γ:=add (Proposition P) (add (Proposition P ⊸ Proposition S)
-      empty)) (Δ:=add (Proposition D) empty);[ | | prove_multiset_eq].
-    apply Impl_L with (Γ:=add (Proposition P) empty) (Δ:=empty) (p:=Proposition P) (q:=Proposition S); [ | | prove_multiset_eq].
+    apply Times_R with (Γ:= {P, { (P ⊸ S), ∅ }}) (Δ:= { D, ∅});[ | | prove_multiset_eq].
+    apply Impl_L with (Γ:= {P , empty}) (Δ:=∅) (p:=P) (q:=S); [ | | prove_multiset_eq].
     constructor;prove_multiset_eq.
     constructor;prove_multiset_eq.
     constructor;prove_multiset_eq.
-    and_l_1 (Proposition R) 1.
-    apply Impl_L with (Γ:=(add (Proposition R) empty)) (Δ:= (add (Proposition D) (add (Proposition P & 1) empty))) (p:=Proposition R) (q:=(1 ⊕ (Proposition P ⊸ Proposition S)));[ | | prove_multiset_eq].
+    and_l_1 R 1.
+    apply Impl_L with (Γ:={R,∅}) (Δ:= {D, {(P & 1), ∅ }}) (p:=R) (q:=(1 ⊕ (P ⊸ S)))
+      ;[ | | prove_multiset_eq].
     constructor;prove_multiset_eq.
-    oplus_l 1 (Proposition P ⊸ Proposition S).
+    oplus_l 1 (P ⊸ S).
     one_l.
-    and_l_2 (Proposition P) 1.
+    and_l_2 P 1.
     one_l.
     apply Oplus_R_2.
     constructor;prove_multiset_eq.
-    and_l_1 (Proposition P) 1.
+    and_l_1 (P) 1.
     apply Oplus_R_1.
-    apply Times_R with (Γ:=(add (Proposition P)
-      (add (Proposition P ⊸ Proposition S) empty))) (Δ:=(add (Proposition D) empty));[ | | prove_multiset_eq].
-    apply Impl_L with (Γ:=add (Proposition P) empty) (Δ:=empty) (p:=Proposition P) (q:=Proposition S);[ | | prove_multiset_eq].
+    apply Times_R with (Γ:={ P, { (P ⊸ S) ,∅}}) (Δ:={D, ∅});[ | | prove_multiset_eq].
+    apply Impl_L with (Γ:={P, ∅}) (Δ:=∅) (p:=P) (q:=S);[ | | prove_multiset_eq].
     constructor;prove_multiset_eq.
     constructor;prove_multiset_eq.
     constructor;prove_multiset_eq.
@@ -390,7 +343,7 @@ Module ILL(X:S)(Vars:OrderedType.OrderedType with Definition t:=X.A with Definit
         end).
 
 
-    Lemma eq_is_compare'_eq : forall phi rho, compare' phi rho = Eq -> phi = rho.
+    Lemma eq_is_compare'_eq : ∀ phi rho, compare' phi rho = Eq -> phi = rho.
     Proof.
       intros phi rho.
       functional induction (compare' phi rho);intros Heq ;try discriminate;clear_goal.
@@ -407,7 +360,7 @@ Module ILL(X:S)(Vars:OrderedType.OrderedType with Definition t:=X.A with Definit
 
     Definition lt phi rho := compare' phi rho = Lt.
 
-    Lemma lt_trans : forall phi rho xi, lt phi rho -> lt rho xi -> lt phi xi.
+    Lemma lt_trans : ∀ phi rho xi, lt phi rho -> lt rho xi -> lt phi xi.
     Proof.
       unfold lt.
       intros phi rho; functional induction (compare' phi rho);intros xi Hxi1 Hxi2; simpl in *;try discriminate;
@@ -552,7 +505,7 @@ Module ILL(X:S)(Vars:OrderedType.OrderedType with Definition t:=X.A with Definit
       Unfocus.
     Qed.
     
-    Lemma lt_not_eq : forall x y, lt x y -> not (eq x y).
+    Lemma lt_not_eq : ∀ x y, lt x y -> not (eq x y).
     Proof.
       intros x y.
       unfold lt.
@@ -569,7 +522,7 @@ Module ILL(X:S)(Vars:OrderedType.OrderedType with Definition t:=X.A with Definit
       elim IHc0;trivial. 
     Qed.
     
-    Lemma lt_gt : forall x y, compare' x y = Lt -> compare' y x = Gt.
+    Lemma lt_gt : ∀ x y, compare' x y = Lt -> compare' y x = Gt.
     Proof.
       intros x y.
       functional induction (compare' x y);intros;try (discriminate);clear_goal;simpl in *;eauto.
@@ -657,7 +610,7 @@ Module ILL(X:S)(Vars:OrderedType.OrderedType with Definition t:=X.A with Definit
     Qed.
 
     
-    Lemma gt_lt : forall x y, compare' x y = Gt -> compare' y x = Lt.
+    Lemma gt_lt : ∀ x y, compare' x y = Gt -> compare' y x = Lt.
     Proof.
       intros x y.
       functional induction (compare' x y);intros;try (discriminate);clear_goal;simpl in *;eauto.
@@ -744,7 +697,7 @@ Module ILL(X:S)(Vars:OrderedType.OrderedType with Definition t:=X.A with Definit
     Qed.
 
 
-    Lemma compare : forall x y, Compare lt eq x y.
+    Lemma compare : ∀ x y, Compare lt eq x y.
     Proof.
       intros x y.
       case_eq (compare' x y);intros Heq.
@@ -757,7 +710,7 @@ Module ILL(X:S)(Vars:OrderedType.OrderedType with Definition t:=X.A with Definit
       apply gt_lt.
     Qed.
       
-    Lemma eq_dec : forall x y, {eq x y}+{~eq x y}.
+    Lemma eq_dec : ∀ x y, {eq x y}+{~eq x y}.
     Proof.
       intros x y.
       case_eq (compare' x y);intro Heq.
@@ -791,75 +744,75 @@ Defined.
 Definition same_env := @Permutation formula.
 
   Inductive ILL_proof : env -> formula -> Prop := 
-  | Id : forall p, ILL_proof (p::nil) p
-  | Cut : forall Γ Δ p q,  ILL_proof Γ p -> ILL_proof (p::Δ) q -> ILL_proof (Δ++Γ) q
+  | Id : ∀ p, ILL_proof (p::nil) p
+  | Cut : ∀ Γ Δ p q,  ILL_proof Γ p -> ILL_proof (p::Δ) q -> ILL_proof (Δ++Γ) q
   | Impl_R : 
-    forall Γ p q, 
+    ∀ Γ p q, 
       ILL_proof (p::Γ) q -> ILL_proof Γ (Implies p q)
   | Impl_L : 
-    forall Γ Δ p q r, 
+    ∀ Γ Δ p q r, 
       ILL_proof Γ p -> ILL_proof (q::Δ) r -> 
       ILL_proof (Implies p q::Δ++Γ)  r
   | Times_R :
-    forall Γ Δ p q, 
+    ∀ Γ Δ p q, 
       ILL_proof Γ p -> ILL_proof Δ q -> 
       ILL_proof (Γ++Δ) (Otimes p q) 
   | Times_L : 
-    forall Γ p q r, 
+    ∀ Γ p q r, 
       ILL_proof (q::p::Γ) r -> 
       ILL_proof ((Otimes p q)::Γ) r
   | One_R : ILL_proof nil One
   | One_L : 
-    forall Γ p, 
+    ∀ Γ p, 
       ILL_proof Γ p -> 
       ILL_proof (One::Γ) p 
   | And_R : 
-    forall Γ p q, 
+    ∀ Γ p q, 
       ILL_proof Γ p -> 
       ILL_proof Γ q ->
       ILL_proof Γ (And p q)
   | And_L_1 : 
-    forall Γ p q r,
+    ∀ Γ p q r,
       ILL_proof (p::Γ) r ->
       ILL_proof ((And p q):: Γ) r
   | And_L_2 : 
-    forall Γ p q r,
+    ∀ Γ p q r,
       ILL_proof (q::Γ) r ->
       ILL_proof ((And p q)::Γ) r
   | Oplus_R : 
-    forall Γ p q r, 
+    ∀ Γ p q r, 
       ILL_proof (p::Γ) r -> 
       ILL_proof (q::Γ) r -> 
       ILL_proof ((Oplus p q)::Γ) r
   | Oplus_L_1 : 
-    forall Γ p q, 
+    ∀ Γ p q, 
       ILL_proof Γ p -> 
       ILL_proof Γ (Oplus p q)
   | Oplus_L_2 : 
-    forall Γ p q, 
+    ∀ Γ p q, 
       ILL_proof Γ q -> 
       ILL_proof Γ (Oplus p q)
-  | T_ : forall Γ, ILL_proof Γ T
-  | Zero_ : forall Γ p, ILL_proof (Zero::Γ) p
+  | T_ : ∀ Γ, ILL_proof Γ T
+  | Zero_ : ∀ Γ p, ILL_proof (Zero::Γ) p
   | Bang_ : (* a verifier *)
-    forall Γ p, 
+    ∀ Γ p, 
       ILL_proof (List.map (fun p => Bang p) Γ) p -> 
       ILL_proof (List.map (fun p => Bang p) Γ) (Bang p)
   | Bang_D : 
-    forall Γ p q,
+    ∀ Γ p q,
       ILL_proof (p::Γ) q -> 
       ILL_proof (Bang p::Γ) q
   | Bang_C : 
-    forall Γ p q, 
+    ∀ Γ p q, 
       ILL_proof (Bang p::Bang p::Γ) q -> 
       ILL_proof (Bang p::Γ) q
   | Bang_W : 
-    forall Γ p q, 
+    ∀ Γ p q, 
       ILL_proof Γ q -> 
       ILL_proof (Bang p::Γ) q
 
   | Reorder : 
-    forall Γ Γ' p, same_env Γ Γ' -> 
+    ∀ Γ Γ' p, same_env Γ Γ' -> 
       ILL_proof Γ p -> ILL_proof Γ' p 
       where 
  " x |- y " := (ILL_proof x y) .
