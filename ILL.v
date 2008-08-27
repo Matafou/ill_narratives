@@ -204,12 +204,10 @@ Module PaperProofs(Vars : OrderedType).
 
   Lemma Copy_Proof_from_figure_1:
   {D, P & 1, R & 1, D ⊸ (((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)} ⊢ ((S ⊗ D) ⊕ D).
-  Proof.
+  Proof with (try complete (try constructor; prove_multiset_eq)).
     vm_compute.
     apply Impl_L with (Δ:= {(P&1) , (R&1) }) (Γ:= {D})
-      (p:=D) (q:=(((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)) ;
-      [ | | prove_multiset_eq ].
-    constructor;prove_multiset_eq.
+      (p:=D) (q:=(((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D))...
     vm_compute.
     times_l ((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) D.
     oplus_l (P ⊸ S) (R ⊸ (1 ⊕ (P ⊸ S))).
@@ -217,28 +215,19 @@ Module PaperProofs(Vars : OrderedType).
     and_l_2 R 1.
     one_l.
     apply Oplus_R_1.
-    apply Times_R with (Γ:= {P, (P ⊸ S) }) (Δ:= {D});[ | | prove_multiset_eq].
-    apply Impl_L with (Γ:= {P}) (Δ:=∅) (p:=P) (q:=S); [ | | prove_multiset_eq].
-    constructor;prove_multiset_eq.
-    constructor;prove_multiset_eq.
-    constructor;prove_multiset_eq.
+    apply Times_R with (Γ:= {P, (P ⊸ S) }) (Δ:= {D})...
+    apply Impl_L with (Γ:= {P}) (Δ:=∅) (p:=P) (q:=S)...
     and_l_1 R 1.
-    apply Impl_L with (Γ:={R}) (Δ:= {D, P & 1 }) (p:=R) (q:=(1 ⊕ (P ⊸ S)))
-      ;[ | | prove_multiset_eq].
-    constructor;prove_multiset_eq.
+    apply Impl_L with (Γ:={R}) (Δ:= {D, P & 1 }) (p:=R) (q:=(1 ⊕ (P ⊸ S)))...
     oplus_l 1 (P ⊸ S).
     one_l.
     and_l_2 P 1.
     one_l.
-    apply Oplus_R_2.
-    constructor;prove_multiset_eq.
+    apply Oplus_R_2...
     and_l_1 (P) 1.
     apply Oplus_R_1.
-    apply Times_R with (Γ:={ P , P ⊸ S}) (Δ:={D});[ | | prove_multiset_eq].
-    apply Impl_L with (Γ:={P}) (Δ:=∅) (p:=P) (q:=S);[ | | prove_multiset_eq].
-    constructor;prove_multiset_eq.
-    constructor;prove_multiset_eq.
-    constructor;prove_multiset_eq.
+    apply Times_R with (Γ:={ P , P ⊸ S}) (Δ:={D})...
+    apply Impl_L with (Γ:={P}) (Δ:=∅) (p:=P) (q:=S)...
   Qed.
 
 End PaperProofs.
