@@ -198,6 +198,52 @@ Module PaperProofs(Vars : OrderedType).
         end
     end.
 
+  Ltac same_env p p' :=
+    match p with 
+      | empty => 
+        match p' with 
+          | empty => idtac
+        end
+      | add ?phi ?env =>
+        match p' with 
+          | context C [(add phi ?env')] => 
+            let e := context C [ env' ] in 
+              same_env env e
+        end
+    end.
+
+  Ltac search_one_goal g := 
+    match goal with 
+      | |- ?g' => 
+        match g with 
+          ?env⊢?e =>
+          match g' with
+            ?env'⊢e => 
+            (same_env env env')
+          end
+        end
+      | |- ?env ⊢ _  => 
+        match env with 
+          | context C [(add 1 ?env')] =>
+            let e := context C [ env' ] in
+              (apply One_L with (Γ:=e);
+                [ search_one_goal g | prove_multiset_eq])||fail 0
+          | context C [(add ( ?p' & ?q') ?env')] =>
+            let e := context C [ env' ] in  
+              (apply And_L_2 with (Γ:=e) (p:=p') (q:=q'); 
+                [search_one_goal g | prove_multiset_eq])|| fail 0
+          | context C [(add ( ?p' & ?q') ?env')] =>
+            let e := context C [ env' ] in  
+              (apply And_L_1 with (Γ:=e) (p:=p') (q:=q'); 
+                [search_one_goal g | prove_multiset_eq])||fail 0
+          | context C [(add ( ?p' ⊗ ?q') ?env')] =>
+            (let e := context C [ env' ] in  
+              apply Times_L with (Γ:=e) (p:=p') (q:=q'); [ search_one_goal g | prove_multiset_eq])||fail 0
+        end
+    end.
+                
+          
+
 
   Definition env := Eval vm_compute in
     add D (add (P & 1) (add (R & 1) (add (D ⊸ (((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)) empty))).
@@ -205,14 +251,16 @@ Module PaperProofs(Vars : OrderedType).
   Lemma Copy_Proof_from_figure_1:
   {D, P & 1, R & 1, D ⊸ (((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)} ⊢ ((S ⊗ D) ⊕ D).
   Proof with (try complete (try constructor; prove_multiset_eq)).
-    vm_compute.
     apply Impl_L with (Δ:= {(P&1) , (R&1) }) (Γ:= {D})
       (p:=D) (q:=(((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D))...
-    vm_compute.
+    (* search_one_goal ({D, (P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S))), P & 1, R & 1} ⊢ (S ⊗ D) ⊕ D). *)
     times_l ((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) D.
     oplus_l (P ⊸ S) (R ⊸ (1 ⊕ (P ⊸ S))).
+    (* search_one_goal    ({P, P ⊸ S, D, R & 1} ⊢ (S ⊗ D) ⊕ D). *)
     and_l_1 P 1.
+    (* search_one_goal ({1, P, P ⊸ S, D} ⊢ (S ⊗ D) ⊕ D). *)
     and_l_2 R 1.
+    (* search_one_goal ({P, P ⊸ S, D} ⊢ (S ⊗ D) ⊕ D). *)
     one_l.
     apply Oplus_R_1.
     apply Times_R with (Γ:= {P, (P ⊸ S) }) (Δ:= {D})...
@@ -229,6 +277,90 @@ Module PaperProofs(Vars : OrderedType).
     apply Times_R with (Γ:={ P , P ⊸ S}) (Δ:={D})...
     apply Impl_L with (Γ:={P}) (Δ:=∅) (p:=P) (q:=S)...
   Qed.
+
+  (* Same proof as above but with some more automation *)
+  Lemma Copy_Proof_from_figure_1_with_weak_search:
+  {D, P & 1, R & 1, D ⊸ (((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)} ⊢ ((S ⊗ D) ⊕ D).
+  Proof with (try complete (try constructor; prove_multiset_eq)).
+    apply Impl_L with (Δ:= {(P&1) , (R&1) }) (Γ:= {D})
+      (p:=D) (q:=(((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D))...
+    search_one_goal ({D, (P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S))), P & 1, R & 1} ⊢ (S ⊗ D) ⊕ D).
+    oplus_l (P ⊸ S) (R ⊸ (1 ⊕ (P ⊸ S))).
+    search_one_goal ({P, P ⊸ S, D} ⊢ (S ⊗ D) ⊕ D).
+    apply Oplus_R_1.
+    apply Times_R with (Γ:= {P, (P ⊸ S) }) (Δ:= {D})...
+    apply Impl_L with (Γ:= {P}) (Δ:=∅) (p:=P) (q:=S)...
+    search_one_goal ({R, R ⊸ (1 ⊕ (P ⊸ S)), D, P & 1} ⊢ (S ⊗ D) ⊕ D).
+    apply Impl_L with (Γ:={R}) (Δ:= {D, P & 1 }) (p:=R) (q:=(1 ⊕ (P ⊸ S)))...
+    oplus_l 1 (P ⊸ S).
+    search_one_goal ({D} ⊢ (S ⊗ D) ⊕ D).
+    apply Oplus_R_2...
+    search_one_goal ( {P ⊸ S, D, P} ⊢ (S ⊗ D) ⊕ D).
+    apply Oplus_R_1.
+    apply Times_R with (Γ:={ P , P ⊸ S}) (Δ:={D})...
+    apply Impl_L with (Γ:={P}) (Δ:=∅) (p:=P) (q:=S)...
+  Qed.
+
+  Ltac search_one_goal_strong g := 
+    match goal with 
+      | |- ?g' => 
+        match g with 
+          ?env⊢?e =>
+          match g' with
+            ?env'⊢e => 
+            (same_env env env')
+          end
+        end
+      | |- ?env ⊢ ?e  => 
+        match env with 
+          | context C [(add 1 ?env')] =>
+            let e := context C [ env' ] in
+              (apply One_L with (Γ:=e);
+                [ search_one_goal g | prove_multiset_eq])||fail 0
+          | context C [(add ( ?p' & ?q') ?env')] =>
+            let e := context C [ env' ] in
+              (apply And_L_2 with (Γ:=e) (p:=p') (q:=q');
+                [search_one_goal g | prove_multiset_eq])|| fail 0
+          | context C [(add ( ?p' & ?q') ?env')] =>
+            let e := context C [ env' ] in
+              (apply And_L_1 with (Γ:=e) (p:=p') (q:=q');
+                [search_one_goal g | prove_multiset_eq])||fail 0
+          | context C [(add ( ?p' ⊗ ?q') ?env')] =>
+            (let e := context C [ env' ] in
+              apply Times_L with (Γ:=e) (p:=p') (q:=q'); [ search_one_goal g | prove_multiset_eq])||fail 0
+          | context C [add (?p'⊸?q') ?env'] =>
+            let e := context C [ env' ] in 
+              match e with 
+                | context C' [ p'::?env''] => 
+                  let e' := context C' [env''] in 
+                    apply Impl_L with (Γ:={p'}) (Δ:=e') (p:=p') (q:=q');
+                      [constructor;prove_multiset_eq |search_one_goal g|prove_multiset_eq]
+              end
+        end || fail 0
+      | |-  _ ⊢ ?p ⊕ ?q => 
+        apply Oplus_R_1;search_one_goal g
+      | |- _ ⊢ ?p ⊕ ?q => 
+        apply Oplus_R_2;search_one_goal g
+    end.
+
+  Lemma Copy_Proof_from_figure_1_with_stronger_search:
+  {D, P & 1, R & 1, D ⊸ (((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)} ⊢ ((S ⊗ D) ⊕ D).
+  Proof with (try complete (try constructor; prove_multiset_eq)).
+    search_one_goal_strong ({D, (P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S))), P & 1, R & 1} ⊢ (S ⊗ D) ⊕ D).
+    oplus_l (P ⊸ S) (R ⊸ (1 ⊕ (P ⊸ S))).
+    search_one_goal_strong ({P, P ⊸ S, D} ⊢ (S ⊗ D)).
+    apply Times_R with (Γ:= {P, (P ⊸ S) }) (Δ:= {D})...
+    search_one_goal_strong ({S}⊢S)...
+    (*This one should be useless *)
+    search_one_goal_strong ({R, R ⊸ (1 ⊕ (P ⊸ S)), D, P & 1} ⊢ (S ⊗ D) ⊕ D). 
+    search_one_goal_strong ({1 ⊕ (P ⊸ S), D, P & 1} ⊢ (S ⊗ D) ⊕ D).
+    oplus_l 1 (P ⊸ S).
+    search_one_goal_strong ({D} ⊢ D)...
+    search_one_goal_strong ( {P ⊸ S, D, P} ⊢ (S ⊗ D)).
+    apply Times_R with (Γ:={ P , P ⊸ S}) (Δ:={D})...
+    search_one_goal_strong ({S}⊢S)...
+  Qed.
+
 
 End PaperProofs.
 
