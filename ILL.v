@@ -85,6 +85,123 @@ Module Type ILL_sig(Vars : OrderedType).
   | Bang_W : ∀ Ω Γ p q , Γ ⊢ q → eq Ω (!p :: Γ) → Ω ⊢ q
     where " x ⊢ y " := (ILL_proof x y) : ILL_scope.
 
+  Add Relation t eq
+  reflexivity proved by eq_refl
+  symmetry proved by eq_sym
+    transitivity proved by eq_trans as eq_rel.
+
+  Add Morphism add
+    with signature (FormulaOrdered.eq ==> FormulaMultiSet.eq ==> FormulaMultiSet.eq)
+      as add_morph.
+  Proof.
+    exact add_morph_eq.
+  Qed.
+  
+  Add Relation formula FormulaOrdered.eq
+  reflexivity proved by FormulaOrdered.eq_refl
+  symmetry proved by FormulaOrdered.eq_sym
+    transitivity proved by FormulaOrdered.eq_trans
+      as fo_eq_rel.
+
+  Add Morphism union
+    with signature (FormulaMultiSet.eq==> FormulaMultiSet.eq ==> FormulaMultiSet.eq)
+      as union_morph.
+  Proof.
+    exact union_morph_eq.
+  Qed.
+
+  Add Morphism mem
+    with signature ( Logic.eq ==> FormulaMultiSet.eq ==> Logic.eq)
+      as mem_morph.
+  Proof.
+    apply FormulaMultiSet.mem_morph_eq.
+  Qed.
+
+  Lemma ILL_proof_pre_morph : forall φ Γ Γ', eq Γ Γ' ->  (Γ⊢φ) -> (Γ'⊢φ).
+  Proof.
+    intros φ Γ Γ' Heq H.
+    revert Γ' Heq.
+    induction H;intros Γ' Heq.
+
+    Focus 1.
+    rewrite Heq in H.
+    constructor;exact H.
+
+    Focus 1.
+    rewrite Heq in H1.
+    constructor 2 with (Γ:=Γ) (Δ:=Δ) (p:=p);assumption.
+
+    Focus 1.
+    constructor 3.
+    apply IHILL_proof.
+    rewrite Heq;reflexivity.
+
+    Focus 1.
+    rewrite Heq in H1.
+    constructor 4 with (Γ:=Γ) (Δ:=Δ) (p:=p) (q:=q);assumption.
+
+    Focus 1.
+    rewrite Heq in H1.
+    econstructor eassumption. 
+
+    Focus 1.
+    rewrite Heq in H0;econstructor eassumption.
+
+    Focus 1.
+    rewrite Heq in H;econstructor eassumption.
+
+    Focus 1.
+    rewrite Heq in H0;econstructor eassumption.
+
+    Focus 1.
+    assert (H1:=IHILL_proof1 _ Heq).
+    assert (H2:=IHILL_proof2 _ Heq).
+    econstructor eassumption.
+
+    Focus 1.
+    rewrite Heq in H0;econstructor eassumption.
+
+    Focus 1.
+    rewrite Heq in H0;econstructor eassumption.
+
+    Focus 1.
+    rewrite Heq in H1. 
+    econstructor 12. 
+    eexact H.
+    eexact H0.
+    eassumption.
+
+    Focus 1.
+    assert (H1:=IHILL_proof _ Heq).
+    econstructor eassumption.
+
+    Focus 1.
+    assert (H1:=IHILL_proof _ Heq).
+    econstructor eassumption.
+
+    Focus 1.
+    constructor fail.
+
+    Focus 1.
+    rewrite Heq in H.
+    econstructor eassumption.
+  
+    Focus 1.
+    rewrite Heq in H0;econstructor eassumption.
+
+    Focus 1.
+    rewrite Heq in H0;econstructor eassumption.
+
+    Focus 1.
+    rewrite Heq in H0;econstructor eassumption.
+  Qed. 
+
+  Add Morphism ILL_proof with signature (FormulaMultiSet.eq ==> Logic.eq ==> iff) as ILL_proof_morph.
+  Proof.
+    intros Γ Γ' Heq φ;split;apply ILL_proof_pre_morph.
+    assumption.
+    symmetry;assumption.
+  Qed.
 End ILL_sig.
 
 

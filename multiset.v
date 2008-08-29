@@ -50,6 +50,10 @@ Module Type S(X:OrderedType).
   Parameter union_empty_right : forall ms, eq (union ms empty) ms.
   Parameter union_rec_left : forall a ms ms', eq (union (add a ms) ms') (add a (union ms ms')).
   Parameter union_rec_right : forall a ms ms', eq (union ms (add a ms')) (add a (union ms ms')).
+
+  Parameter mem_morph_eq :
+    forall (φ : A) (Γ Γ' : t), eq Γ Γ' -> mem φ Γ = mem φ Γ'.
+
 End S.
 
 Module Make(X:OrderedType) <: S(X).
@@ -936,6 +940,16 @@ Module Make(X:OrderedType) <: S(X).
     intros a ms ms'.
     unfold eq,union,add.
     apply addm_rec_right.
+  Qed.
+
+  Lemma mem_morph_eq :
+    forall (φ : A) (Γ Γ' : t), eq Γ Γ' -> mem φ Γ = mem φ Γ'.
+  Proof.
+    intros φ Γ Γ' H.
+    unfold eq,mem in *.
+    apply  MapsPtes.F.mem_m.
+    reflexivity.
+    assumption.
   Qed.
 
 End Make.
