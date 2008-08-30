@@ -1,0 +1,61 @@
+-*- outline -*-  
+
+* To compile you need coq-8.3.
+
+** To compile coq files:
+
+make
+
+** To compile a single file foo.v:
+
+make foo.vo
+
+** To compile coq files documentation (à la javadoc):
+
+make html
+(creates a "html" directory)
+
+** To clean up archive:
+
+make clean
+
+
+* To open file   
+  you can either use emacs (>=23) or coqide. See inside file IL.v to
+  input utf8 chars in emacs. See below for how to use utf8 chars in
+  coqide (paste from coq reference manual).
+
+
+** 14.8.2  Defining an input method for non ASCII symbols
+
+To input an Unicode symbol, a general method is to press both the
+CONTROL and the SHIFT keys, and type the hexadecimal code of the
+symbol required, for example 2200 for the ∀ symbol. A list of symbol
+codes is available at http://www.unicode.org.
+
+Of course, this method is painful for symbols you use often. There is
+always the possibility to copy-paste a symbol already typed in.
+Another method is to bind some key combinations for frequently used
+symbols. For example, to bind keys F11 and F12 to ∀ and ∃
+respectively, you may add
+
+    bind "F11" "insert-at-cursor" ("∀")
+    bind "F12" "insert-at-cursor" ("∃") 
+
+to your binding "text" section in .coqiderc-gtk2rc.
+
+** 14.8.3  Character encoding for saved files
+
+In the Files section of the preferences, the encoding option is
+related to the way files are saved.
+
+If you have no need to exchange files with non UTF-8 aware
+applications, it is better to choose the UTF-8 encoding, since it
+guarantees that your files will be read again without problems. (This
+is because when CoqIDE reads a file, it tries to automatically detect
+its character encoding.)
+
+If you choose something else than UTF-8, then missing characters will
+be written encoded by \x{....} or \x{........} where each dot is an
+hexadecimal digit: the number between braces is the hexadecimal
+UNICODE index for the missing character.

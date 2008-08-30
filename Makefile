@@ -80,7 +80,7 @@ endif
 COQC:=$(COQBIN)coqc
 COQDEP:=$(COQBIN)coqdep -c
 GALLINA:=$(COQBIN)gallina
-COQDOC:=$(COQBIN)coqdoc
+COQDOC:=$(COQBIN)coqdoc --utf8
 COQMKTOP:=$(COQBIN)coqmktop
 CAMLLIB:=$(shell $(CAMLBIN)ocamlc.opt -where)
 CAMLC:=$(CAMLBIN)ocamlc.opt -c -rectypes
