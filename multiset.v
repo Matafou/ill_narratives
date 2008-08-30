@@ -1,3 +1,6 @@
+Require Import FMapInterface.
+Require Import FMapFacts.
+Require Import FMapAVL.
 Require Import OrderedType.
 Module Type S(X:OrderedType).
 
@@ -17,6 +20,7 @@ Module Type S(X:OrderedType).
   Parameter eq_bool : t -> t -> bool. 
 
   Parameter eq : t -> t -> Prop. 
+  Parameter eq_bool_correct : forall m1 m2, eq_bool m1 m2 = true -> eq m1 m2.
 
   Parameter eq_refl : forall ms, eq ms ms.
 
@@ -56,10 +60,13 @@ Module Type S(X:OrderedType).
 
 End S.
 
-Module Make(X:OrderedType) <: S(X).
-  Require Import FMapInterface.
-  Require Import FMapFacts.
-  Declare Module Maps : FMapInterface.S with Module E:=X.
+  Function nat_eq_bool (n m:nat) {struct n} : bool := 
+    match n,m with 
+      | 0,0 => true 
+      | S n,S m => nat_eq_bool n m
+      | _,_ => false
+    end.
+Module PreMake(X:OrderedType)(Maps:FMapInterface.S with Module E:=X) <: S(X).
   Module MapsFact := WFacts(Maps).
 
 
@@ -89,13 +96,6 @@ Module Make(X:OrderedType) <: S(X).
       end.
 
   Definition mem : A -> t -> bool := @Maps.mem nat. 
-
-  Function nat_eq_bool (n m:nat) {struct n} : bool := 
-    match n,m with 
-      | 0,0 => true 
-      | S n,S m => nat_eq_bool n m
-      | _,_ => false
-    end.
 
 
   Definition eq_bool : t -> t -> bool := Maps.equal nat_eq_bool.
@@ -952,4 +952,28 @@ Module Make(X:OrderedType) <: S(X).
     assumption.
   Qed.
 
-End Make.
+
+  Lemma eq_bool_correct : forall m1 m2, eq_bool m1 m2 = true -> eq m1 m2.
+  Proof.
+  unfold eq,eq_bool.
+  intros m1 m2 H.
+  apply Maps.equal_2 in H.
+  rewrite <- MapsPtes.F.Equal_Equivb in H. 
+  assumption.
+  clear m1 m2 H.
+  intros m n.
+  functional induction (nat_eq_bool m n).
+  tauto.
+  split;intro H;destruct IHb.
+  rewrite (H0 H);reflexivity.
+  injection H;clear H;intro H.
+  auto.
+  destruct n;destruct m;try tauto;
+  split;intro;discriminate.
+Qed.
+End PreMake.
+
+Module MakeAVL(X:OrderedType )<:S(X).
+  Module Maps' := FMapAVL.Make(X).
+  Include PreMake(X)(Maps').
+End MakeAVL.
