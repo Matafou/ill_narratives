@@ -28,7 +28,6 @@ Module Type ILL_sig(Vars : OrderedType).
   Reserved Notation "⊤" (at level 10, no associativity).
   Reserved Notation "∪" (at level 60, right associativity).
   Reserved Notation "∅" (at level 10, no associativity).
-(*   Reserved Notation "{ a ; .. ; b }" (at level 60). *)
 
   (** Le type des formules, les atomes sont dénotés par [Proposition]. *)
   Inductive formula : Type := 
@@ -60,36 +59,53 @@ Module Type ILL_sig(Vars : OrderedType).
   Infix "∪" := union (at level 60, right associativity).
   Notation " a :: b " := (add a b) (at level 60, right associativity).
   Notation "{ a , .. , b }" := (add a .. (add b empty) ..).
-  
+
+  (* Notation pour l'égalité des environnements (égalité des multisets). *)
+  Notation " E == F " := (eq E F) (at level 80): ILL_scope.
+
+  (* Notation pour l'appartenance à un environnement. *)
+  Notation " x ∈ F " := (mem x F) (at level 60): ILL_scope.
+
+  (** La définition d'une reuve en LLI. On utilise l'égalité sur les
+     environnements plutôt que de mettre le même environnement partout, afin de
+     permettre le réarrangement des environnements au moment d'appliquer une
+     règle. *)
   Definition env := FormulaMultiSet.t.
 
   Inductive ILL_proof : env → formula → Prop :=
-    Id : ∀ p Gamma, eq Gamma {p} → Gamma ⊢ p
-  | Cut : ∀ Ω Γ Δ p q, Γ ⊢ p → p::Δ ⊢ q → eq Ω (Δ ∪ Γ) → Ω ⊢ q
+    Id : ∀ p Γ, Γ == {p} → Γ ⊢ p
+  | Cut : ∀ Ω Γ Δ p q, Γ ⊢ p → p::Δ ⊢ q → Ω == (Δ ∪ Γ) → Ω ⊢ q
   | Impl_R : ∀ Γ p q, p::Γ ⊢ q → Γ ⊢ p ⊸ q
-  | Impl_L : ∀ Ω Γ Δ p q r, Γ ⊢ p → q::Δ ⊢ r → eq Ω (p ⊸ q :: Δ ∪ Γ) → Ω ⊢ r
-  | Times_R : ∀ Ω Γ Δ p q , Γ ⊢ p → Δ ⊢ q → eq Ω (Γ ∪ Δ) → Ω ⊢ p ⊗ q
-  | Times_L : ∀ Ω Γ p q r , q :: p :: Γ ⊢ r → eq Ω (p ⊗ q :: Γ) → Ω ⊢ r
-  | One_R : ∀ Ω, eq Ω (∅) → Ω ⊢ 1
-  | One_L : ∀ Ω Γ p , Γ ⊢ p → eq Ω (1 :: Γ) → Ω ⊢ p
+  | Impl_L : ∀ Ω Γ Δ p q r, Γ ⊢ p → q::Δ ⊢ r → Ω == (p ⊸ q :: Δ ∪ Γ) → Ω ⊢ r
+  | Times_R : ∀ Ω Γ Δ p q , Γ ⊢ p → Δ ⊢ q → Ω == (Γ ∪ Δ) → Ω ⊢ p ⊗ q
+  | Times_L : ∀ Ω Γ p q r , q :: p :: Γ ⊢ r → Ω == (p ⊗ q :: Γ) → Ω ⊢ r
+  | One_R : ∀ Ω, Ω == ∅ → Ω ⊢ 1
+  | One_L : ∀ Ω Γ p , Γ ⊢ p → Ω == (1 :: Γ) → Ω ⊢ p
   | And_R : ∀ Γ p q , Γ ⊢ p → Γ ⊢ q → Γ ⊢ (p & q)
-  | And_L_1 : ∀ Ω Γ p q r , p::Γ ⊢ r → eq Ω ((p & q) :: Γ) → Ω ⊢ r
-  | And_L_2 : ∀ Ω Γ p q r , q::Γ ⊢ r → eq Ω ((p & q) :: Γ) → Ω ⊢ r
-  | Oplus_L : ∀ Ω Γ p q r , p :: Γ ⊢ r → q :: Γ ⊢ r → eq Ω (p ⊕ q :: Γ) → Ω ⊢ r
+  | And_L_1 : ∀ Ω Γ p q r , p::Γ ⊢ r → Ω == ((p & q) :: Γ) → Ω ⊢ r
+  | And_L_2 : ∀ Ω Γ p q r , q::Γ ⊢ r → Ω == ((p & q) :: Γ) → Ω ⊢ r
+  | Oplus_L : ∀ Ω Γ p q r , p :: Γ ⊢ r → q :: Γ ⊢ r → Ω == (p ⊕ q :: Γ) → Ω ⊢ r
   | Oplus_R_1 : ∀ Γ p q , Γ ⊢ p → Γ ⊢ p ⊕ q
   | Oplus_R_2 : ∀ Γ p q , Γ ⊢ q → Γ ⊢ p ⊕ q 
   | T_ : ∀ Γ, Γ ⊢ ⊤
-  | Zero_ : ∀ Γ p , mem 0 Γ = true → Γ ⊢ p
-  | Bang_D : ∀ Ω Γ p q , p :: Γ ⊢ q → eq Ω (!p :: Γ) → Ω ⊢ q
-  | Bang_C : ∀ Ω Γ p q , !p :: !p :: Γ ⊢ q → eq Ω (!p :: Γ) → Ω ⊢ q
-  | Bang_W : ∀ Ω Γ p q , Γ ⊢ q → eq Ω (!p :: Γ) → Ω ⊢ q
+  | Zero_ : ∀ Γ p , 0 ∈ Γ = true → Γ ⊢ p
+  | Bang_D : ∀ Ω Γ p q , p :: Γ ⊢ q → Ω == (!p :: Γ) → Ω ⊢ q
+  | Bang_C : ∀ Ω Γ p q , !p :: !p :: Γ ⊢ q → Ω == (!p :: Γ) → Ω ⊢ q
+  | Bang_W : ∀ Ω Γ p q , Γ ⊢ q → Ω == (!p :: Γ) → Ω ⊢ q
+
+    (* Syntaxe définie en même temps que le type des preuve. *)
     where " x ⊢ y " := (ILL_proof x y) : ILL_scope.
+
+  (** Morphismes. Les morphismes déclar&és ci-dessous permettront d'utiliser les
+      tactiques de réécriture pour prouver les égalité sur les environnements et
+      sur les formules.*)
 
   Add Relation t eq
   reflexivity proved by eq_refl
   symmetry proved by eq_sym
     transitivity proved by eq_trans as eq_rel.
 
+  (* On peut réécrire à l'intérieur d'un ::. *)
   Add Morphism add
     with signature (FormulaOrdered.eq ==> FormulaMultiSet.eq ==> FormulaMultiSet.eq)
       as add_morph.
@@ -103,6 +119,7 @@ Module Type ILL_sig(Vars : OrderedType).
     transitivity proved by FormulaOrdered.eq_trans
       as fo_eq_rel.
 
+  (* On peut réécrire à l'intérieur d'une union d'environnements. *)
   Add Morphism union
     with signature (FormulaMultiSet.eq==> FormulaMultiSet.eq ==> FormulaMultiSet.eq)
       as union_morph.
@@ -110,6 +127,7 @@ Module Type ILL_sig(Vars : OrderedType).
     exact union_morph_eq.
   Qed.
 
+  (* On peut réécrire à l'intérieur d'un mem. *)
   Add Morphism mem
     with signature ( Logic.eq ==> FormulaMultiSet.eq ==> Logic.eq)
       as mem_morph.
@@ -117,7 +135,8 @@ Module Type ILL_sig(Vars : OrderedType).
     apply FormulaMultiSet.mem_morph_eq.
   Qed.
 
-  Lemma ILL_proof_pre_morph : forall φ Γ Γ', eq Γ Γ' ->  (Γ⊢φ) -> (Γ'⊢φ).
+  (* l'égalité sur les environnements est compatible avec ⊢. *)
+  Lemma ILL_proof_pre_morph : forall φ Γ Γ', Γ == Γ' ->  (Γ⊢φ) -> (Γ'⊢φ).
   Proof.
     intros φ Γ Γ' Heq H.
     revert Γ' Heq.
@@ -196,6 +215,7 @@ Module Type ILL_sig(Vars : OrderedType).
     rewrite Heq in H0;econstructor eassumption.
   Qed. 
 
+  (* On peut réécrire à l'intérieur d'un ⊢. *)
   Add Morphism ILL_proof with signature (FormulaMultiSet.eq ==> Logic.eq ==> iff) as ILL_proof_morph.
   Proof.
     intros Γ Γ' Heq φ;split;apply ILL_proof_pre_morph.
@@ -204,37 +224,12 @@ Module Type ILL_sig(Vars : OrderedType).
   Qed.
 End ILL_sig.
 
-
+(** Les preuves de epsrc_case_for_support.pdf. *)
 Module PaperProofs(Vars : OrderedType).
   Declare Module Import M : ILL_sig(Vars).
   Import FormulaMultiSet.
 
-
-  Add Relation t eq
-  reflexivity proved by eq_refl
-  symmetry proved by eq_sym
-    transitivity proved by eq_trans as eq_rel.
-
-  Add Morphism add
-    with signature (FormulaOrdered.eq ==> FormulaMultiSet.eq ==> FormulaMultiSet.eq)
-      as add_morph.
-  Proof.
-    exact add_morph_eq.
-  Qed.
-  
-  Add Relation formula FormulaOrdered.eq
-  reflexivity proved by FormulaOrdered.eq_refl
-  symmetry proved by FormulaOrdered.eq_sym
-    transitivity proved by FormulaOrdered.eq_trans
-      as fo_eq_rel.
-
-  Add Morphism union
-    with signature (FormulaMultiSet.eq==> FormulaMultiSet.eq ==> FormulaMultiSet.eq)
-      as union_morph.
-  Proof.
-    exact union_morph_eq.
-  Qed.
-  
+  (** Tactiques *)
   Ltac prove_multiset_eq := 
     reflexivity ||
     vm_compute;
@@ -409,7 +404,7 @@ Module PaperProofs(Vars : OrderedType).
   Ltac finish_proof_strong := search_one_goal_strong ({⊤}⊢⊤).
 
 
-
+  (** Figure 1 de epsrc_case_for_support. *)
   Section figure_1.
   Parameters vD vP vR vS : Vars.t.
   Local Notation "'D'" := (Proposition vD).
@@ -427,8 +422,6 @@ Module PaperProofs(Vars : OrderedType).
           
 
 
-  Definition env := Eval vm_compute in
-    add D (add (P & 1) (add (R & 1) (add (D ⊸ (((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)) empty))).
 
   Lemma Copy_Proof_from_figure_1:
   {D, P & 1, R & 1, D ⊸ (((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)} ⊢ ((S ⊗ D) ⊕ D).
@@ -475,7 +468,7 @@ Module PaperProofs(Vars : OrderedType).
     search_one_goal ({R, R ⊸ (1 ⊕ (P ⊸ S)), D, P & 1} ⊢ (S ⊗ D) ⊕ D).
     apply Impl_L with (Γ:={R}) (Δ:= {D, P & 1 }) (p:=R) (q:=(1 ⊕ (P ⊸ S)))...
     oplus_l 1 (P ⊸ S).
-    search_one_goal ({D} ⊢ (S ⊗ D) ⊕ D).
+    info search_one_goal ({D} ⊢ (S ⊗ D) ⊕ D).
     apply Oplus_R_2...
     search_one_goal ( {P ⊸ S, D, P} ⊢ (S ⊗ D) ⊕ D).
     apply Oplus_R_1.
@@ -499,6 +492,8 @@ Module PaperProofs(Vars : OrderedType).
     apply Times_R with (Γ:={ P , P ⊸ S}) (Δ:={D})...
   Qed.
 End figure_1.
+
+(** Figure 5 de epsrc_case_for_support. *)
 Section figure_5.
   Parameters vD' vD0' vD1' vD2' vH' vF' vG' vM' vL' : Vars.t.
   Local Notation "'D'" := (Proposition vD').
