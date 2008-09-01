@@ -1,0 +1,33 @@
+\begin{prooftree}
+\def\ScoreOverhang{-4pt}
+        \ax{\cseqtiny{G}{G}}
+            \ax{\cseqtiny{H}{H}}
+            \ax{\cseqtiny{M{\cvir}D_2}{\ccot{M}{D_2}}}
+                \ax{\cseqtiny{L{\cvir}D_2{\cvir}H}{\cott{L}{D_2}{H}}}
+                            \ax{\cseqtiny{L{\cvir}D_2}{\ccot{L}{D_2}}}
+                                \ax{\cseqtiny{D}{D}}
+                            \nactions{{\multimap}L}
+                            \binf{\cseqscript{\otherfs{L{\cvir}D_2}{\cvir}\mainfs{\cmmap{(\ccot{L}{D_2})}{D}}}{\otherfs{D}}}
+                            \plab{{\otimes}L}
+                            \uinf{\cseqtiny{\mainfs{\ccot{L}{D_2}}{\cvir}\otherfs{\cmmap{(\ccot{L}{D_2})}{D}}}{\otherfs{D}}}
+                            \uinf{...}
+                            \uinf{\cseqtiny{\mainfs{\cott{L}{D_0}{\cmmap{(\ccot{L}{D_2})}{D}}}{\cvir}\lheureux}{D}}
+                \nactions{{\multimap}L}%L,D2,H
+                \binf{\cseqscript{\otherfs{H}{\cvir}\otherfs{L}{\cvir}\otherfs{D_2}{\cvir}\mainfs{\cmmap{(\cott{L}{D_2}{H})}{(\cott{L}{D_0}{(\cmmap{(\ccot{L}{D_2})}{D})})}}{\cvir}\otherfs{\lheureux}}{\otherfs{D}}}
+                \uinf{...}
+                \uinf{\cseqtiny{H{\cvir}L{\cvir}D_1{\cvir}\mainfs{\oc(\cmmap{H}{(\ccot{H}{M})})}{\cvir}\cmmap{(\cott{L}{D_2}{H})}{(\cott{L}{D_0}{(\cmmap{(\ccot{L}{D_2})}{D})})}{\cvir}\lheureux{\cvir}\money}{D}}
+            \nactions{{\multimap}L}%M, D2
+            \binf{\cseqscript{\otherfs{H}{\cvir}\otherfs{L}{\cvir}\otherfs{M}{\cvir}\otherfs{D_2}{\cvir}\otherfs{\oc(\cmmap{H}{(\ccot{H}{M})})}{\cvir}\otherfs{\cmmap{(\cott{L}{D_2}{H})}{(\cott{L}{D_0}{(\cmmap{(\ccot{L}{D_2})}{D})})}}{\cvir}\otherfs{\lheureux}{\cvir}\otherfs{\money}{\cvir}\mainfs{\cmmap{(\ccot{D_2}{M})}{D_1}}}{\otherfs{D}}}
+            \plab{{\oc}CD}
+            \uinf{\cseqtiny{\otherfs{\ccot{H}{M}{\cvir}L{\cvir}D_2{\cvir}\oc(\cmmap{H}{(\ccot{H}{M})}){\cvir}\cmmap{(\cott{L}{D_2}{H})}{(\cott{L}{D_0}{(\cmmap{(\ccot{L}{D_2})}{D})})}{\cvir}\lheureux{\cvir}\oc(\cmmap{(\ccot{D_1}{M})}{D_0}){\cvir}}\mainfs{\oc(\cmmap{(\ccot{D_2}{M})}{D_1})}}{D}}
+            \plab{{\otimes}L}
+            \uinf{\cseqtiny{\mainfs{\ccot{H}{M}}{\cvir}\otherfs{L}{\cvir}\otherfs{D_2}{\cvir}\otherfs{\oc(\cmmap{H}{(\ccot{H}{M})})}{\cvir}\otherfs{\cmmap{(\cott{L}{D_2}{H})}{(\cott{L}{D_0}{(\cmmap{(\ccot{L}{D_2})}{D})})}}{\cvir}\otherfs{\lheureux}{\cvir}\otherfs{\money}}{D}}
+        \nactions{{\multimap}L}%H
+        \insertBetweenHyps{\hskip -11pt}
+        \binf{\cseqscript{\otherfs{H{\cvir}L{\cvir}D_2{\cvir}}\mainfs{\cmmap{H}{(\ccot{H}{M})}}\otherfs{{\cvir}\oc(\cmmap{H}{(\ccot{H}{M})}){\cvir}\cmmap{(\cott{L}{D_2}{H})}{(\cott{L}{D_0}{(\cmmap{(\ccot{L}{D_2})}{D})})}{\cvir}\lheureux{\cvir}\money}}{\otherfs{D}}}
+        \plab{{\oc}CD}
+        \uinf{\cseqtiny{\otherfs{H}{\cvir}\otherfs{L}{\cvir}\otherfs{D_2}{\cvir}\mainfs{\oc(\cmmap{H}{(\ccot{H}{M})})}{\cvir}\otherfs{\cmmap{(\cott{L}{D_2}{H})}{(\cott{L}{D_0}{(\cmmap{(\ccot{L}{D_2})}{D})})}}{\cvir}\otherfs{\lheureux}{\cvir}\otherfs{\money}}{D}}
+    \nactions{{\multimap}L}%G
+    \insertBetweenHyps{\hskip -4pt}
+    \binf{\cseqscript{\otherfs{H}{\cvir}\otherfs{L}{\cvir}\otherfs{D_2}{\cvir}\otherfs{G}{\cvir}\mainfs{\cmmap{G}{\oc(\cmmap{H}{(\ccot{H}{M})})}}{\cvir}\otherfs{\cmmap{(\cott{L}{D_2}{H})}{(\cott{L}{D_0}{(\cmmap{(\ccot{L}{D_2})}{D})})}}{\cvir}\otherfs{\lheureux}{\cvir}\otherfs{\money}}{\otherfs{D}}}
+\end{prooftree} 

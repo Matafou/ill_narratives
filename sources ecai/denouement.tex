@@ -1,0 +1,79 @@
+%\def\proofSkipAmount{\vskip-1ex plus-1ex minus-2ex}
+\begin{prooftree}
+\def\ScoreOverhang{-4pt}
+\ax{}
+\doubleLine
+\uinf{\cseq{D}{D}}
+    \ax{}
+    \doubleLine
+    \uinf{\cseq{P}{P}}
+        \ax{\footnotesize{No Conversation with Rodolphe}}
+        \noLine
+        \uinf{ }
+        \doubleLine
+        \uinf{\cseq{S}{S}}
+    \naction{\multimap L}
+    \insertBetweenHyps{\hskip -4pt}
+    \binf{\cseq{\otherf{P}{\vir}\mainf{\mmap{P}{S}}}{S}}
+        \ax{}
+        \doubleLine
+        \uinf{\cseq{D}{D}}
+    \plab{\otimes R}
+    \binf{\cseq{\otherf{P}{\vir}\otherf{\mmap{P}{S}}{\vir}\otherf{D}}{{\mainf{\ot{S}{D}}}}}
+    \naction{\oplus R}
+    \uinf{\cseq{\otherf{P}{\vir}\otherf{\mmap{P}{S}}{\vir}\otherf{D}}{\mainf{\op{(\ot{S}{D})}{D}}}}
+    \plab{1 L}
+    \uinf{\cseq{\otherf{P}{\vir}\mainf{1}{\vir}\otherf{\mmap{P}{S}}{\vir}\otherf{D}}{\otherf{\op{(\ot{S}{D})}{D}}}}
+    \plab{\& L}
+    \uinf{\cseq{\otherf{P}{\vir}\mainf{R \& 1}{\vir}\otherf{\mmap{P}{S}}{\vir}\otherf{D}}{\otherf{\op{(\ot{S}{D})}{D}}}}
+    \plab{\& L}
+    \uinf{\cseq{\mainf{P \& 1}{\vir}\otherf{R \& 1}{\vir}\otherf{\mmap{P}{S}}{\vir}\otherf{D}}{\otherf{\op{(\ot{S}{D})}{D}}}}
+        \ax{}
+        \doubleLine
+        \uinf{\cseq{R}{R}}
+        \ax{\footnotesize{No Suicide}}
+        \noLine
+        \uinf{ }
+        \doubleLine
+        \uinf{\cseq{D}{D}}
+            \naction{\oplus R}
+            \uinf{\cseq{\otherf{D}}{\mainf{\op{(\ot{S}{D})}{D}}}}
+            \plab{1 L}
+            \uinf{\cseq{\mainf{1}{\vir}\otherf{D}}{\otherf{\op{(\ot{S}{D})}{D}}}}
+            \plab{\& L}
+            \uinf{\cseq{\mainf{P \& 1}{\vir}\otherf{D}}{\otherf{\op{(\ot{S}{D})}{D}}}}
+            \plab{1 L}
+            \uinf{\cseq{\otherf{P \& 1}{\vir}\mainf{1}{\vir}\otherf{D}}{\otherf{\op{(\ot{S}{D})}{D}}}}
+                \ax{}
+                \doubleLine
+                \uinf{\cseq{P}{P}}
+                    \ax{\footnotesize{Original Storyline}}
+                    \noLine
+                    \uinf{ }
+%                    \ax{Original Storyline}
+                    \doubleLine
+                    \uinf{\cseq{S}{S}}
+                \naction{\multimap L}
+                \binf{\cseq{\otherf{P}{\vir}\mainf{\mmap{P}{S}}}{S}}
+                    \ax{}
+                    \doubleLine
+                    \uinf{\cseq{D}{D}}
+                \plab{\otimes R}
+                \binf{\cseq{\otherf{P}{\vir}\otherf{\mmap{P}{S}}{\vir}\otherf{D}}{\mainf{\ot{S}{D}}}}
+                \naction{\oplus R}
+                \uinf{\cseq{\otherf{P}{\vir}\otherf{\mmap{P}{S}}{\vir}\otherf{D}}{\mainf{\op{(\ot{S}{D})}{D}}}}
+                \plab{\& L}
+                \uinf{\cseq{\mainf{\wt{P}{1}}{\vir}\otherf{\mmap{P}{S}}{\vir}\otherf{D}}{\otherf{\op{(\ot{S}{D})}{D}}}}
+            \naction{\oplus L}
+            \binf{\cseq{\otherf{P \& 1}{\vir}\mainf{\op{1}{(\mmap{P}{S})}}{\vir}\otherf{D}}{\otherf{\op{(\ot{S}{D})}{D}}}}
+        \naction{\multimap L}
+        \binf{\cseq{\otherf{P \& 1}{\vir}\otherf{R}{\vir}\mainf{\mmap{R}{(\op{1}{(\mmap{P}{S})})}}{\vir}\otherf{D}}{\otherf{\op{(\ot{S}{D})}{D}}}}
+        \plab{\& L}
+        \uinf{\cseq{\otherf{P \& 1}{\vir}\mainf{R \& 1}{\vir}\otherf{\mmap{R}{(\op{1}{(\mmap{P}{S})})}}{\vir}\otherf{D}}{\otherf{\op{(\ot{S}{D})}{D}}}}
+    \naction{\oplus L}
+    \binf{\cseq{\otherf{P \& 1}{\vir}\otherf{R \& 1}{\vir}\mainf{\op{(\mmap{P}{S})}{(\mmap{R}{(\op{1}{(\mmap{P}{S})})})}}{\vir}\otherf{D}}{\otherf{\op{(\ot{S}{D})}{D}}}}
+    \plab{\otimes L}
+    \uinf{\cseq{\otherf{P \& 1}{\vir}\otherf{R \& 1}{\vir}\mainf{\ot{(\op{(\mmap{P}{S})}{(\mmap{R}{(\op{1}{(\mmap{P}{S})})})})}{D}}}{\otherf{\op{(\ot{S}{D})}{D}}}}
+\naction{\multimap L}
+\binf{\cseq{\otherf{D}{\vir}\otherf{P \& 1}{\vir}\otherf{R \& 1}{\vir}\mainf{\mmap{D}{(\ot{(\op{(\mmap{P}{S})}{(\mmap{R}{(\op{1}{(\mmap{P}{S})})})})}{D})}}}{\otherf{\op{(\ot{S}{D})}{D}}}}
+\end{prooftree} 

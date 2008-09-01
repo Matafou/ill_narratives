@@ -1,0 +1,326 @@
+\documentclass{ecai2010}
+\usepackage{times}
+\usepackage{verbatim}
+\usepackage{xspace}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{latexsym}
+\usepackage{bussproofs}
+\usepackage{cmll}
+\usepackage[usenames]{color}
+\usepackage{rotating}
+\usepackage{multicol}
+
+\newcommand{\vir}{ , }
+\newcommand{\cvir}{ , }
+\newcommand{\seq}[2]{$#1\:\vdash\:#2$}
+\newcommand{\cseq}[2]{$\mathrm{#1}\vdash\mathrm{#2}$}
+\newcommand{\cseqsmall}[2]{\small\cseq{#1}{#2}}
+\newcommand{\cseqfoot}[2]{\footnotesize\cseq{#1}{#2}}
+\newcommand{\cseqscript}[2]{\scriptsize\cseq{#1}{#2}}
+\newcommand{\cseqtiny}[2]{\tiny\cseq{#1}{#2}}
+\newcommand{\mainf}[1]{#1}
+\newcommand{\otherf}[1]{\textcolor[gray]{0.4}{#1}}
+\newcommand{\totherf}[1]{\scriptstyle{\textcolor[gray]{0.5}{#1}}} % to be used with cseq
+\newcommand{\naction}[1]{\RightLabel{\footnotesize($#1$)}}
+\newcommand{\plab}[1]{\RightLabel{\tiny($#1$)}}
+\newcommand{\ax}[1]{\AxiomC{#1}}
+\newcommand{\axseq}[2]{$#1\vdash#2$}
+\newcommand{\uinf}[1]{\UnaryInfC{#1}}
+\newcommand{\binf}[1]{\BinaryInfC{#1}}
+\newcommand{\axb}[1]{\AxiomC{#1}}
+
+\newcommand{\ot}[2]{#1 \otimes #2}
+\newcommand{\ott}[3]{#1 \otimes #2 \otimes #3}
+\newcommand{\ottt}[4]{#1 \otimes #2 \otimes #3 \otimes #4}
+\newcommand{\mmap}[2]{#1 \multimap #2}
+\newcommand{\op}[2]{#1 \oplus #2}
+\newcommand{\wt}[2]{#1{\with}#2}
+
+\newcommand{\ccot}[2]{#1{\otimes}#2}
+\newcommand{\cott}[3]{#1{\otimes}#2{\otimes}#3}
+\newcommand{\cottt}[4]{#1{\otimes}#2{\otimes}#3{\otimes}#4}
+\newcommand{\cmmap}[2]{#1{\multimap}#2}
+\newcommand{\cop}[2]{#1{\oplus}#2}
+
+\newcommand{\cseqact}[2]{$\mathrm{#1}{\scriptstyle \vdash}\mathrm{#2}$}
+\newcommand{\mainfs}[1]{\textstyle #1}
+\newcommand{\otherfs}[1]{\scriptscriptstyle \textcolor[gray]{0.5}{#1}}
+\newcommand{\nactions}[1]{\RightLabel{($\mathbf{\scriptscriptstyle #1}$)}}
+
+
+\newcommand{\lheureux}{\mathcal{L}}
+\newcommand{\money}{\mathcal{M}}
+\newcommand{\resources}{\mathcal{R}}
+\newcommand{\whatlheureux}{$\lheureux =\mathrm{\oc({\mmap{(\ot{L}{D_0})}{(\ot{L}{D_1})}}){\cvir}\oc(\mmap{(\ot{L}{D_1})}{(\ot{L}{D_2})})}$}
+\newcommand{\whatmoney}{$\money =\mathrm{\oc(\mmap{(\ot{D_1}{M})}{D_0}){\cvir}\oc(\mmap{(\ot{D_2}{M})}{D_1})}$}
+\newcommand{\whatresources}{$\resources =\mathrm{H{\cvir}F{\cvir}L{\cvir}D_2{\cvir}\mmap{G}{\oc(\mmap{H}{(\ot{H}{M})})}}$}
+\newcommand{\textf}[1]{#1}
+\newdimen\boxfigwidth % width of figure box
+
+\def\bigbox{\begingroup
+  \boxfigwidth=\hsize
+  \advance\boxfigwidth by -2\fboxrule
+  \advance\boxfigwidth by -2\fboxsep
+  \setbox4=\vbox\bgroup\hsize\boxfigwidth
+  \hrule height0pt width\boxfigwidth\smallskip%
+  \linewidth=\boxfigwidth
+}
+\def\endbigbox{\smallskip\egroup\fbox{\box4}\endgroup}
+
+%\author{Tracking number 715}
+
+\begin{document}
+
+\title{Linear Logic for Non-Linear Storytelling}
+
+\author{Anne-Gwenn Bosser\institute{School of Computing, Teesside University, Middlesbrough, UK, a.g.bosser@tees.ac.uk} \and Marc Cavazza\institute{School of Computing, Teesside University, Middlesbrough, UK, m.o.cavazza@tees.ac.uk} \and Ronan Champagnat\institute{La Rochelle University - L3i, 17042 La Rochelle, France, ronan.champagnat@univ-lr.fr} }
+
+
+\maketitle
+\bibliographystyle{ecai2010}
+
+\begin{abstract}
+Whilst narrative representations have played a prominent role in AI research, there has been a renewed interest in the topic with the development of interactive narratives. A typical approach aims at generating narratives from baseline action representations, most often using planning techniques. However, this research has developed empirically, often as an application of planning.
+In this paper, we explore a more rigorous formalisation of narrative concepts, both at the action level and at the plot level. Our aim is to investigate how to bridge the gap between action descriptions and narrative concepts, by considering the latter from the perspective of resource consumption and causality. We propose to use Linear Logic, often introduced as a logic of resources, for it provides, through linear implication, a better description of causality than in Classical and Intuitionistic Logic. Besides advances in the fundamental principles of narrative formalisation, this approach can support the formal validation of scenario description as a preliminary step to their implementation via other computational formalisms.
+\end{abstract}
+
+\section{INTRODUCTION}
+Narratives have always played an important role in AI research (see e.g.~\cite{Richards09} for a recent review and current trends), and have been the backdrop for multiple contributions to knowledge representation, for instance the definition of events' structure. More recently, there has been a sustained interest from AI researchers into Interactive Storytelling (IS)~\cite{AAAI09,AAAI07}, whose long-term goal is to create stories that can be modified in real-time to respond to user's reactions. A typical Interactive Storytelling system uses a planner~\cite{Young99} to dynamically generate a sequence of actions, corresponding to the backbone of the narrative, which can subsequently be visualised using computer gaming technology or computer animation techniques.
+Research in Interactive Storytelling has revived the search for narrative formalisms, in an effort to depart from empirical approaches and to develop more solid theoretical foundations. However, initial hopes of developing computational narratology on the same basis as computational linguistics have been dashed by the finding that narrative formalisms developed in the field of Humanities~\cite{Cavazza06} were indeed closer to ontologies than to proper logical or computational formalisms.
+In this paper, we are exploring the logical formalisation of narratives, in an attempt to return to the representation of core properties of narratives which may be valid regardless of story genres. Such core properties naturally involve time, causality and reasoning about action and change, all of which have been the subject of significant work in knowledge representation, not least through the use of non-standard logics~\cite{Herzig03,Thielscher00}. In our search for a logic that would support the most important properties of narratives, we have chosen to explore the use of Linear Logic (LL), initially for its support of causality~\cite{GirardTCS87,Girard95}.
+The explicit management of resources allowed by LL could also support key narrative phenomena in a unified way: indeed, all the work in narratology which placed action semantics at the centre of narrative description (see for instance~\cite{Greimas66}) has as a direct consequence that resources are a key element of narratives. Furthermore, while continuous time is not naturally represented with LL, the discrete, implicit `narrative time' corresponding to the occurrence of narrative actions appears to be easily represented.
+
+Our objective is to show how, by modelling narrative actions using LL, it is possible to describe core narrative properties on a structural basis only, without having to resort to ad hoc narrative ontologies. In particular, the deduction mechanisms supported by LL should provide a foundation not only for essential narrative concepts, but also for traditional IS problems, such as the generation of story variants.
+
+On the other hand, we do not envisage LL as a short-term substitute to existing AI techniques in the practical implementation of IS systems, despite our use of the llprover theorem prover~\cite{Tamura98} on some of the logical representations introduced in this paper.
+%
+\section{MODELLING NON-LINEAR NARRATIVES}
+\subsection{Previous and related work}
+\paragraph{Logical Approaches to Interactive Storytelling}
+Grasbon and Braun~\cite{Grasbon01} have used standard logic programming to support the generation of narratives, however their system still relied on a narrative ontology (inspired from Vladimir Propp's narrative functions~\cite{Propp}), rather than using logical properties as first principles.
+The only previous use of LL in a closely related application has been reported by~\cite{ColleACE05}, and has used
+a fragment of LL for scenario analysis, in particular for computer games. Their approach aimed at \emph{a priori} game/scenario design validation, through compilation into Petri Nets, with an emphasis on evidencing reachable states and dead-ends.
+Most AI work in IS has instead been based on some form of Planning~\cite{Young99}  albeit with an empirical approach to action representation, most often directly formalising main narrative actions as planning operators.
+\paragraph{Linear Logic and Planning}
+ Masseron et al.~\cite{MasseronTCS93a,Masseron93b} have established how LL formalisation could support planning and how the fundamental properties of LL (in particular the absence of weakening) made it so that a proof in LL could be equated to a plan. Linear implication allows us to represent change due to an action through the consumption and creation of formulae as resources, which avoids the frame problem and the need for additional frame axioms as in the situation calculus (for which reason it has also been used in the Linear Dynamic Event Calculus presented in~\cite{Steedman02} and another use of LL for Planning described in~\cite{Dixon09b}).
+Our contribution is primarily representational and epistemological, suggesting that core properties of narratives can be studied logically without complexifying Planning formalisms to make them more `narrative'.
+
+\subsection{Sequent Representation of Stories}
+We propose to model a narrative by a sequent written in Intuitionistic Linear Logic (ILL). ILL is a restriction of LL with only one `goal-formula' on the right-hand side of the sequent and is perfectly suited to an interpretation in a resource-conscious context~\cite{GirardILL87}.
+The left-hand side of the sequent contains the description of the initial conditions, considered as resources to use up while unfolding the story. Resources thus include narrative actions, and the various states of the narrative. The formula on the right-side of the sequent describes the global state of the narrative once all resources have been consumed, including all resources still available after the unfolding of the story. In the remainder of this article, we will describe how we can express in a sequent:
+the generation of a variety of different story unfoldings with the same sequent (\textbf{\emph{generativity}});
+the impact of an open world assumption on the narrative, taken into account as part of the initial conditions description on the left side of the sequent (\textbf{\emph{variability}});
+the enforcement of the occurrence of specific narrative actions
+(\textbf{\emph{narrative drive}}).
+A proof of such a sequent represents a particular narrative. Being able to encode into a sequent the aforementioned properties, we are thus able to provide a conceptual tool for expressing and studying the most important characteristics of non-linear narratives.
+%
+\subsection{Baseline Example: Madame Bovary\label{sec:why_flaubert}}
+%
+We have chosen a classic XIX century novel, Flaubert's \emph{Madame Bovary}~\cite{Emma} as a baseline narrative to support our work into narrative formalisation~\footnote{On a lighter note, J.-Y. Girard himself has introduced Mr Homais, a Madame Bovary's character, in an imaginary dialogue on G\"{o}del's theorem.}. One of the major difficulties faced when attempting to derive logical or computational representations from literary work is the absence of any definite reference material, apart from work in literary studies which is often subject to interpretation. However, a recent publication of Flaubert's own annotated preparatory works to the novel does provide such reference material. A detailed set of plans and scenarios written by Flaubert for \emph{Madame Bovary}~\cite{Flaubert95} emphasises narrative actions and describes the causality relationships behind the chain of events in the novel. It provides not so much an ontology of narrative actions than a rationale for each narrative event and its consequence on the subsequent unfolding of the story. In other words, it gives insight into the causal structure of the novel. This description is not formalised \emph{stricto sensu}, to the exception of the novel's timeline, but provides a detailed description of key events which makes it easy to translate them into a logical formula. The same reference material has been used by Pizzi et al.~\cite{PizziACII07} to support the implementation of their interactive storytelling system, although their perspective was based on an identification of characters' feelings supporting a plan-based representation of each character's actions. Finally, it can be noted that Flaubert himself recognised the importance of well described causal relations to the structure of a plot. Dissatisfied with his own \emph{L'Education sentimentale}, Flaubert wrote: ``Causes are made visible and so are their effects, yet what links them is not, and that is perhaps the flaw in this book."~\footnote{Letter to Louise Collet, 16 January 1852.}
+
+
+During the remainder of this article, we will develop two narrative fragments, using~\cite{Flaubert95} as a guide.
+
+We model states and resources from the narrative (introduced as $\mathrm{D}$, $\mathrm{P}$, $\mathrm{R}$ and $\mathrm{S}$), and key narrative actions identified by Flaubert in his plan (\cite{Flaubert95} plan~57) for the novel in the following extract. This allows us to define key Turning Points for important narrative events, from which we will be able to construct alternative storylines.\\
+\begin{minipage}{\columnwidth}
+\textbf{Fragment 1:}\\
+\begin{footnotesize}
+\begin{bigbox}
+{\setlength{\baselineskip}{1\baselineskip}
+Emma has exhausted all possible means to defer the payment of her debt (D) and faces public humiliation for it.
+She has previously learned where the pharmacist hides his arsenic (P).
+She comes up with a last desperate idea \textbf{[Turning Point]}: begging her former lover Rodolphe (R) for help. However Rodolphe appears reluctant to get involved with her again in any way. \textbf{[Turning Point]}. When Emma leaves him, she decides to steal the poison and commit suicide (S).\par}
+\end{bigbox}
+\end{footnotesize}
+\end{minipage}
+In a similar way, we identify  resources $\mathrm{D_i}$,  $\mathrm{L}$, $\mathrm{H}$, $\mathrm{D}$, $\mathrm{F}$, $\mathrm{G}$ and $\mathrm{M}$, and narrative actions from Flaubert's plans (\cite{Flaubert95} plan 55 and 57) in the following extract.The last narrative event, the actual content of the discussion with the notary, comes directly from the novel and is not mentioned in the plan: this is presented as a retrospective potentiality which would provide an escape route to Emma, thus not corresponding to Flaubert's intended storyline.\\
+%
+\begin{minipage}{\columnwidth}
+\textbf{Fragment 2:}\\
+\begin{footnotesize}
+\begin{bigbox}
+{\setlength{\baselineskip}{1\baselineskip}
+Emma Bovary is in debt ($\mathrm{D_i£}$), but Lheureux is still willing to lend her money ($\mathrm{L}$). The Bovarys recently inherited some land ($\mathrm{H}$). Emma sells the inheritance using Lheureux as a middleman. She continues increasing her debt ($\mathrm{D_i£}$), until Lheureux refuses to lend her more ($\mathrm{D}$). As she has no more resources, she has a short discussion about the financial situation with F\'elicit\'e (F), through which she learns that Guillaumin, the notary, might be in a position to help her ($\mathrm{G}$). Emma subsequently has a discussion with Guillaumin, ending on a disagreement, but during which he mentions that if only she had come sooner, he would have helped her making profitable ($\mathrm{M}$) investments \textbf{[Turning Point]}.\par}
+\end{bigbox}
+\end{footnotesize}
+\end{minipage}
+%
+\section{PROOFS AS STORIES IN INTUITIONISTIC LINEAR LOGIC}
+In this section, we will start by proposing a narrative interpretation of ILL connectors, in order to better discuss how ILL can finely characterise essential narrative concepts, illustrating this approach by formulae extracted from our modelisation examples. We will subsequently describe the construction of a sequent representing a non-linear narrative based on the narrative fragment 1 described in section~\ref{sec:why_flaubert}. Sequents are of the form $\Gamma \vdash A$ where A is a single formula and $\Gamma$ is a multiset. We are looking for a trace of the execution of narrative actions. Therefore, we will be interested in cut-free proofs.
+\subsection{ILL connectors, resources and narrative actions\label{sec:connectors_interpretation}}
+We point that the intrinsic properties of LL connectors can be used to express narrative concepts.  For instance, the multiplicative conjunction $(\otimes)$ will be used extensively to express complex pre and post conditions for narrative actions. The sub-formula $\ot{\mathrm{S}}{\mathrm{D}}$ on the right-hand side of the sequent described in section~\ref{sec:small_example} expresses that both resources $\mathrm{S}$ and $\mathrm{D}$ are available after the unfolding of a particular branch of the narrative.
+
+For narratives taking place within an open-world assumption, we need to describe variability with respect to those external factors progressively introduced as part of the world description. We will use the $(\oplus)$ connector to encode such a `branching choice' in context, as well as its dual connector $\with$ to model the adaptation of the narrative when consuming initial resources for a given storyline. Such an encoding is detailed in section~\ref{sec:variability}.
+
+The same $(\oplus)$  connector  in the right-hand side formula can be used to describe different possible outcomes, depending on the branch-section of the narrative considered.  For instance, the formula $\op{(\ot{\mathrm{S}}{\mathrm{D}})}{\mathrm{D}}$ on the right-hand side of the sequent introduced in section~\ref{sec:small_example} expresses the possibility of two different endings in a narrative, taking into account external events in an open-world assumption (as above). One is represented by the sub-formula $\ot{\mathrm{S}}{\mathrm{D}}$ and the other by the sub-formula $\mathrm{D}$.
+
+However, one of the main motivations for our work is to capture the nature of narrative actions, and in particular their causal properties. In order to capture narrative causality, a model of narrative actions should be able to take into account its relationship with the overall context, and the impact of action execution. This is precisely the nature of linear implication  $(\multimap)$, which corresponds to causality within an \emph{action/reaction} paradigm~\cite{Girard95}. In the model we propose, the application of the $(\multimap L)$ (left) rule in the proof corresponds to the execution of a narrative action and accurately represents its impact on the narrative context. For instance, let us consider the formula defined in section~\ref{sec:small_example}:\\
+%\begin{center}
+\mbox{\hskip 0.5in}\textf{$\mmap{(\ott{\mathrm{L}}{\mathrm{D_2}}{\mathrm{H}})}{(\ott{\mathrm{L}}{\mathrm{D_0}}{(\mmap{(\ot{\mathrm{L}}{\mathrm{D_2}})}{\mathrm{D}})})}$}\\
+%\end{center}
+This formula represents a narrative action requiring (and preserving) the resource $\mathrm{L}$, consuming the resources $\mathrm{D_2}$ and $\mathrm{H}$, and producing the resources $\mathrm{D_0}$ and $\mmap{(\ot{\mathrm{L}}{\mathrm{D_2}})}{\mathrm{D}}$, the latter representing itself a narrative action. If the context allows for the application of the $(\multimap L)$ rule above a sequent, i.e. if the environment contains the resources $\mathrm{L}$, $\mathrm{D_2}$ and $\mathrm{H}$, the narrative action can be executed and the environment is transformed accordingly.
+
+In addition to key narrative actions, we also need to represent narrative actions which can be executed an arbitrary number of times, including none. We will use the ($\oc$) connector as a prefix for this purpose since it strictly controls contraction and weakening in LL. For instance, the formula $\oc(\mmap{\mathrm{H}}{(\ot{\mathrm{H}}{\mathrm{M}})})$  defined in section~\ref{sec:big_example} represents a narrative action $\mmap{\mathrm{H}}{(\ot{\mathrm{H}}{\mathrm{M}})}$ which may never be executed in the original story, but several times in an alternative.
+%
+\subsection{Representing narrative properties\label{sec:narrative_properties}}
+%
+Our aim here is to demonstrate how the basic concepts underpinning non-linear narratives can be naturally expressed in terms of LL formalism. We will also describe how a LL sequent supports the expression of dynamic properties of the narrative so formalised.
+%
+\paragraph{Narrative drive\label{sec:narrative_drive}}
+The concept of narrative drive, developed in non-linear narrative, requires us to ensure that specific actions do take place driving the story towards a particular ending.
+An interesting matching characteristic of ILL in this respect is the fact that rather than emphasising the validity of a formula in a given context, a cut-free proof describes how the context consumption leads to the right-hand side formula. The unfolding of the proof is thus a natural match for the unfolding of the story.
+
+For instance, by defining the formula $\op{(\ot{\mathrm{S}}{\mathrm{D}})}{\mathrm{D}}$, appearing on the right-hand side of the sequent described in section~\ref{sec:small_example}, we can constrain two possible ending states on the narrative: one is characterised by the availability of resources $\mathrm{S}$ and $\mathrm{D}$, and the other by the availability of the resource $\mathrm{D}$.
+
+Furthermore, thanks to the resource-awareness of ILL, a context formula will either be decomposed through its main connector rule(s), or discarded through a leaf of the proof (with a corresponding sub-formula of the right-hand side or using the $0$ or $\top$ rules). A way to control the actual occurrence of mandatory actions is thus to ensure that the corresponding formula is part of the context and cannot be discarded on a leaf. The sequent generating the proofs on Figures~\ref{fig:alternative} and~\ref{fig:flaubert_proof} provides an example where the mandatory narrative action modelled by $\mmap{\mathrm{F}}{\mathrm{G}}$, part of the initial context, will be executed regardless of the story variant. Moreover, they provide an example of how the execution of a mandatory action (formula 5 in section~\ref{sec:big_example}) adds to the context a formula representing another mandatory narrative action, creating a causal chain.
+%
+\paragraph{Generativity\label{sec:generativity}}
+%
+More than just the story ending, what characterises a narrative is a particular sequence of actions. Generating variations in the action sequence is one basic mechanism for non-linear storytelling. However, a sequent itself is generative in nature, for it embeds all its possible proofs. Modelling a narrative by means of a sequent thus provides a way to generate different instances with respect to the specification of narrative actions. Because of the above mentioned properties (trace of resources' consumption), these proofs, hence the stories they represent are distinct from one another.
+
+The example we provide in section~\ref{sec:big_example}, and more specifically the proofs described on Figures~\ref{fig:alternative} and~\ref{fig:flaubert_proof} illustrate how, from the same sequent description, various stories can be generated differing not only in the order in which actions are executed, but also by the actions actually taking place. This is the true characterisation of story variants.
+%
+\paragraph{Narrative variability in an open-world assumption\label{sec:variability}}
+Non-linear narratives typically take place in a dynamic environment which is best captured using an open world assumption. Such narratives typically present a branching structure (albeit \emph{a posteriori}, an important difference with branching stories): different storylines emerge from the influence of external events on the execution of narrative actions.
+
+This variability of the narrative can be expressed as part of the description of the initial conditions of a sequent using $(\oplus)$. The sequent modelled in section~\ref{sec:small_example} on Figure~\ref{fig:denouement} gives an example of such an external choice between two narrative actions:\\
+\mbox{{\hskip 1in}}$\op{(\mmap{\mathrm{P}}{\mathrm{S}})}{(\mmap{\mathrm{R}}{\textit{formula}})}$\\
+This leads to two possible storylines represented by a different branch of the proof tree. For one action to be executed, it is then necessary to obtain the `pre-condition' resources (here $\mathrm{P}$ or $\mathrm{R}$) from the context, and to be able to discard the resources which are only consumed by the other action. A simple way to model this is to use the $\with$ connector and add the $\mathrm{P} \with \mathrm{R}$ formula to the context. Depending on the proof branch, the adequate resource is consumed (the example described in section~\ref{sec:small_example} is slightly more complex but relies on the same encoding, requiring the two formulae $\mathrm{P}\with{1}$ and $\mathrm{R}\with{1}$).
+%
+\subsection{Sequent calculus and narrative representation\label{sec:small_example}}
+We can now describe how to model a narrative fragment using an LL sequent and discuss the story generated by the corresponding proof. We are interested here in fragment 1 described in section~\ref{sec:why_flaubert}.
+%
+\begin{figure*}
+\begin{bigbox}
+\input{denouement}
+\end{bigbox}
+\caption{Alternative plot unfolding and endings for the final stages of Madame Bovary (the active formula for each inference is in black)} \label{fig:denouement}
+\end{figure*}
+The atomic resources which we have previously identified in section~\ref{sec:why_flaubert} are as follows:\\
+\input{legende_denouement}
+\\
+
+We have also identified in section~\ref{sec:why_flaubert} the two main narrative actions: Emma discussing her situation with Rodolphe, and Emma ingesting poison. For each Turning Point previously identified, we introduce elements of \emph{variability}, representing the possible impact of external events in an open-world assumption. Firstly, Emma could decide not to beg Rodolphe for help. Secondly, Rodolphe, could convince Emma that humiliation is not worth taking one's own life.
+This creates two possible outcomes for this fragment: Emma commits suicide because of her debt, or goes on living with her own debt.
+
+
+We can now introduce the following formulae to construct the left-hand side of the sequent, according to the principles described in sections~\ref{sec:connectors_interpretation} and~\ref{sec:narrative_properties}: each action is modelled using $(\multimap)$ and $(\otimes)$ (for complex pre and post sub-formulae), then each external choice between actions using $(\oplus)$. The description of the resources is systematically adapted to the pre-conditions of the modelled choices of actions by duality, using $(\with)$. Applying this procedure, we obtain:
+\begin{enumerate}
+\item $\mathrm{P}{\with}1$ : the poison will either be used or not, depending on the branch of the proof, corresponding to a given unfolding.
+%Using this formula, we ensure that the poison can be used by Emma only once in the story at most while using ${\oc}P$ would have meant it can be used as many times as the proof requires.
+\item $\mathrm{R}{\with}1$: in a similar fashion, we model the fact that Emma can choose to have at most one conversation about her debt with Rodolphe.
+\item $\mathrm{P}{\multimap}\mathrm{S}$: Emma commits suicide by stealing and ingesting arsenic.
+\item $1{\oplus}(\mathrm{P}{\multimap}\mathrm{S})$: whether Emma commits suicide or not
+\item $\mathrm{R}{\multimap}(1{\oplus}(\mathrm{P}{\multimap}\mathrm{S}))$: the final discussion with Rodolphe conditions the above choice.
+\item $(\mathrm{P}{\multimap}\mathrm{S}){\oplus}(\mathrm{R}{\multimap}(1{\oplus}(\mathrm{P}{\multimap}\mathrm{S})))$: whether Emma is committing suicide or begging Rodolphe for help first.
+\item $((\mathrm{P}{\multimap}\mathrm{S}){\oplus}(\mathrm{R}{\multimap}(1{\oplus}(\mathrm{P}{\multimap}\mathrm{S})))){\otimes}\mathrm{D}$: the co-existence of the previously described choices and Emma's debt.
+\item $\mathrm{D}{\multimap}(((\mathrm{P}{\multimap}\mathrm{S}){\oplus}(\mathrm{R}{\multimap}(1{\oplus}(\mathrm{P}{\multimap}\mathrm{S})))){\otimes}\mathrm{D})$: Emma takes the decision to try and avoid public humiliation due to her debt. This action does not consume the `resource' representing the debt but takes it as a premise.
+\end{enumerate}
+The right-hand side formula representing the outcome $(\mathrm{S}{\otimes}\mathrm{D}){\oplus}\mathrm{D}$, obtained through the same systematic encoding, describes the two possible endings of the story and completes the formalisation of that fragment.
+
+The sequent we obtain, at the root of the proof in Figure~\ref{fig:denouement}, thus represents three courses of action, including the default plot of the novel, which are readily derived from the formalisation of basic dependencies between the plot elements. By following the successive applications of the $(\multimap L)$ rules corresponding to the execution of narrative actions from bottom up, we can reconstruct these storylines: they correspond to the different paths in the structure of the proof-tree presented in Figure~\ref{fig:denouement}, branching with each choice represented by $(\oplus L)$. Although the purpose of this article is not to investigate direct practical applications but rather to propose a unified conceptual framework, we would like to point out that this proof has been obtained with the \emph{llprover} theorem prover~\cite{Tamura98}.
+\begin{figure*}
+\begin{bigbox}
+\begin{turn}{90}
+\begin{minipage}{\textheight}
+    \begin{minipage}{0.485\textheight}
+        \begin{minipage}{0.485\textheight}
+             \input{alternative}
+            \caption{Alternative Fragment -- Part 1. An earlier discussion with F\'elicit\'e reveals Guillaumin's willingness to help.} \label{fig:alternative}
+        \end{minipage}
+        \begin{minipage}{0.485\textheight}
+            \input{flaubert_proof}
+            \caption{Flaubert's Original Story Fragment-- Part 1. Emma sells the inherited land through Lheureux.} \label{fig:flaubert_proof}
+        \end{minipage}
+        \begin{minipage}{0.485\textheight}
+            \begin{minipage}{0.1\textheight}
+            \hspace{0.09\textheight}
+            \end{minipage}
+            \begin{minipage}{0.285\textheight}
+            \input{legende_gros_sequent}\\\\
+            \begin{bigbox}
+            {\scriptsize \whatlheureux}\\
+            {\scriptsize \whatmoney}\\
+            {\scriptsize \whatresources}
+            \end{bigbox}
+            \caption{Resources and Multisets Definitions} \label{fig:multisets}
+            \end{minipage}
+        \end{minipage}
+    \end{minipage}
+    \begin{minipage}{0.515\textheight}
+        \begin{minipage}{0.515\textheight}
+           \vspace*{0.25in}
+            \input{alternative_sub_proof}
+            \caption{Alternative Fragment -- Part 2. Invested with Guillaumin's help, the inheritance temporarily provides an income which delays Emma's debt.} \label{fig:alternative_sub_proof}
+        \end{minipage}
+        \begin{minipage}{0.515\textheight}
+            \input{flaubert_sub_proof}
+            \caption{Flaubert's Original Story Fragment -- Part 2. Emma increases her debt until she can no longer cope with it. The discussion between Emma and F\'elicit\'e occurs too late, after the sale of the inherited land, for Emma to invest the inheritance.} \label{fig:flaubert_sub_proof}
+        \end{minipage}
+    \end{minipage}
+    \begin{minipage}{\textheight}
+        \centering
+        \input{big_interactive_unfolding}
+        \caption{Alternative Branching Narrative Fragment. In an open world assumption, an external influence decides of the ordering of two narrative actions: they correspond respectively to the discussion between Emma and F\'elicit\'e and to the sale of the inherited land. \label{fig:big_interactive_unfolding}}
+    \end{minipage}
+\end{minipage}
+\end{turn}
+\end{bigbox}
+\end{figure*}
+\section{EXAMPLE: THE END OF EMMA BOVARY\label{sec:big_example}}
+We propose here a more substantial modelling\footnote{For lack of space, we have chosen small fonts for sequent details although formulae corresponding to narrative actions will stand out in taller fonts.} of a narrative sequence from \emph{Madame Bovary} based on the narrative fragment 2 presented in section~\ref{sec:why_flaubert}.
+
+\textbf{Modelling}
+We model the following atomic resources:\\
+\input{legende_gros_sequent}
+
+The sequent we propose uses the following formulae systematically constructed in the same way as in section~\ref{sec:small_example}:
+\begin{enumerate}
+\item $\mathrm{F}{\multimap}\mathrm{G}$: discussion between Emma and F\'elicit\'e.
+%Emma discusses with F\'elicit\'e and learns about Guillaumin willingness to help
+\item $\mathrm{G}{\multimap}{\oc}(\mathrm{H}{\multimap}\mathrm{H}{\otimes}\mathrm{M})$: meeting between Emma and Guillaumin, during which she learns the inheritance can be invested.
+\item $\oc((\mathrm{L}{\otimes}\mathrm{D_i}){\multimap}(\mathrm{L}{\otimes}\mathrm{D_{i+1}})), i=0,1$: Emma increases her debt.
+\item $\oc((\mathrm{D_{i+1}}{\otimes}\mathrm{M}){\multimap}\mathrm{D_i}), i=0,1$: Emma decreases her debt.
+%Emma can decrease her debt from $D_{i+1}$ to $D_i$ using up money earned through the placement of the inheritance any number of times.
+\item $(\mathrm{L}{\otimes}\mathrm{D_2}{\otimes}\mathrm{H}){\multimap}(\mathrm{L}{\otimes}\mathrm{D_0}{\otimes}((\mathrm{L}{\otimes}\mathrm{D_2}){\multimap}\mathrm{D}))$: Emma sells the inheritance to reimburse the debt. This execution of this action will noticeably produce another action: when Emma again owes that amount of debt, Lheureux will lend her money for the last time.
+\end{enumerate}
+We define the multisets $\lheureux$, $\money$ and $\resources$ in Figure~\ref{fig:multisets}.
+The narrative is now encoded into the sequent:\\
+${\resources},\mathrm{F}{\multimap}\mathrm{G},(\mathrm{L}{\otimes}\mathrm{D_2}{\otimes}\mathrm{H}){\multimap}(\mathrm{L}{\otimes}\mathrm{D_0}{\otimes}((\mathrm{L}{\otimes}\mathrm{D_2}){\multimap}\mathrm{D})),{\lheureux}, {\money}{\vdash}\mathrm{D}$
+
+In this sequent, we have explicitly encoded atomic causal relationships into formulae in each use of the $(\multimap)$ connector. This has enabled the fine-grained modelling of resource consumption and action generation. The narrative actions represented by formulae 1, 2 and 5 are mandatory narrative actions, driving the story towards the constrained end result $\mathrm{D}$.
+%
+
+\textbf{Discussion}
+%
+%In this sequent, thanks to the atomic encoding of causal relationships into formulas with each use of the $(\multimap)$ connector, we have successfully modeled a fine-grained description of the impact of each narrative action on the narrative environment.
+%
+We have shown that several story variants could be generated from the above sequent: Figure~\ref{fig:flaubert_proof} corresponds to the novel's original fragment, while Figure~\ref{fig:alternative} displays an alternative course of action, in which Emma is provisionally safe thanks to her inheritance.
+More than a reordering of narrative actions, these stories differ in their usage of the story-world's resources: the alternative story describes narrative actions which do not occur in the original novel.
+
+From the atomic encoding of causal relationships into formulae, we have successfully produced a fine-grained description of the impact of each narrative action, and therefore obtained within each proof of the sequent a causally related chain of narrative actions, potentially consuming resources (including narrative actions) in different ways. This sequent contains in itself all the possible causal chains emerging from the elementary causal relations expressed as part of individual actions' descriptions.
+
+We can also encode in a sequent causal relationships which are external to the baseline narrative. An example of such an encoding is provided on Figure~\ref{fig:big_interactive_unfolding}: formulas 1 and 5 have been replaced by a more complex formula providing a choice between two possible orderings of narrative actions, precedence relationships being encoded using linear implication again.
+
+%
+%We can now describe an interactive narrative where external factors (such as, for instance, user interaction) would impact on the order of execution of the actions modeled by formulas 1 and 5, thus incorporating variability of the narrative in an open-world assumption. This can be done by replacing formulas 1 and 5 by a more complex formula, using the linear implication for encoding precedence relationships and the connector $\oplus$ for the branching of the two possibilities. By doing so, we constraint on the story causality relationships which are external to the narrative logic. Such a sequent and its proof is represented on figure~\ref{fig:big_interactive_unfolding}. Such a proof contains, as sub-proofs, the previously described alternatives stories.
+%
+\section{CONCLUSION AND PERSPECTIVES}
+%
+Intuitionistic Linear Logic can provide a conceptual model for non-linear narratives, for it provides a suitable theory of action and change for narrative actions. This supports a return to first principles in the representation of narrative actions when contrasted with approaches described in~\cite{Cavazza06}.
+%Our main objective was to return to first principles in the representation of narrative actions, as a reaction to the proliferation of narrative formalisms and the difficulty faced by AI formalisms to explicitly represent such principles.
+In a sense, ILL can serve as an Occam's razor for the representation of fundamental narrative properties which AI formalisms have had difficulties to capture.
+
+More interestingly, starting from a basic description of causal relations and comsumption of resources, we have described in this article how high-level concepts relevant to non-linear narrative such as \emph{generativity}, \emph{variability} and \emph{narrative drive} can be expressed as ILL sequents, and how proofs of such a sequent describe the possible unfoldings of narrative actions.
+
+The full ILL sequent calculus is limited as a computational model, since formula provability is undecidable, and proof-search costly. While theorem provers can help in the validation of a sequent offering low generativity, proof assistants offer better perspectives in this respect, as has been investigated in another context by~\cite{Dixon2009}. We also plan to investigate restrictions of ILL and ad-hoc proof-search tactics, based on the way connectors and rules are used in the context of narrative modelling, in order to try and identify a generative solution, which offers a good compromise between expressivity and computational perspectives.
+
+Although our approach does not claim to translate directly into computer implementations, it can still have practical implications for the knowledge representation aspects of current Planning-based systems, through the emphasis on local causality and global action resources.
+\paragraph{Aknowledgements:} This work has been partly funded by the European Commission
+under grant agreement IRIS (FP7-ICT-231824)
+%
+\bibliography{LLemmaEcai2010}
+
+\end{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
