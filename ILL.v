@@ -20,14 +20,14 @@ Require Import vars.
 
 Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
 
-  Reserved Notation "x ⊸ y" (at level 60, no associativity).
-  Reserved Notation "x ⊕ y" (at level 60, no associativity).
-  Reserved Notation "x ⊗ y" (at level 60, no associativity).
+  Reserved Notation "x ⊸ y" (at level 64, no associativity).
+  Reserved Notation "x ⊕ y" (at level 63, no associativity).
+  Reserved Notation "x ⊗ y" (at level 62, no associativity).
   Reserved Notation "x ⊢ y" (at level 70, no associativity).
   Reserved Notation "! x" (at level 50, no associativity).
-  Reserved Notation "x & y" (at level 80, no associativity).
+  Reserved Notation "x & y" (at level 61, no associativity).
   Reserved Notation "⊤" (at level 10, no associativity).
-  Reserved Notation "∪" (at level 60, right associativity).
+  Reserved Notation "∪" (at level 65, right associativity).
   Reserved Notation "∅" (at level 10, no associativity).
 
   (** Le type des formules, les atomes sont dénotés par [Proposition]. *)
@@ -628,15 +628,15 @@ Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
     Id : ∀ p Γ, Γ == {p} → Γ ⊢ p
   | Cut : ∀ Ω Γ Δ p q, Γ ⊢ p → p::Δ ⊢ q → Ω == (Δ ∪ Γ) → Ω ⊢ q
   | Impl_R : ∀ Γ p q, p::Γ ⊢ q → Γ ⊢ p ⊸ q
-  | Impl_L : ∀ Ω Γ Δ p q r, Γ ⊢ p → q::Δ ⊢ r → Ω == (p ⊸ q :: Δ ∪ Γ) → Ω ⊢ r
+  | Impl_L : ∀ Ω Γ Δ p q r, Γ ⊢ p → q::Δ ⊢ r → Ω == (p ⊸ q) :: Δ ∪ Γ → Ω ⊢ r
   | Times_R : ∀ Ω Γ Δ p q , Γ ⊢ p → Δ ⊢ q → Ω == (Γ ∪ Δ) → Ω ⊢ p ⊗ q
-  | Times_L : ∀ Ω Γ p q r , q :: p :: Γ ⊢ r → Ω == (p ⊗ q :: Γ) → Ω ⊢ r
+  | Times_L : ∀ Ω Γ p q r , q :: p :: Γ ⊢ r → Ω == (p ⊗ q) :: Γ → Ω ⊢ r
   | One_R : ∀ Ω, Ω == ∅ → Ω ⊢ 1
   | One_L : ∀ Ω Γ p , Γ ⊢ p → Ω == (1 :: Γ) → Ω ⊢ p
   | And_R : ∀ Γ p q , Γ ⊢ p → Γ ⊢ q → Γ ⊢ (p & q)
   | And_L_1 : ∀ Ω Γ p q r , p::Γ ⊢ r → Ω == ((p & q) :: Γ) → Ω ⊢ r
   | And_L_2 : ∀ Ω Γ p q r , q::Γ ⊢ r → Ω == ((p & q) :: Γ) → Ω ⊢ r
-  | Oplus_L : ∀ Ω Γ p q r , p :: Γ ⊢ r → q :: Γ ⊢ r → Ω == (p ⊕ q :: Γ) → Ω ⊢ r
+  | Oplus_L : ∀ Ω Γ p q r , p :: Γ ⊢ r → q :: Γ ⊢ r → Ω == (p ⊕ q) :: Γ → Ω ⊢ r
   | Oplus_R_1 : ∀ Γ p q , Γ ⊢ p → Γ ⊢ p ⊕ q
   | Oplus_R_2 : ∀ Γ p q , Γ ⊢ q → Γ ⊢ p ⊕ q 
   | T_ : ∀ Γ, Γ ⊢ ⊤

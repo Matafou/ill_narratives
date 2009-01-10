@@ -1,84 +1,93 @@
-Require Import ILL.
-Require Import OrderedType.
+Require ILLVarInt.
 Require Import Utf8_core.
+(*
+Require Import OrderedType.
 Require Import ILL_spec.
 Require Import vars.
-Require Import String.
 Require Import multiset_spec.
 Require Import multiset.
+Require Import NatOrderedType OrderedTypeEx.
+*)
 
 
-Module MILL := ILL_Make(VarsString).
-Module PaperProofs := MakePaperProofs(VarsString)(MILL).
 
-Import MILL.
-Import PaperProofs.
+Import ILLVarInt.MILL.
+Import ILLVarInt.M.
 Import FormulaMultiSet.
 
-Section Emma1.
+Local Notation "'P'" := (Proposition 1%nat).
+Local Notation "'R'" := (Proposition 2%nat).
+Local Notation "'G'" := (Proposition 3%nat).
+Local Notation "'B'" := (Proposition 4%nat).
+Local Notation "'V'" := (Proposition 5%nat).
+Local Notation "'A'" := (Proposition 6%nat).
+Local Notation "'E'" := (Proposition 7%nat).
+Local Notation "'M'" := (Proposition 8%nat).
 
-  Parameters vP vR vG vB vV vA vE vM : VarsString.t.
-  Local Notation "'P'" := (Proposition vP).
-  Local Notation "'R'":= (Proposition vR).
-  Local Notation "'G'" := (Proposition vG).
-  Local Notation "'B'" := (Proposition vB).
-  Local Notation "'V'" := (Proposition vV).
-  Local Notation "'A'" := (Proposition vA).
-  Local Notation "'E'" := (Proposition vE).
-  Local Notation "'M'" := (Proposition vM).
-
-  Notation neq x y := (not (VarsString.eq x y)).
-
-
-
-  Hypothesis P_not_R : neq vP vR.
-  Hypothesis P_not_G : neq vP vG.
-  Hypothesis P_not_B : neq vP vB.
-  Hypothesis P_not_V : neq vP vV.
-  Hypothesis P_not_A : neq vP vA.
-  Hypothesis P_not_E : neq vP vE.
-  Hypothesis P_not_M : neq vP vM.
-
-  Hypothesis R_not_G : neq vR vG.
-  Hypothesis R_not_B : neq vR vB.
-  Hypothesis R_not_V : neq vR vV.
-  Hypothesis R_not_A : neq vR vA.
-  Hypothesis R_not_E : neq vR vE.
-  Hypothesis R_not_M : neq vR vM.
-  
-  Hypothesis G_not_B : neq vG vB.
-  Hypothesis G_not_V : neq vG vV.
-  Hypothesis G_not_A : neq vG vA.
-  Hypothesis G_not_E : neq vG vE.
-  Hypothesis G_not_M : neq vG vM.
-  
-  Hypothesis B_not_V : neq vB vV.
-  Hypothesis B_not_A : neq vB vA.
-  Hypothesis B_not_E : neq vB vE.
-  Hypothesis B_not_M : neq vB vM.
-
-  Hypothesis V_not_A : neq vV vA.
-  Hypothesis V_not_E : neq vV vE.
-  Hypothesis V_not_M : neq vV vM.
-  
-  Hypothesis A_not_E : neq vA vE.
-  Hypothesis A_not_M : neq vA vM.
-  Hypothesis E_not_M : neq vE vM.
 Open Scope ILL_scope.
 
-Lemma essai : { 1, !(V ⊸ A) , 1 , 1 , 1, V } ⊢ A ⊕ M.
+Lemma essai : { P & 1 , !(V ⊸ A), (E⊸A)&1 , (P⊸M)&1 , 1, V } ⊢ A ⊕ M.
 Proof  with (try complete (try constructor; prove_multiset_eq)).
-  setoid_rewrite add_comm at 2.
-  setoid_rewrite add_comm at 3.
-  setoid_rewrite add_comm at 4.  
+  and_l_2 P 1.
+  and_l_2 (E⊸A) 1.
+  and_l_2 (P⊸M) 1.
   do 4 one_l.
   apply Bang_D with (p:=(V ⊸ A)) (Γ:= {V}).
   2: reflexivity.
-  eapply Impl_L with (Γ:={V}) (Δ := ∅) (p:=V) (q:=A).
-  constructor;reflexivity.
-  apply Oplus_R_1.
-  constructor;reflexivity.
-  rewrite <- union_rec_left.
-  reflexivity.
-  Qed.
+  finish_proof_strong.
+Qed.
+
+Axiom union_comm: ∀x y, union x y = union y x.
+Axiom union_add: ∀a x, a::x = {a} ∪ x. 
+
+Lemma originelle :
+  {P&1, R, G, B&1, !(V⊸A), (E⊸A)&1, (P⊸M)&1,(R⊸1)&(R⊸E), (G⊸1)⊕(G⊸V), 1⊕((B⊸V)&(B⊸1))  } ⊢ A ⊕ M .
+Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
+  oplus_l (G ⊸ 1) (G ⊸ V).  
+  Focus 1.
+  eapply Impl_L with (p:=G) (q:=1) (Γ:={G}) 
+    (Δ:={P & 1, R, B & 1, !(V ⊸ A), (E ⊸ A) & 1, 
+      (P ⊸ M) & 1, (R ⊸ 1) & (R ⊸ E), 1 ⊕ ((B ⊸ V) & (B ⊸ 1))})...
+  one_l.
+  oplus_l 1 ((B ⊸ V) & (B ⊸ 1)).
+
+  (* inversion gauche droite par rapport au doc *)
+  Focus 2.
+  and_l_2 (B ⊸ V) (B ⊸ 1).
+  and_l_1 B 1.
+  apply Impl_L with (Δ:={P & 1, R, !(V ⊸ A), (E ⊸ A) & 1, (P ⊸ M) & 1, (R ⊸ 1) & (R ⊸ E)}) (Γ:={B}) (p:=B)(q:=1)...
+  one_l.  
+  and_l_1 (R ⊸ 1) (R ⊸ E).
+  apply Impl_L with (Δ:={ P & 1, !(V ⊸ A), (E ⊸ A) & 1, (P ⊸ M) & 1})
+    (Γ:={R}) (p:=R)(q:=1)...
+  and_l_1 P 1.
+  and_l_2 (E ⊸ A) 1.
+  and_l_1 (P ⊸ M ) 1.
+  do 2 one_l.
+  apply Bang_W with (Γ:={P ⊸ M, P}) (p:=(V ⊸ A))...
+
+  apply Impl_L with (Δ:= ∅) (Γ:={P}) (p:=P)(q:=M)...
+  apply Oplus_R_2...
+
+  (* branche du milieu. *)
+  Focus 1.
+  and_l_2 B 1.
+  do 2 one_l.
+  and_l_2 P 1.
+  and_l_1 (E ⊸ A) 1.
+  and_l_2 (P ⊸ M) 1.
+  and_l_2 (R ⊸ 1) (R ⊸ E).
+  do 2 one_l.
+  apply Bang_W with (Γ:={R ⊸ E, E ⊸ A, R}) (p:=(V ⊸ A))...
+  eapply Impl_L with (p:=R) (q:=E) (Γ:={ R}) 
+    (Δ:={E ⊸ A})...
+  eapply Impl_L with (p:=E) (q:=A) (Γ:={E}) 
+    (Δ:=∅)...
+  apply Oplus_R_1...
+
+  (* ARTIE DE DROITE *)
+
+
+Qed.
+
 

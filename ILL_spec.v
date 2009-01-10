@@ -55,10 +55,11 @@ Module Type ILL_sig(Vars : OrderedType).
   Notation  "⊤" := Top : ILL_scope.
   Set Printing Width 100.
   Open Scope ILL_scope.
-  Notation "∅" := empty.
-  Infix "∪" := union (at level 60, right associativity).
-  Notation " a :: b " := (add a b) (at level 60, right associativity).
-  Notation "{ a , .. , b }" := (add a .. (add b empty) ..).
+  Infix "∪" := union (at level 60, right associativity) : ILL_scope.
+  Notation " a :: b " := (add a b) (at level 60, right associativity) : ILL_scope.
+  Notation "{ a , .. , b }" := (add a .. (add b empty) ..) : ILL_scope.
+  Notation "{ }" := empty (at level 80) : ILL_scope.
+  Notation "∅" := empty : ILL_scope.
 
   (* Notation pour l'égalité des environnements (égalité des multisets). *)
   Notation " E == F " := (eq E F) (at level 80): ILL_scope.

@@ -98,10 +98,12 @@ PP:=-pp "$(CAMLP4BIN)$(CAMLP4)o -I $(CAMLLIB) -I . $(COQSRCLIBS) $(CAMLP4EXTEND)
 ###################################
 
 VFILES:=ILL_spec.v\
+  ILLVarInt.v\
   ILL.v\
   multiset_spec.v\
   multiset.v\
-  vars.v
+  vars.v\
+  emma.v
 VOFILES:=$(VFILES:.v=.vo)
 VOFILES0:=$(filter-out ,$(VOFILES))
 GLOBFILES:=$(VFILES:.v=.glob)
