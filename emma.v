@@ -85,9 +85,36 @@ Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
     (Δ:=∅)...
   apply Oplus_R_1...
 
-  (* ARTIE DE DROITE *)
+  (* PARTIE DE DROITE *)
+  apply Impl_L with (Δ:= {P & 1, R, B & 1, !(V ⊸ A), (E ⊸ A) & 1, 
+   (P ⊸ M) & 1, (R ⊸ 1) & (R ⊸ E), 1 ⊕ (B ⊸ V) & (B ⊸ 1)}) (Γ:={G}) (p:=G)(q:=V)...
+  and_l_1(R ⊸ 1) (R ⊸ E).
+  apply Impl_L with (Δ:={ V, P & 1, B & 1, !(V ⊸ A), (E ⊸ A) & 1, 
+    (P ⊸ M) & 1, 1 ⊕ (B ⊸ V) & (B ⊸ 1)}) (Γ:={R}) (p:=R)(q:=1)...
+  one_l. (* +L dans le doc, mais en fait c'est 1L *)
+  oplus_l 1 ((B ⊸ V) & (B ⊸ 1)).
+  (* PARTIE GAUCHE DE LA PARTIE DROITE *)
+  and_l_2 P 1.
+  and_l_2 B 1.
+  and_l_2 (E ⊸ A)  1.
+  and_l_2 (P ⊸ M) 1.  
+  repeat one_l. 
+  apply Bang_D with (Γ:={V})(p:=V ⊸ A) (q:=A⊕M)... (* !D au lieu de WL *)
+  apply Impl_L with (Δ:=∅) (Γ:={V}) (p:=V)(q:=A)...
+  apply Oplus_R_1...
 
-
+  (* PARTIE DROITE DE LA PARTIE DROITE *)
+  and_l_2 (B ⊸ V) (B ⊸ 1).
+  and_l_1 B 1.
+  apply Impl_L with (Δ:={ V, P & 1, !(V ⊸ A), (E ⊸ A) & 1, (P ⊸ M) & 1}) (Γ:={B}) (p:=B)(q:=1)...
+  one_l.
+  and_l_2 P 1.
+  and_l_2 (E ⊸ A) 1.
+  and_l_2 (P ⊸ M) 1.
+  repeat one_l.
+  apply Bang_D with (Γ:={V})(p:=V ⊸ A) (q:=A⊕M)... (* !D au lieu de WL *)
+  apply Impl_L with (Δ:=∅) (Γ:={V}) (p:=V)(q:=A)...
+  apply Oplus_R_1...
 Qed.
 
 
