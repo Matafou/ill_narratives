@@ -66,6 +66,40 @@ Module M.
         end
     end.
 
+  Ltac impl_l_aux p' q' tacleft_right := 
+  (* try in the order p' , q' *)
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(add p' ?env')] =>
+            let e := context C [ env' ] in  
+              match e with
+                | context C [(add (p'⊸q') ?env'')]  => 
+                  let e' := context C [ env'' ] in
+                    apply Impl_L with (Δ:=e') (Γ:= { p' }) (p:=p') (q:=q')
+              end
+        end
+  (* Try in reverse order and fail if fail *)
+      | |- ILL_proof ?env _ => tacleft_right ; impl_l q' p' fail
+    end
+
+  (* impl_l X Y applies impl rule with p := X and q:= X⊸Y AND Γ:={p}.
+     WARNING: The latter is a special case. It does not capture all
+     possible application of the impl_l rule, which may have a non
+     trivial Γ and Γ ⊢ p. *)
+  with impl_l x y := impl_l_aux x y idtac.
+
+(* 
+  Definition remove_map := (@Maps'.fold nat t (fun f n mp => match remove f mp with Some x=> x | _ => mp end)).
+  Ltac impl_l2  p' q' Γ := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        let Δ := constr:(remove_map Γ env) in
+          apply Impl_L with (Δ:=Δ) (Γ:= Γ) (p:=p') (q:=q')
+    end.
+ *)
+
+
 (*  Ltac impl_l p' q' :=
     up (p'⊸q');
 *)
