@@ -66,8 +66,31 @@ Module M.
         end
     end.
 
-  Ltac impl_l_aux p' q' tacleft_right := 
-  (* try in the order p' , q' *)
+  Ltac bang_w p' :=
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(add (!p') ?env')] =>
+            let e := context C [ env' ] in
+              apply Bang_W with (Γ:=e) (p:=p')     
+        end
+    end.
+
+  Ltac bang_d p' :=
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(add (!p') ?env')] =>
+            let e := context C [ env' ] in
+              apply Bang_D with (Γ:=e) (p:=p')     
+        end
+    end.
+
+  (* impl_l X Y applies impl rule with p := X and q:= X⊸Y AND Γ:={p}.
+     WARNING: The latter is a special case. It does not capture all
+     possible application of the impl_l rule, which may have a non
+     trivial Γ. *)
+  Ltac impl_l p' q' := 
     match goal with 
       |- ILL_proof ?env _ =>
         match env with
@@ -79,15 +102,8 @@ Module M.
                     apply Impl_L with (Δ:=e') (Γ:= { p' }) (p:=p') (q:=q')
               end
         end
-  (* Try in reverse order and fail if fail *)
-      | |- ILL_proof ?env _ => tacleft_right ; impl_l q' p' fail
-    end
+    end.
 
-  (* impl_l X Y applies impl rule with p := X and q:= X⊸Y AND Γ:={p}.
-     WARNING: The latter is a special case. It does not capture all
-     possible application of the impl_l rule, which may have a non
-     trivial Γ and Γ ⊢ p. *)
-  with impl_l x y := impl_l_aux x y idtac.
 
 (* 
   Definition remove_map := (@Maps'.fold nat t (fun f n mp => match remove f mp with Some x=> x | _ => mp end)).

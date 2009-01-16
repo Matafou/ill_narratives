@@ -607,10 +607,10 @@ Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
   Module Import FormulaMultiSet := multiset.MakeAVL(FormulaOrdered).
 
   (** Les notations classiques  *)
-  Notation "∅" := empty.
-  Infix "∪" := union (at level 60, right associativity).
-  Notation " a :: b " := (add a b) (at level 60, right associativity).
-  Notation "{ a , .. , b }" := (add a .. (add b empty) ..).
+  Notation "∅" := empty : ILL_scope.
+  Infix "∪" := union (at level 60, right associativity): ILL_scope.
+  Notation " a :: b " := (add a b) (at level 60, right associativity): ILL_scope.
+  Notation "{ a , .. , b }" := (add a .. (add b empty) ..): ILL_scope.
 
   (* Notation pour l'égalité des environnements (égalité des multisets). *)
   Notation " E == F " := (eq E F) (at level 80): ILL_scope.
