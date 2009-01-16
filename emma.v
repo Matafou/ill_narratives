@@ -20,7 +20,7 @@ Open Scope Emma.
 Lemma originelle :              
   {P&1, R, G, B&1, !(V⊸A), (E⊸A)&1, (P⊸M)&1,(R⊸1)&(R⊸E), (G⊸1)⊕(G⊸V), 1⊕((B⊸V)&(B⊸1))  } ⊢ A ⊕ M .
 Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
-  oplus_l (G ⊸ 1) (G ⊸ V).  
+  oplus_l (G ⊸ 1) (G ⊸ V).
   Focus.
   (* BRANCHE DE GAUCHE *)
   impl_l G 1...
