@@ -88,3 +88,21 @@ Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
   apply Oplus_R_1...
 Qed.
 
+
+
+
+Lemma marchepas :
+  {P&1, R, G, B&1, !(V⊸A), (E⊸A)&1, (P⊸M)&1,(R⊸1)&(R⊸E), (G⊸1)⊕(G⊸V), 1⊕((B⊸V)&(B⊸1))  } ⊢ A ⊕ M .
+Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
+  and_l_2 (R ⊸ 1) (R ⊸ E).
+  oplus_l (G ⊸ 1) (G ⊸ V).
+  
+  Focus 2.
+  impl_l R E ... (* Obligé *)
+  and_l_1 (E ⊸ A) 1.
+  impl_l E A... 
+  impl_l G V...
+  bang_d (V ⊸ A)...
+  impl_l V A... (* Dead. Il y a 2 A. *)
+Qed.
+
