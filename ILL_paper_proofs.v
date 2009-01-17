@@ -1,3 +1,23 @@
+(*
+Sous emacs, pour avoir les symboles il faut avoir une font adequat (par exemple: "Mono")
+Pour taper les symboles utf8, il faut faire:
+
+ M-x set-input-method TeX
+
+ensuite il suffit de taper la commande latex correspondante.
+
+⊕  \oplus
+⊗ \otimes
+⊸ \multimap
+⊤ \top
+⊢ \vdash
+*)
+Require Import multiset_spec.
+Require Import ILL_spec.
+Require Import OrderedType.
+Require Import Utf8_core.
+Require Import vars.
+
 Require Import ILL.
 
 (** Les preuves de epsrc_case_for_support.pdf. *)

@@ -702,7 +702,12 @@ Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
     assumption.
     symmetry;assumption.
   Qed.
+End ILL_Make.
 
+Module ILL_tactics(Vars:OrderedType)(M:ILL_sig(Vars)).
+  Import Vars.
+  Import M.
+  Import FormulaMultiSet.
 
   (** Tactiques *)
   Ltac prove_multiset_eq := 
@@ -902,6 +907,4 @@ Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
     end.
   
   Ltac finish_proof_strong := search_one_goal_strong ({⊤}⊢⊤).
-
-
-End ILL_Make.
+End ILL_tactics.
