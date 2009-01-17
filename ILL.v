@@ -626,7 +626,7 @@ Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
 
   Inductive ILL_proof : env → formula → Prop :=
     Id : ∀ p, {p} ⊢ p
-  | Cut : ∀ Γ Δ p q, Γ ⊢ p → p::Δ ⊢ q → (Δ ∪ Γ) ⊢ q
+  (* | Cut : ∀ Γ Δ p q, Γ ⊢ p → p::Δ ⊢ q → (Δ ∪ Γ) ⊢ q *)
   | Impl_R : ∀ Γ p q, p::Γ ⊢ q → Γ ⊢ p ⊸ q
   | Impl_L : ∀ Γ Δ p q r, Γ ⊢ p → q::Δ ⊢ r → ((p ⊸ q) :: Δ ∪ Γ) ⊢ r
   | Times_R : ∀ Γ Δ p q , Γ ⊢ p → Δ ⊢ q → (Γ ∪ Δ) ⊢ p ⊗ q
@@ -929,3 +929,212 @@ Module ILL_tactics(Vars:OrderedType)(M:ILL_sig(Vars)).
   
   Ltac finish_proof_strong := search_one_goal_strong ({⊤}⊢⊤).
 End ILL_tactics.
+
+Module ILL_tactics_refl(Vars:OrderedType)(M:ILL_sig(Vars)).
+  Import Vars.
+  Import M.
+  Import FormulaMultiSet.
+
+  (** Tactiques *)
+  Ltac prove_multiset_eq := apply eq_bool_correct;vm_compute;reflexivity.
+
+  Ltac with_multiset Γ' t := 
+    apply Multiset with (Γ:=Γ');[prove_multiset_eq|t].
+
+  Ltac and_l_1  p' q'  := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(add ( p' & q') ?env')] =>
+            let e := context C [ env' ] in  
+              with_multiset (( p' & q')::e) ltac:(apply And_L_1)
+        end
+    end.
+
+
+  Ltac times_l  p' q'  := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(add ( p' ⊗ q') ?env')] =>
+            let e := context C [ env' ] in  
+              with_multiset ((p'⊗q')::e) ltac:(apply Times_L)
+        end
+    end.
+
+(*     apply Multiset with (Γ:=(p⊸q)::Δ∪Γ');
+      [prove_multiset_eq| apply Impl_L].
+*)
+
+  Ltac oplus_l  p' q'  := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(add ( p' ⊕ q') ?env')] =>
+            let e := context C [ env' ] in  
+              with_multiset (( p' ⊕ q')::e) ltac:(apply Oplus_L)
+        end
+    end.
+
+  Ltac and_l_2  p' q'  := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(add ( p' & q') ?env')] =>
+            let e := context C [ env' ] in  
+              with_multiset (( p' & q')::e) ltac:(apply And_L_2)
+        end
+    end.
+  
+
+  Ltac bang_w  p'   := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(!p':: ?env')] =>
+            let e := context C [ env' ] in  
+              with_multiset (!p'::e) ltac:(apply Bang_W)
+        end
+    end.
+
+
+  Ltac bang_c  p'   := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(!p'::?env')] =>
+            let e := context C [ env' ] in  
+              with_multiset (!p'::e) ltac:(apply Bang_C)
+        end
+    end.
+
+  Ltac bang_d  p'   := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(!p'::?env')] =>
+            let e := context C [ env' ] in  
+              with_multiset (!p'::e) ltac:(apply Bang_D)
+        end
+    end.
+
+  Ltac one_l  := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(add 1 ?env')] =>
+            let e := context C [ env' ] in  
+              with_multiset (1::e) ltac:(apply One_L)
+        end
+    end.
+
+  Ltac impl_l Γ' Δ p q := 
+    with_multiset ((p⊸q)::Δ∪Γ') ltac:(apply Impl_L).
+
+  Ltac times_r Γ' Δ' := 
+  with_multiset (Γ'∪Δ') ltac:(apply Times_R with (Γ:= Γ') (Δ:= Δ')).
+    
+  Ltac same_env p p' :=
+    match p' with 
+      | p => idtac
+      | union (add ?φ ?p'') ?p''' => 
+        same_env p (add φ (union p'' p'''))
+      | union empty ?p''' => 
+        same_env p p'''
+      | _ =>
+        match p with 
+          | empty => 
+            match p' with 
+              | empty => idtac
+            end
+          | add ?phi ?env =>
+            match p' with 
+              | context C [(add phi ?env')] => 
+                let e := context C [ env' ] in 
+                  same_env env e
+            end
+          | union (add ?φ ?p'') ?p'''  =>
+            same_env (add φ (union p'' p''')) p'
+          | union empty ?p'''  =>
+            same_env p''' p'
+        end
+    end.
+
+  Ltac search_one_goal g := 
+    match goal with 
+      | |- ?g' => 
+        match g with 
+          ?env⊢?e =>
+          match g' with
+            ?env'⊢e => 
+            (same_env env env')
+          end
+        end
+      | |- ?env ⊢ _  => 
+        match env with 
+          | context C [(add 1 ?env')] =>
+            let e := context C [ env' ] in
+              (one_l;search_one_goal g) || fail 0
+              (* (apply One_L with (Γ:=e); *)
+              (*   [ search_one_goal g | prove_multiset_eq])||fail 0 *)
+          | context C [(add ( ?p' & ?q') ?env')] =>
+            (and_l_2 p' q'; search_one_goal g ) || fail 0
+            (* let e := context C [ env' ] in   *)
+            (*   (apply And_L_2 with (Γ:=e) (p:=p') (q:=q');  *)
+            (*     [search_one_goal g | prove_multiset_eq])|| fail 0 *)
+          | context C [(add ( ?p' & ?q') ?env')] =>
+            (and_l_1 p' q'; search_one_goal g ) || fail 0
+            
+            (* let e := context C [ env' ] in   *)
+            (*   (apply And_L_1 with (Γ:=e) (p:=p') (q:=q');  *)
+            (*     [search_one_goal g | prove_multiset_eq])||fail 0 *)
+          | context C [(add ( ?p' ⊗ ?q') ?env')] =>
+            (times_l p' q';search_one_goal g) || fail 0
+            (* (let e := context C [ env' ] in   *)
+            (*   apply Times_L with (Γ:=e) (p:=p') (q:=q'); [ search_one_goal g | prove_multiset_eq])||fail 0 *)
+        end
+    end.
+
+  Ltac search_one_goal_strong g := 
+    match goal with 
+      | |- ?g' => 
+        match g with 
+          ?env⊢?e =>
+          match g' with
+            ?env'⊢e => 
+            same_env env env'
+          end
+        end
+      | |- ?env ⊢ ?e  => 
+        match env with 
+          | {e} => apply Id;prove_multiset_eq
+          | context C [(add 1 ?env')] =>
+            (one_l;search_one_goal_strong g)||fail 0
+          | context C [(add ( ?p' & ?q') ?env')] =>
+            (and_l_2 p' q';search_one_goal_strong g)|| fail 0
+          | context C [(add ( ?p' & ?q') ?env')] =>
+            (and_l_1 p' q';search_one_goal_strong g)|| fail 0
+          | context C [(add ( ?p' ⊗ ?q') ?env')] =>
+            (times_l p' q';search_one_goal_strong g) || fail 0
+          | context C [add (?p'⊸?q') ?env'] =>
+            let e := context C [ env' ] in 
+              match e with 
+                | context C' [ p'::?env''] => 
+                  let e' := context C' [env''] in 
+                    (impl_l {p'} e' p' q';[constructor|search_one_goal_strong g])
+                    (* apply Impl_L with (Γ:={p'}) (Δ:=e') (p:=p') (q:=q'); *)
+                    (*   [constructor;prove_multiset_eq |search_one_goal_strong g|prove_multiset_eq] *)
+              end
+          | context C [add ( !?p') ?env'] => 
+            (bang_w p';search_one_goal_strong g)
+            (* let e := context C [env'] in  *)
+            (*   apply Bang_W with (Γ:=e) (p:=p');[search_one_goal_strong g|prove_multiset_eq] *)
+        end || fail 0
+      | |-  _ ⊢ ?p ⊕ ?q => 
+        apply Oplus_R_1;search_one_goal_strong g
+      | |- _ ⊢ ?p ⊕ ?q => 
+        apply Oplus_R_2;search_one_goal_strong g
+    end.
+  
+  Ltac finish_proof_strong := search_one_goal_strong ({⊤}⊢⊤).
+End ILL_tactics_refl.

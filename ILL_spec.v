@@ -75,7 +75,7 @@ Module Type ILL_sig(Vars : OrderedType).
 
   Inductive ILL_proof : env → formula → Prop :=
     Id : ∀ p, {p} ⊢ p
-  | Cut : ∀ Γ Δ p q, Γ ⊢ p → p::Δ ⊢ q → (Δ ∪ Γ) ⊢ q
+  (* | Cut : ∀ Γ Δ p q, Γ ⊢ p → p::Δ ⊢ q → (Δ ∪ Γ) ⊢ q *)
   | Impl_R : ∀ Γ p q, p::Γ ⊢ q → Γ ⊢ p ⊸ q
   | Impl_L : ∀ Γ Δ p q r, Γ ⊢ p → q::Δ ⊢ r → (p ⊸ q :: Δ ∪ Γ) ⊢ r
   | Times_R : ∀ Γ Δ p q , Γ ⊢ p → Δ ⊢ q → (Γ ∪ Δ) ⊢ p ⊗ q
