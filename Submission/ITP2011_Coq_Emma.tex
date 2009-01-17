@@ -1,0 +1,142 @@
+\documentclass[runningheads,a4paper]{llncs}
+
+\usepackage{amssymb}
+\setcounter{tocdepth}{3}
+\usepackage{graphicx}
+
+\usepackage{url}
+%\urldef{\mailsa}\path|{alfred.hofmann, ursula.barth, ingrid.haas, frank.holzwarth,|
+%\urldef{\mailsb}\path|anna.kramer, leonie.kunz, christine.reiss, nicole.sator,|
+%\urldef{\mailsc}\path|erika.siebert-cole, peter.strasser, lncs}@springer.com|    
+\newcommand{\keywords}[1]{\par\addvspace\baselineskip
+\noindent\keywordname\enspace\ignorespaces#1}
+
+\begin{document}
+
+\mainmatter  % start of an individual contribution
+
+\title{Revisiting Interactive Narratology with Proof Assistants\\ --\\ Structural Analysis of Narratives with Proof Assistants}
+
+% a short form should be given in case it is too long for the running head
+\titlerunning{Revisiting Interactive Storytelling with Proof Assistants}
+
+% the name(s) of the author(s) follow(s) next
+%
+% NB: Chinese authors should write their first names(s) in front of
+% their surnames. This ensures that the names appear correctly in
+% the running heads and the author index.
+%
+\author{Anne-Gwenn Bosser\inst{1}%
+%\thanks{Please note that the LNCS Editorial assumes that all authors have used
+%the western naming convention, with given names preceding surnames. This determines
+%the structure of the names in the running heads and the author index.}%
+\and Pierre Courtieu\inst{2}\and Julien Forest\inst{2} \and Marc Cavazza\inst{1}}
+%
+%\authorrunning{Lecture Notes in Computer Science: Authors' Instructions}
+% (feature abused for this document to repeat the title also on left hand pages)
+
+% the affiliations are given next; don't give your e-mail address
+% unless you accept that it will be published
+\institute{University of Teesside, School of Computing, Intelligent Virtual Environments Research Group\\
+\url{http://ive.scm.tees.ac.uk/}
+\and
+Conservatoire National des Arts et M\'{e}tiers, Laboratoire CEDRIC, Equipe CPR\\
+\url{http://cedric.cnam.fr/}}
+
+%
+% NB: a more complex sample for affiliations and the mapping to the
+% corresponding authors can be found in the file "llncs.dem"
+% (search for the string "\mainmatter" where a contribution starts).
+% "llncs.dem" accompanies the document class "llncs.cls".
+%
+
+%\toctitle{Lecture Notes in Computer Science}
+%\tocauthor{Authors' Instructions}
+\maketitle
+
+
+\begin{abstract}
+%This paper proposes a novel application of Interactive Proof Assistants, for studying and verifying formally properties
+%of Interactive Narratives. This builds on recent work evidencing the suitability of Intuitionistic Linear Logic (ILL) as a conceptual model for Interactive Narratives, for it provides a theory for representing narrative actions. This extends the philosophy which has led to the use of LL for the representation of actions semantic in natural languages, in the field of computational linguistic. We propose here to go further and describe a method, relying on a simple encoding of ILL within the Coq Proof-Assistant, for the modelisation, study and formal verification of properties of Interactive Narratives. In contrast with existing work in this sub-discipline of Artificial Intelligence, which are mostly based on ad-hoc ontologies, this novel approach supports a return to the first principles of narrative action description while providing a robust framework for studying and verifying the properties of interactive narratives, extending some of the work which has been done in the past regarding game-design validation through petri-nets.
+%
+%More specifically, we describe a method for modeling the resources and narrative actions of a given interactive narrative, together with constraints on the story endings and intermediate states of the narrative in the form of an ILL sequent. From this specification, we describe how different generated interactive narratives (obtained by cut-free proof trees of the sequent) can be verified using Coq, and how Coq can be used to formally prove that arbitrarily defined properties traversing all the interactive narratives such a sequent can generate.
+%
+This paper proposes a novel application of Interactive Proof Assistants, for studying the formal properties of Narratives. This builds on recent work demonstrating the suitability of Intuitionistic Linear Logic (ILL) as a conceptual model for Interactive Narratives, for it provides a theory for representing the basic properties associated to narrative actions, i.e. causality and competition for resources. This extends the philosophy behind the use of LL for the representation of actions semantics in computational linguistics. Linear Logic could in the long-term support narrative generation on a principled basis, by relying on a representation of core properties rather than ad hoc narrative ontologies, such as those associated to AI approaches to narrative generation. A first step in that direction is to study formal properties of narratives modelled in ILL relying on a direct encoding of ILL within the Coq Proof-Assistant.
+
+More specifically, we describe a method for modelling the resources attached to narrative actions, together with constraints on the story endings and intermediate states of the narrative in the form of an ILL sequent. From this specification, we describe how different narratives can be obtained and verified using Coq (obtained by cut-free proof trees of the sequent), and how Coq can also be used to formally prove second order properties traversing all the interactive narratives such a sequent can generate.
+\keywords{Linear Logic, Applications of Theorem Provers, Interactive Narratives}
+\end{abstract}
+
+
+\section{Introduction}
+Proofs as narratives.
+
+\section{Related Works}
+\subsection{Logical Approaches to Interactive Storytelling}
+inclure travaux avec LL.\\
+meme approche que pour papier ECAI mais en insistant plus sur usages de LL + model checking via petri nets/colored petri nets.\\
+LL tool support for IS: model checking w. petri nets. Montrer la difference de l'approche auto/prouveur avec une approche Proof Assistant. Insister sur le fait que meme si ils semblent inclure tous les connecteurs on voit pas bien comment ils s'en sortent pour l'indecidabilite, et que le fragment de LL utilise est vraiment pas clair du tout.
+\subsection{Related applications of Linear Logic}
+computational linguistics: a ete utilise pour la representation d'actions. Ici on etend a un context d'action narratives.\\
+LL and planning: idem, representation d'actions.\\
+Referer a ECAI-LL-Emma comme "evidence" que LL presente une theorie de l'action particulierement adaptee a la narration interactive.
+\subsection{Proof Assistants and Automatic Provers support for LL}
+Encodings existants (plusieurs naifs, certains sans proof-terms (juste oui/non) ce qui ne convient pas, c'est la preuve qui nous interesse pas le fait que ce soit prouvable seulement. 
+
+Les proches:Dixon, LLP, Prover de Ronan?: 
+Dixon: usage "proche" car pour de la planif + le seul exemple d'encodage d'ILL avec des tactiques un peu elaborees dans un assistant de preuve. Nous, on a pas de tactiques definies, mais cet exemple montre que c'est possible et qu'il y a tout un champ qui a ete tres peu investigue par la recherche, et qui a un gros potentiel d'automatisation/semi-automatisation. Les approches Prouveur automatique  a la LLProver (qui mouline 3 semaines sans que rien ne sorte...) et Petri nets ne permettent pas en l'etat actuel des connaissances de passer au niveau du fragment ILL qui est suffisament expressif. L'approche Assistant de Preuve semi-automatique est une premiere etape, permettant d'etudier dans le futur des tactiques performantes, sans avoir a restreindre l'expressivite du fragment considere. Ces consideration sont pour des travaux futurs sur une automatisation ou automatisation partielle.
+
+Pour notre sujet, l'analyse de proprietes de narration interactives, et de specification de narration interactives, avantage qu'il y a a pouvoir faire des preuves au second ordre grace a une approche proof-assistant, comparee a une approche prouveur automatique: Meme sans automatisation, un assistant de preuve permet d'exprimer des proprietes "arbitraires" au second ordre sur une specification de narrations interactives: de raisonner sur un ensemble d'histoires que peut generer la specification. Ceci permet ensuite de verifier ces proprietes (qui sont structurelles, et suivant notre analogie, mappee sur la structure de la preuve), ou d'exhiber une narration interactive particuliere verifiant une propriete structurelle donnee. C'est ce qu'on discute dans ce papier.
+\section{ILL as a Representational Theory for IS}
+Referer a ECAI, mais decrire plus precisement que pour ECAI ou c'etait pour le moins fumeux. Faire passer l'idee que c'est une methode. A partir d'une description faite par un auteur de narration interactive, il est "simple" (sisi) d'extraire la formalisation sous forme d'un sequent. Rectifier mecomprehension de l'article de Spierling ici: on ne pretend (surtout) pas faire de l'authoring, on ne pretend pas non plus qu'on puisse extraire directement une narration interactive d'une histoire lineaire. On dit juste que de la specification de conditions initiales, ressources, et actions narratives, on peut faire une analyse formelle d'un ensemble de narrations interactives, du point de vue de leurs proprietes structurelles, grace a une correspondance preuve-narration interactive. 
+
+description du mapping:\\
+Ressources\\
+Actions\\
+Choix internes/externes\\
+Fins multiples\\
+Sequent = specification d'un ensemble de resources possibles et d'actions narrative\\
+Preuve = une narration interactive donnee, interactions possibles comprises. Attention, l'isomorphisme fonctionne a plein: une
+action toujours accessible a l'utilisateur et la preuve ne termine pas. Ce n'est pas un probleme insolvable en terme de modelisation, mais pas non plus l'objet du papier. Passer sous silence en attendant de le resoudre avec les sous de l'EPSRC?\\
+Bien expliquer la lecture de l'histoire, en se concentrant sur $\oplus$ gauche interaction, $\multimap$ action narrative, et les fins possibles avec $\oplus$ droit.
+Ensemble de preuve = Ensemble des histoires interactives qu'un sequent peut produire.\\
+
+Analyser les proprietes structurelles d'une preuve = Analyser les proprietes intrinseques d'une histoire interactive.
+
+\textbf{Cas d'utilisation 1: construction du sequent qui servira de fil d'Ariane dans la suite, pour illustrer la methode}
+\section{Using the Coq proof assistant for Story Properties Analysis}
+\subsection{ILL encoding into Coq}
+quelques details techniques pertinents pour la communaute ITP (multisets etc). Comparer avec encodings existants si necessaire (y'en a peu, mais certains pour Isabelle sont plus aboutis avec tactiques).
+%\subsection{Specifying Interactive Narratives}
+%methode/cuisine pour ecrire le sequent. Faut que ca paraisse facile, et suive naturellement la description de la theorie representationnelle.
+\subsection{Unfolding a Story}
+Generation "assistee" d'histoires interactives \emph{well-formed}. Bien dire que si pour l'instant on ne fait que de la verif, il est possible de definir des tactiques efficaces (e.g full auto), meme pour ILL. Ca na pas ete tres recherche mais Dixon a certains resultats preliminaires. Un objectif futur est de travailler sur des tactiques, y compris ad-hoc et correspondant a des usage patterns (voir ce qui a ete fait en computational linguistics avec succes), et qu'il n'est pas completement sans espoir de penser a une tactique "trivial" future (full-automation) meme si c'est un vrai probleme car ILL est indecidable. Des arguments places ici doivent etre retires de l'etat de l'art et vice-versa, voir ce qui rend le mieux.
+
+\textbf{Cas d'utilisation 2: une preuve du sequent qui suit l'ordre du roman, preuve assistee meme si pas full-auto}
+
+Exemple de la preuve deroulee, de maniere assistee: une instance d'un sequent assez generatif. On montre comment on a produit la preuve en Coq, et on raconte l'histoire correspondante, avec les choix possibles de l'utilisateur. 
+
+Il faut que ca fasse "methode". Ideal, un truc du genre: l'utilisateur choisit une action narrative a executer, et une tactique Coq deroule la suite, jusqu'a ce qu'il y aie une nouvelle formule a decomposer. Le contexte est coupe en 2 en fait: il y a les formules qui correspondent a des actions narratives ou composition d'actions narratives, et des trucs qui sont "juste" des ressources ou des etats consommes par les actions. L'utilisateur ne travaille que sur les premieres et Coq l'aide pour les "details".
+
+Considerations sur les possibles alternatives par rapport a la structure de la specification, pour lier avec la suite: les "choix internes" a la recherche de preuve, l'ordre d'execution des actions. Montrer qu'on ne peut pas construire d'histoires qui sont mal formees du point de vue des ressources disponibles (e.g. dans notre cas, commencer par aller voir Rodolphe et choisir de s'enfuir).
+\section{Perspectives}
+\subsection{2nd order analysis of interactive narratives specification}
+(Decrire le passage assiste par Coq au second ordre: C'est ce qu'on a en plus par rapport a un prouveur)
+\\
+Inspection des proprietes d'une preuve/histoire -> Inspection des proprietes de l'ensemble des histoires specifiees par un sequent.\\
+Inspection n'est pas basee forcement sur des proprietes generiques, on inspecte ce qu'on veut!
+
+\textbf{Cas d'utilisation 3: prouver des proprietes structurelles au second ordre, e.g. sur toutes les histoires que genere le sequent. La les tactiques de base ne marcheront pas. Preuve a la main, mais qui est verifiee par le systeme}
+Exemple des 2 proprietes-meta, de type "toute histoire generee par cette specification de ressources, conditions initiales, et actions narratives, verifie telle propriete":\\
+- preuves sur l'accessibilite des fins possibles. Ronan fait ca aussi avec ses reseaux de petri? Mais dans un cadre plus facile, MML jusqu'a preuve du contraire\\
+- preuve qu'une action donnee se produira toujours avant une autre, meme sans rapports de precedence/causalite directement encode dans le sequent. Dans l'exemple, a cause d'une configuration particuliere de competition pour la consommation de ressources narratives provoquee par une "interaction" possible. \textbf{Cela met dans cet exemple en evidence une relation structurelle de la specification, qui emerge de l'analyse, et qui est a priori non evidente: elle n'est pas encodee directement dans les specifications.}
+\textbf{Cas d'utilisation 4: exhiber une instance particuliere de narration interactive, qui verifie une propriete structurelle donnee}
+Avec l'exemple: exhiber une histoire interactive ayant plusieurs fins possibles suivant le "chemin" parcouru par l'utilisateur.
+ajout, au second ordre, de contraintes sur la recherche de preuve. Permet de resoudre des problemes non traites?
+Lorsque tactiques pour automatiser seront definies, cela permettra de rechercher/generer des histoires verifiant certaines proprietes structurelles: presence de fins alternatives etc.
+\section{Conclusion}
+On a montre que: un couplage ILL et Proof assistant fourni un outil puissant pour etudier les proprietes structurelles de narrations interactives.//
+On a fourni: une methode d'encodage IS en sequent ILL, une methode pour derouler une narration interactive correspondante en utilisant Coq.//
+Insister:\\
+A partir d'un encodage/specification des conditions initiales, actions narratives, et open-world input, a faire a la main selon une methode que nous avons definie ici -> une methode reposant sur des tactiques de Coq pour derouler une histoire.
+\end{document}
