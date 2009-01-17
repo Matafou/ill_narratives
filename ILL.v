@@ -788,6 +788,27 @@ Module ILL_tactics(Vars:OrderedType)(M:ILL_sig(Vars)).
         end
     end.
 
+
+  Ltac bang_c  p'   := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(!p'::?env')] =>
+            let e := context C [ env' ] in  
+              with_multiset (!p'::e) ltac:(apply Bang_C)
+        end
+    end.
+
+  Ltac bang_d  p'   := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(!p'::?env')] =>
+            let e := context C [ env' ] in  
+              with_multiset (!p'::e) ltac:(apply Bang_D)
+        end
+    end.
+
   Ltac one_l  := 
     match goal with 
       |- ILL_proof ?env _ =>
