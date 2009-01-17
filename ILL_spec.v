@@ -74,25 +74,26 @@ Module Type ILL_sig(Vars : OrderedType).
   Definition env := FormulaMultiSet.t.
 
   Inductive ILL_proof : env → formula → Prop :=
-    Id : ∀ p Γ, Γ == {p} → Γ ⊢ p
-  | Cut : ∀ Ω Γ Δ p q, Γ ⊢ p → p::Δ ⊢ q → Ω == (Δ ∪ Γ) → Ω ⊢ q
+    Id : ∀ p, {p} ⊢ p
+  | Cut : ∀ Γ Δ p q, Γ ⊢ p → p::Δ ⊢ q → (Δ ∪ Γ) ⊢ q
   | Impl_R : ∀ Γ p q, p::Γ ⊢ q → Γ ⊢ p ⊸ q
-  | Impl_L : ∀ Ω Γ Δ p q r, Γ ⊢ p → q::Δ ⊢ r → Ω == (p ⊸ q :: Δ ∪ Γ) → Ω ⊢ r
-  | Times_R : ∀ Ω Γ Δ p q , Γ ⊢ p → Δ ⊢ q → Ω == (Γ ∪ Δ) → Ω ⊢ p ⊗ q
-  | Times_L : ∀ Ω Γ p q r , q :: p :: Γ ⊢ r → Ω == (p ⊗ q :: Γ) → Ω ⊢ r
-  | One_R : ∀ Ω, Ω == ∅ → Ω ⊢ 1
-  | One_L : ∀ Ω Γ p , Γ ⊢ p → Ω == (1 :: Γ) → Ω ⊢ p
+  | Impl_L : ∀ Γ Δ p q r, Γ ⊢ p → q::Δ ⊢ r → (p ⊸ q :: Δ ∪ Γ) ⊢ r
+  | Times_R : ∀ Γ Δ p q , Γ ⊢ p → Δ ⊢ q → (Γ ∪ Δ) ⊢ p ⊗ q
+  | Times_L : ∀ Γ p q r , q :: p :: Γ ⊢ r → (p ⊗ q :: Γ) ⊢ r
+  | One_R :  ∅ ⊢ 1
+  | One_L : ∀ Γ p , Γ ⊢ p → (1 :: Γ) ⊢ p
   | And_R : ∀ Γ p q , Γ ⊢ p → Γ ⊢ q → Γ ⊢ (p & q)
-  | And_L_1 : ∀ Ω Γ p q r , p::Γ ⊢ r → Ω == ((p & q) :: Γ) → Ω ⊢ r
-  | And_L_2 : ∀ Ω Γ p q r , q::Γ ⊢ r → Ω == ((p & q) :: Γ) → Ω ⊢ r
-  | Oplus_L : ∀ Ω Γ p q r , p :: Γ ⊢ r → q :: Γ ⊢ r → Ω == (p ⊕ q :: Γ) → Ω ⊢ r
+  | And_L_1 : ∀ Γ p q r , p::Γ ⊢ r → ((p & q) :: Γ) ⊢ r
+  | And_L_2 : ∀ Γ p q r , q::Γ ⊢ r → ((p & q) :: Γ) ⊢ r
+  | Oplus_L : ∀ Γ p q r , p :: Γ ⊢ r → q :: Γ ⊢ r → (p ⊕ q :: Γ) ⊢ r
   | Oplus_R_1 : ∀ Γ p q , Γ ⊢ p → Γ ⊢ p ⊕ q
   | Oplus_R_2 : ∀ Γ p q , Γ ⊢ q → Γ ⊢ p ⊕ q 
   | T_ : ∀ Γ, Γ ⊢ ⊤
   | Zero_ : ∀ Γ p , 0 ∈ Γ = true → Γ ⊢ p
-  | Bang_D : ∀ Ω Γ p q , p :: Γ ⊢ q → Ω == (!p :: Γ) → Ω ⊢ q
-  | Bang_C : ∀ Ω Γ p q , !p :: !p :: Γ ⊢ q → Ω == (!p :: Γ) → Ω ⊢ q
-  | Bang_W : ∀ Ω Γ p q , Γ ⊢ q → Ω == (!p :: Γ) → Ω ⊢ q
+  | Bang_D : ∀ Γ p q , p :: Γ ⊢ q → (!p :: Γ) ⊢ q
+  | Bang_C : ∀ Γ p q , !p :: !p :: Γ ⊢ q → (!p :: Γ) ⊢ q
+  | Bang_W : ∀ Γ p q , Γ ⊢ q → (!p :: Γ) ⊢ q
+  | Multiset : ∀ Γ Γ' p, Γ == Γ' -> Γ ⊢ p -> Γ' ⊢ p
 
     (* Syntaxe définie en même temps que le type des preuve. *)
     where " x ⊢ y " := (ILL_proof x y) : ILL_scope.
