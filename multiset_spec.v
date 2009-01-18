@@ -13,7 +13,7 @@ Module Type S(X:OrderedType).
 
   Parameter add : A -> t -> t. 
 
-  Parameter remove : A -> t -> option t.
+  (* Parameter remove : A -> t -> option t. *)
 
   Parameter mem : A -> t -> bool. 
 
@@ -44,8 +44,8 @@ Module Type S(X:OrderedType).
 
   Parameter add_comm : forall a b ms, eq (add a (add b ms)) (add b (add a ms)).
 
-  Parameter remove_mem : forall a ms, mem a ms = true -> exists ms', remove a ms = Some ms'.
-  Parameter remove_not_mem : forall a ms, mem a ms = false -> remove a ms = None.
+  (* Parameter remove_mem : forall a ms, mem a ms = true -> exists ms', remove a ms = Some ms'. *)
+  (* Parameter remove_not_mem : forall a ms, mem a ms = false -> remove a ms = None. *)
  
   Parameter mem_add_comm : forall a b ms, mem a ms = true -> mem a (add b ms) = true.
 

@@ -102,5 +102,12 @@ Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
   weak_impl_l G V...
   bang_d (V ⊸ A)...
   weak_impl_l V A... (* Dead. Il y a 2 A. *)
-Qed.
+Abort.
 
+Goal ~({A, A, P & 1, B & 1, (P ⊸ M) & 1, 1 ⊕ (B ⊸ V) & (B ⊸ 1)} ⊢ A ⊕ M).
+Proof.
+  intros abs.
+  set(Γ:={A, A, P & 1, B & 1, (P ⊸ M) & 1, 1 ⊕ (B ⊸ V) & (B ⊸ 1)}) in *.
+  vm_compute in Γ.
+  inversion abs.
+Qed.

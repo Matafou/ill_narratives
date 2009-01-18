@@ -16,8 +16,7 @@ Require Import multiset_spec.
 Require Import OrderedType.
 Require Import Utf8_core.
 
-
-Module Type ILL_sig(Vars : OrderedType).
+Module Type ILL_formulas(Vars : OrderedType).
 
   Reserved Notation "x ⊸ y" (at level 60, no associativity).
   Reserved Notation "x ⊕ y" (at level 60, no associativity).
@@ -26,8 +25,6 @@ Module Type ILL_sig(Vars : OrderedType).
   Reserved Notation "! x" (at level 50, no associativity).
   Reserved Notation "x & y" (at level 80, no associativity).
   Reserved Notation "⊤" (at level 10, no associativity).
-  Reserved Notation "∪" (at level 60, right associativity).
-  Reserved Notation "∅" (at level 10, no associativity).
 
   (** Le type des formules, les atomes sont dénotés par [Proposition]. *)
   Inductive formula : Type := 
@@ -41,9 +38,6 @@ Module Type ILL_sig(Vars : OrderedType).
   | And : formula -> formula  -> formula 
   | Top : formula.
 
-  Declare Module FormulaOrdered : OrderedType with Definition t:= formula.
-  Declare  Module Import FormulaMultiSet : multiset_spec.S(FormulaOrdered).
-
   (** Les notations classiques  *)
   Notation "A ⊸ B" := (Implies A B) : ILL_scope.
   Notation  "A ⊕ B" := (Oplus A B) : ILL_scope.
@@ -54,6 +48,17 @@ Module Type ILL_sig(Vars : OrderedType).
   Notation  "A & B" := (And A B) : ILL_scope.
   Notation  "⊤" := Top : ILL_scope.
   Set Printing Width 100.
+
+  Declare Module FormulaOrdered : OrderedType with Definition t:= formula.
+
+End ILL_formulas.
+
+Module Type ILL_sig(Vars : OrderedType).
+  Include ILL_formulas(Vars).
+  Declare  Module Import FormulaMultiSet : multiset_spec.S(FormulaOrdered).
+  Reserved Notation "∪" (at level 60, right associativity).
+  Reserved Notation "∅" (at level 10, no associativity).
+
   Open Scope ILL_scope.
   Infix "∪" := union (at level 60, right associativity) : ILL_scope.
   Notation " a :: b " := (add a b) (at level 60, right associativity) : ILL_scope.

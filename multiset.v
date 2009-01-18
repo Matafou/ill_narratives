@@ -914,3 +914,117 @@ Module MakeAVL(X:OrderedType )<:S(X).
   Module Maps' := FMapAVL.Make(X).
   Include PreMake(X)(Maps').
 End MakeAVL.
+
+Module MakeList(X:OrderedType )<:S(X).
+  Module Maps' := FMapList.Make(X).
+  Include PreMake(X)(Maps').
+End MakeList.
+(*
+Module MakeRawList(X:OrderedType)<:S(X).
+  Local Notation A := X.t.
+  Definition t := list A.
+
+  Definition empty : t := nil.
+
+  Definition is_empty (l : t) := match l with nil => true | _ => false end.
+
+  Function add (e:A) (ms:t) {struct ms} : t := 
+    match ms with 
+      | nil => e::nil
+      | e'::ms' => match X.compare e e' with 
+                     | GT _ => e'::add e ms'
+                     | _ => e::ms
+                   end
+    end.
+        
+
+  Function mem (e:A) (ms:t) {struct ms} : bool := 
+    match ms with 
+      | nil => false 
+      | e'::ms' => 
+        match X.compare e e' with 
+          | GT _ => mem e ms'
+          | EQ _ => true 
+          | LT _ => false 
+        end
+    end.
+
+  Function eq_bool (ms1 ms2:t) {struct ms1} : bool :=
+    match ms1,ms2 with 
+      | nil,nil => true 
+      | e1::ms1,e2::ms2 => 
+        match X.compare e1 e2 with 
+          | EQ _ => eq_bool ms1 ms2
+          | _ => false
+        end
+      | _,_ => false
+    end.
+
+  Function eq (ms1 ms2:t) {struct ms1} : Prop :=
+    match ms1,ms2 with 
+      | nil,nil => True
+      | e1::ms1,e2::ms2 => 
+        match X.compare e1 e2 with 
+          | EQ _ => eq ms1 ms2
+          | _ => False
+        end
+      | _,_ => False
+    end.
+  
+
+  Lemma eq_bool_correct : forall m1 m2, eq_bool m1 m2 = true -> eq m1 m2.
+  Proof.
+    intros m1 m2;functional induction (eq_bool m1 m2);intros Heqb.
+
+    reflexivity.
+
+    simpl;rewrite e3;auto.
+
+    discriminate.
+  
+    discriminate.
+  Qed.
+
+  Lemma eq_refl : forall ms, eq ms ms.
+  Proof.
+    induction ms as [|e ms IH].
+    
+    reflexivity.
+    
+    simpl.
+
+  Parameter eq_sym : forall ms ms', eq ms ms' -> eq ms' ms.
+
+  Parameter eq_trans : forall ms1 ms2 ms3, eq ms1 ms2 -> eq ms2 ms3 -> eq ms1 ms3.
+
+  Parameter add_morph_eq : forall a a', X.eq a a' -> forall ms ms',  eq ms ms' -> eq (add a ms) (add a' ms'). 
+
+  Parameter union : t -> t -> t.
+
+  Parameter union_morph_eq : forall a a', eq a a' -> forall ms ms',  eq ms ms' -> eq (union a ms) (union a' ms'). 
+
+  Parameter is_empty_empty : is_empty empty = true.
+  
+  Parameter is_empty_no_mem : forall ms, is_empty ms = true <-> (forall a, mem a ms = false). 
+
+  Parameter add_is_not_empty : forall a ms, is_empty (add a ms) = false.
+  
+  Parameter add_is_mem : forall a ms, mem a (add a ms) = true.
+
+  Parameter add_comm : forall a b ms, eq (add a (add b ms)) (add b (add a ms)).
+
+  Parameter remove_mem : forall a ms, mem a ms = true -> exists ms', remove a ms = Some ms'.
+  Parameter remove_not_mem : forall a ms, mem a ms = false -> remove a ms = None.
+ 
+  Parameter mem_add_comm : forall a b ms, mem a ms = true -> mem a (add b ms) = true.
+
+  
+  Parameter union_empty_left : forall ms, eq (union empty ms) ms.
+  Parameter union_empty_right : forall ms, eq (union ms empty) ms.
+  Parameter union_rec_left : forall a ms ms', eq (union (add a ms) ms') (add a (union ms ms')).
+  Parameter union_rec_right : forall a ms ms', eq (union ms (add a ms')) (add a (union ms ms')).
+
+  Parameter mem_morph_eq :
+    forall (φ : A) (Γ Γ' : t), eq Γ Γ' -> mem φ Γ = mem φ Γ'.
+End MakeRawList.
+*)
