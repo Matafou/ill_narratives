@@ -16,6 +16,13 @@ Local Notation "'M'" := (Proposition 8%nat):Emma.
 
 Open Scope ILL_scope.
 Open Scope Emma.
+Lemma titi: {P ⊸ M, P, !(V ⊸ A)} ⊢ A ⊕ M.
+Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
+  bang_w (V ⊸ A)...
+  weak_impl_l P M...
+  apply Oplus_R_2...
+Defined.
+
 
 Lemma originelle :              
   {P&1, R, G, B&1, !(V⊸A), (E⊸A)&1, (P⊸M)&1,(R⊸1)&(R⊸E), (G⊸1)⊕(G⊸V), 1⊕((B⊸V)&(B⊸1))  } ⊢ A ⊕ M .
@@ -43,7 +50,6 @@ Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
   bang_w (V ⊸ A)...
   weak_impl_l P M...
   apply Oplus_R_2...
-
   (* BRANCHE DE DROITE DE LA BRANCHE DE GAUCHE. *)
   Focus.
   and_l_2 B 1.
@@ -216,6 +222,67 @@ Definition not_exists_oplus_on_formula lhs rhs (e1:env) (f1:formula) (h1: e1 ⊢
 
 Eval vm_compute in (forall_impl_l_on_formula (not_exists_oplus_on_formula (G⊸1) (G⊸V)) R E _ _ originelle).
 Eval vm_compute in (forall_impl_l_on_formula (not_exists_oplus_on_formula 1 ((B ⊸ V) & (B ⊸ 1))) G 1 _ _ originelle).
+
+
+
+
+
+
+
+Program Fixpoint exists_AtheseA_on_formula 
+  (cont: forall (e1:env) (f1:formula) (h1: e1 ⊢ f1),bool)
+  (φl φr:formula)  (e:env) (f:formula) (h: e ⊢ f) {struct h}: bool := 
+match h with
+  | Oplus_R_1 Γ p q x =>
+    if FormulaOrdered.eq_dec p φl
+      then if FormulaOrdered.eq_dec q φr 
+        then cont _ _  x
+        else exists_AtheseA_on_formula cont φl φr _ _ x
+      else exists_AtheseA_on_formula cont φl φr _ _ x
+  | Oplus_R_2 Γ q p x =>
+    if FormulaOrdered.eq_dec p φl
+      then if FormulaOrdered.eq_dec q φr 
+        then cont _ _  x
+        else exists_AtheseA_on_formula cont φl φr _ _ x
+      else exists_AtheseA_on_formula cont φl φr _ _ x
+  | Id p => false
+  | Impl_R Γ p q x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | Impl_L Γ Δ p q r x x0 => if exists_AtheseA_on_formula cont φl φr _ _ x then true else exists_AtheseA_on_formula cont φl φr _ _ x0
+  | Times_R Γ Δ p q x x0 => if exists_AtheseA_on_formula cont φl φr _ _ x then true else exists_AtheseA_on_formula cont φl φr _ _ x0
+  | Times_L Γ p q r x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | One_R => false
+  | One_L Γ p x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | And_R Γ p q x x0 => if exists_AtheseA_on_formula cont φl φr _ _ x then true else exists_AtheseA_on_formula cont φl φr _ _ x0
+  | And_L_1 Γ p q r x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | And_L_2 Γ p q r x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | Oplus_L Γ p q r x x0 => if exists_AtheseA_on_formula cont φl φr _ _ x then true else exists_AtheseA_on_formula cont φl φr _ _ x0
+  | T_ Γ => false
+  | Zero_ Γ p x => false
+  | Bang_D Γ p q x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | Bang_C Γ p q x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | Bang_W Γ p q x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | Multiset Γ Γ' p x x0 =>  exists_AtheseA_on_formula cont φl φr _ _ x0
+end.
+
+
+Eval vm_compute in exists_AtheseA_on_formula (fun _ _ _ => true) A M _ _ originelle.
+Eval vm_compute in exists_AtheseA_on_formula (fun _ _ _ => true) A M _ _ titi.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 Goal forall (p:  {P&1, R, G, B&1, !(V⊸A), (E⊸A)&1, (P⊸M)&1,(R⊸1)&(R⊸E), (G⊸1)⊕(G⊸V), 1⊕((B⊸V)&(B⊸1))  } ⊢ A ⊕ M), forall_impl_l_on_formula (exists_oplus_on_formula (G⊸1) (G⊸V)) R E _ _ p = true.
