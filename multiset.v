@@ -919,6 +919,7 @@ Module MakeList(X:OrderedType )<:S(X).
   Module Maps' := FMapList.Make(X).
   Include PreMake(X)(Maps').
 End MakeList.
+
 (*
 Module MakeRawList(X:OrderedType)<:S(X).
   Local Notation A := X.t.
@@ -928,60 +929,107 @@ Module MakeRawList(X:OrderedType)<:S(X).
 
   Definition is_empty (l : t) := match l with nil => true | _ => false end.
 
-  Function add (e:A) (ms:t) {struct ms} : t := 
-    match ms with 
-      | nil => e::nil
-      | e'::ms' => match X.compare e e' with 
-                     | GT _ => e'::add e ms'
-                     | _ => e::ms
-                   end
-    end.
-        
+  Definition add := cons (A:=A).
 
   Function mem (e:A) (ms:t) {struct ms} : bool := 
     match ms with 
       | nil => false 
       | e'::ms' => 
         match X.compare e e' with 
-          | GT _ => mem e ms'
           | EQ _ => true 
-          | LT _ => false 
+          | _ => mem e ms'
+        end
+    end.
+  
+  Inductive eq' : t -> t -> Prop := 
+  | Eq_nil : eq' nil nil 
+  | Eq_cons : forall e1 e2 ms1 ms2 ms2', X.eq e1 e2 -> eq' ms1 (ms2++ms2') -> eq' (e1::ms1) (ms2++e2::ms2').
+
+  Definition eq := eq'.
+
+  Function find_decomp (e:A) (ms:t) (acc:t) {struct ms} : option (A*t*t) := 
+    match ms with 
+      | nil => None 
+      | e'::ms' => 
+        match X.compare e e' with 
+          | EQ _ => Some(e',List.rev acc,ms')
+          | _ => find_decomp e ms' (e'::acc)
         end
     end.
 
-  Function eq_bool (ms1 ms2:t) {struct ms1} : bool :=
-    match ms1,ms2 with 
-      | nil,nil => true 
-      | e1::ms1,e2::ms2 => 
-        match X.compare e1 e2 with 
-          | EQ _ => eq_bool ms1 ms2
-          | _ => false
+  Lemma rev_cons : forall A l1 (e:A) l2, rev (e::l1)++l2 = rev l1 ++ e :: l2.
+  Proof.
+    destruct l1 as [|e1 l1].
+
+    intros e l2.
+    reflexivity.
+
+    intros e l2.
+    simpl.
+    repeat rewrite <- app_assoc.
+    simpl. reflexivity.
+  Qed.
+
+  Lemma find_decomp_concat : forall e e' ms m m' acc, find_decomp e ms acc = Some(e',m,m') -> 
+    (List.rev acc)++ms = m++e'::m'.
+  Proof.
+    intros e e' ms m m' acc.
+    revert e' m m'.
+    functional induction (find_decomp e ms acc).
+
+    intros e' m m' H;discriminate H.
+
+    intros e'0 m m' H.
+    injection H;clear H;intros;subst.
+    reflexivity.
+
+    intros e'0 m m' H.
+    rewrite <- rev_cons.
+    apply IHo;assumption.
+  Qed.
+    
+  Lemma find_decomp_eq : forall e e' ms m m' acc, find_decomp e ms acc = Some(e',m,m') -> 
+    X.eq e e'.
+  Proof.
+    intros e e' ms m m' acc.
+    revert e' m m'.
+    functional induction (find_decomp e ms acc).
+
+    intros e' m m' H;discriminate H.
+
+    intros e'0 m m' H.
+    injection H;clear H;intros;subst.
+    assumption.
+
+    intros e'0 m m' H.
+    eauto.     
+  Qed.
+
+
+  Function eq_bool (ms1 ms2:t) {struct ms1} : bool := 
+    match ms1,ms2 with
+      | nil,nil => true
+      | e1::ms1,e2::ms2 =>
+        match find_decomp e1 (e2::ms2) nil with 
+          | None => false 
+          | Some (_,ms2,ms2') => eq_bool ms1 (ms2++ms2')
         end
       | _,_ => false
     end.
-
-  Function eq (ms1 ms2:t) {struct ms1} : Prop :=
-    match ms1,ms2 with 
-      | nil,nil => True
-      | e1::ms1,e2::ms2 => 
-        match X.compare e1 e2 with 
-          | EQ _ => eq ms1 ms2
-          | _ => False
-        end
-      | _,_ => False
-    end.
   
-
   Lemma eq_bool_correct : forall m1 m2, eq_bool m1 m2 = true -> eq m1 m2.
   Proof.
     intros m1 m2;functional induction (eq_bool m1 m2);intros Heqb.
 
-    reflexivity.
-
-    simpl;rewrite e3;auto.
+    constructor.
 
     discriminate.
-  
+
+    generalize (find_decomp_concat _ _ _ _ _ _ e3);simpl;intros.
+    generalize (find_decomp_eq _ _ _ _ _ _ e3);simpl;intros.
+    rewrite H in *.
+    constructor 2;auto.
+
     discriminate.
   Qed.
 
@@ -989,42 +1037,145 @@ Module MakeRawList(X:OrderedType)<:S(X).
   Proof.
     induction ms as [|e ms IH].
     
-    reflexivity.
+    constructor. 
+
+    change (e :: ms) with (nil ++ e :: ms) at 2. 
+    constructor .
+    apply X.eq_refl.
+    simpl;assumption.
+  Qed.
+  Lemma eq_sym : forall ms ms', eq ms ms' -> eq ms' ms.
+  Admitted.     
     
+  Lemma eq_trans : forall ms1 ms2 ms3, eq ms1 ms2 -> eq ms2 ms3 -> eq ms1 ms3.
+  Admitted.
+    
+
+  Lemma add_morph_eq : forall a a', X.eq a a' -> forall ms ms',  eq ms ms' -> eq (add a ms) (add a' ms'). 
+  Proof.
+    intros a a' H ms ms' H0.
+    change (add a' ms') with (nil ++ a' :: ms');constructor 2;simpl;auto.
+  Qed.
+
+  Definition union := app (A:=A). 
+
+  Lemma union_morph_eq : forall a a', eq a a' -> forall ms ms',  eq ms ms' -> eq (union a ms) (union a' ms'). 
+  Proof.
+    unfold union.
+    intros a a' H.
+    induction H.
+
+    simpl;tauto.
+
+    intros ms ms' H1.
     simpl.
+    rewrite <- app_assoc.
+    simpl.
+    constructor 2.
+    assumption.
+    rewrite app_assoc.
+    auto.
+  Qed.
 
-  Parameter eq_sym : forall ms ms', eq ms ms' -> eq ms' ms.
 
-  Parameter eq_trans : forall ms1 ms2 ms3, eq ms1 ms2 -> eq ms2 ms3 -> eq ms1 ms3.
+  Lemma is_empty_empty : is_empty empty = true.
+  Proof.
+    vm_cast_no_check (refl_equal true).
+  Qed.
+  Module XFacts := OrderedTypeFacts(X).
 
-  Parameter add_morph_eq : forall a a', X.eq a a' -> forall ms ms',  eq ms ms' -> eq (add a ms) (add a' ms'). 
+  Lemma is_empty_no_mem : forall ms, is_empty ms = true <-> (forall a, mem a ms = false). 
+  Proof.
+    
+    intros ms.
+    split.
 
-  Parameter union : t -> t -> t.
+    destruct ms;simpl.
+    tauto.
+    discriminate.
 
-  Parameter union_morph_eq : forall a a', eq a a' -> forall ms ms',  eq ms ms' -> eq (union a ms) (union a' ms'). 
+    destruct ms;simpl.
+    reflexivity.
+    intros.
+    assert (U:=H t0);clear H.
+    destruct (X.compare t0 t0). 
+    elim (XFacts.lt_antirefl l).
+    discriminate.
+    elim (XFacts.lt_antirefl l).
+  Qed.
+   
+  Lemma add_is_not_empty : forall a ms, is_empty (add a ms) = false.
+  Proof.
+    intros a ms.
+    simpl;reflexivity.
+  Qed.
 
-  Parameter is_empty_empty : is_empty empty = true.
-  
-  Parameter is_empty_no_mem : forall ms, is_empty ms = true <-> (forall a, mem a ms = false). 
+  Lemma add_is_mem : forall a ms, mem a (add a ms) = true.
+  Proof.
+    intros a ms.
+    simpl.
+    destruct (X.compare a a).
+    elim (XFacts.lt_antirefl l).
+    reflexivity.
+    elim (XFacts.lt_antirefl l).
+  Qed.
 
-  Parameter add_is_not_empty : forall a ms, is_empty (add a ms) = false.
-  
-  Parameter add_is_mem : forall a ms, mem a (add a ms) = true.
+  Lemma add_comm : forall a b ms, eq (add a (add b ms)) (add b (add a ms)).
+  Proof.
+    unfold add.
+    intros a b ms.
+    change (b::a::ms) with ((b::nil)++a::ms);constructor 2.
+    apply X.eq_refl.
+    apply eq_refl.
+  Qed.
 
-  Parameter add_comm : forall a b ms, eq (add a (add b ms)) (add b (add a ms)).
-
-  Parameter remove_mem : forall a ms, mem a ms = true -> exists ms', remove a ms = Some ms'.
-  Parameter remove_not_mem : forall a ms, mem a ms = false -> remove a ms = None.
+  (* Parameter remove_mem : forall a ms, mem a ms = true -> exists ms', remove a ms = Some ms'. *)
+  (* Parameter remove_not_mem : forall a ms, mem a ms = false -> remove a ms = None. *)
  
-  Parameter mem_add_comm : forall a b ms, mem a ms = true -> mem a (add b ms) = true.
+  Lemma mem_add_comm : forall a b ms, mem a ms = true -> mem a (add b ms) = true.
+  Proof.
+    intros a b ms;revert b.
+    functional induction (mem a ms);try discriminate.
+    
+    intros b _.
+    simpl.
+    destruct (XFacts.elim_compare_eq _x).
+    rewrite H.
+    destruct (X.compare a b);reflexivity.
 
-  
-  Parameter union_empty_left : forall ms, eq (union empty ms) ms.
-  Parameter union_empty_right : forall ms, eq (union ms empty) ms.
-  Parameter union_rec_left : forall a ms ms', eq (union (add a ms) ms') (add a (union ms ms')).
-  Parameter union_rec_right : forall a ms ms', eq (union ms (add a ms')) (add a (union ms ms')).
 
-  Parameter mem_morph_eq :
+    intros b H.
+    
+    simpl in *.
+    destruct (X.compare a e');try tauto;    auto.
+  Qed.
+
+  Lemma union_empty_left : forall ms, eq (union empty ms) ms.
+  Proof.
+    intros.
+    vm_compute. apply eq_refl.
+  Qed.
+
+  Lemma union_empty_right : forall ms, eq (union ms empty) ms.
+  Proof.
+    intros ms.
+    unfold empty,union.
+
+    induction ms as [| e ms].
+    constructor 1.
+    simpl.
+    rewrite app_nil_r.
+    apply eq_refl.
+  Qed.
+
+  Lemma union_rec_left : forall a ms ms', eq (union (add a ms) ms') (add a (union ms ms')).
+  Proof.
+  Admitted.
+  Lemma union_rec_right : forall a ms ms', eq (union ms (add a ms')) (add a (union ms ms')).
+  Admitted.
+
+  Lemma mem_morph_eq :
     forall (φ : A) (Γ Γ' : t), eq Γ Γ' -> mem φ Γ = mem φ Γ'.
+  Admitted.
 End MakeRawList.
 *)
