@@ -17,6 +17,7 @@ Require Import ILL_spec.
 Require Import OrderedType.
 Require Import Utf8_core.
 Require Import vars.
+Require Import formulas_spec.
 
 Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
 

@@ -12,46 +12,11 @@ ensuite il suffit de taper la commande latex correspondante.
 ⊤ \top
 ⊢ \vdash
 *)
+Require Import basic.
 Require Import multiset_spec.
 Require Import OrderedType.
 Require Import Utf8_core.
-
-Module Type ILL_formulas(Vars : OrderedType).
-
-  Reserved Notation "x ⊸ y" (at level 60, no associativity).
-  Reserved Notation "x ⊕ y" (at level 60, no associativity).
-  Reserved Notation "x ⊗ y" (at level 60, no associativity).
-  Reserved Notation "x ⊢ y" (at level 70, no associativity).
-  Reserved Notation "! x" (at level 50, no associativity).
-  Reserved Notation "x & y" (at level 80, no associativity).
-  Reserved Notation "⊤" (at level 10, no associativity).
-
-  (** Le type des formules, les atomes sont dénotés par [Proposition]. *)
-  Inductive formula : Type := 
-  | Proposition : Vars.t -> formula
-  | Implies : formula -> formula -> formula 
-  | Otimes : formula -> formula -> formula 
-  | Oplus : formula -> formula -> formula 
-  | One : formula 
-  | Zero : formula 
-  | Bang : formula -> formula
-  | And : formula -> formula  -> formula 
-  | Top : formula.
-
-  (** Les notations classiques  *)
-  Notation "A ⊸ B" := (Implies A B) : ILL_scope.
-  Notation  "A ⊕ B" := (Oplus A B) : ILL_scope.
-  Notation  "A ⊗ B" := (Otimes A B) : ILL_scope.
-  Notation "1" := One : ILL_scope.
-  Notation "0" := Zero : ILL_scope.
-  Notation  "! A" := (Bang A) : ILL_scope.
-  Notation  "A & B" := (And A B) : ILL_scope.
-  Notation  "⊤" := Top : ILL_scope.
-  Set Printing Width 100.
-
-  Declare Module FormulaOrdered : OrderedType with Definition t:= formula.
-
-End ILL_formulas.
+Require Import formulas_spec.
 
 Module Type ILL_sig(Vars : OrderedType).
   Include ILL_formulas(Vars).
@@ -78,7 +43,7 @@ Module Type ILL_sig(Vars : OrderedType).
      règle. *)
   Definition env := FormulaMultiSet.t.
 
-  Inductive ILL_proof : env → formula → Prop :=
+  Inductive ILL_proof : env → formula → Type :=
     Id : ∀ p, {p} ⊢ p
   (* | Cut : ∀ Γ Δ p q, Γ ⊢ p → p::Δ ⊢ q → (Δ ∪ Γ) ⊢ q *)
   | Impl_R : ∀ Γ p q, p::Γ ⊢ q → Γ ⊢ p ⊸ q
@@ -146,7 +111,7 @@ Module Type ILL_sig(Vars : OrderedType).
   Parameter ILL_proof_pre_morph : forall φ Γ Γ', Γ == Γ' ->  (Γ⊢φ) -> (Γ'⊢φ).
 
   (* On peut réécrire à l'intérieur d'un ⊢. *)
-  Add Morphism ILL_proof with signature (FormulaMultiSet.eq ==> Logic.eq ==> iff) as ILL_proof_morph.
+  Add Morphism ILL_proof with signature (FormulaMultiSet.eq ==> Logic.eq ==> equivT) as ILL_proof_morph.
   Proof.
     intros Γ Γ' Heq φ;split;apply ILL_proof_pre_morph.
     assumption.

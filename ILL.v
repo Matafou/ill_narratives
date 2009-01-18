@@ -13,6 +13,7 @@ ensuite il suffit de taper la commande latex correspondante.
 ⊢ \vdash
 *)
 Require formulas.
+Require Import basic.
 Require Import multiset_spec.
 Require Import ILL_spec.
 Require Import OrderedType.
@@ -42,7 +43,7 @@ Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
      règle. *)
   Definition env := FormulaMultiSet.t.
 
-  Inductive ILL_proof : env → formula → Prop :=
+  Inductive ILL_proof : env → formula → Type :=
     Id : ∀ p, {p} ⊢ p
   (* | Cut : ∀ Γ Δ p q, Γ ⊢ p → p::Δ ⊢ q → (Δ ∪ Γ) ⊢ q *)
   | Impl_R : ∀ Γ p q, p::Γ ⊢ q → Γ ⊢ p ⊸ q
@@ -114,7 +115,7 @@ Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
   Qed.
 
   (* On peut réécrire à l'intérieur d'un ⊢. *)
-  Add Morphism ILL_proof with signature (FormulaMultiSet.eq ==> Logic.eq ==> iff) as ILL_proof_morph.
+  Add Morphism ILL_proof with signature (FormulaMultiSet.eq ==> Logic.eq ==> equivT) as ILL_proof_morph.
   Proof.
     intros Γ Γ' Heq φ;split;apply ILL_proof_pre_morph.
     assumption.

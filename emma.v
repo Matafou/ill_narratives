@@ -93,35 +93,136 @@ Set Printing Depth 50000.
 Print originelle.
 *)
 
-Inductive boolP : Prop := trueb : boolP | falseb: boolP.
 
 Require Import JMeq.
 
-Program Fixpoint essai (e:env) (f:formula) (h: e ⊢ f) {struct h}: boolP := 
+Program Fixpoint essai (e:env) (f:formula) (h: e ⊢ f) {struct h}: bool := 
 match h with
-  | Id p => trueb
+  | Id p => true
   | Impl_R Γ p q x => essai _ _ x
-  | Impl_L Γ Δ p q r x x0 => if essai _ _ x then trueb else essai _ _ x0
-  | Times_R Γ Δ p q x x0 => falseb
-  | Times_L Γ p q r x => falseb
-  | One_R => falseb
+  | Impl_L Γ Δ p q r x x0 => if essai _ _ x then true else essai _ _ x0
+  | Times_R Γ Δ p q x x0 => false
+  | Times_L Γ p q r x => false
+  | One_R => false
   | One_L Γ p x => essai _ _ x
-  | And_R Γ p q x x0 => falseb
+  | And_R Γ p q x x0 => false
   | And_L_1 Γ p q r x => essai _ _ x
   | And_L_2 Γ p q r x => essai _ _ x
-  | Oplus_L Γ p q r x x0 => if essai _ _ x then trueb else essai _ _ x0
+  | Oplus_L Γ p q r x x0 => if essai _ _ x then true else essai _ _ x0
   | Oplus_R_1 Γ p q x => essai _ _ x
   | Oplus_R_2 Γ p q x => essai _ _ x
-  | T_ Γ => falseb
-  | Zero_ Γ p x => falseb
+  | T_ Γ => false
+  | Zero_ Γ p x => false
   | Bang_D Γ p q x => essai _ _ x
   | Bang_C Γ p q x => essai _ _ x
-  | Bang_W Γ p q x => falseb
+  | Bang_W Γ p q x => false
   | Multiset Γ Γ' p x x0 => essai _ _ x0
 end.
 
 Eval vm_compute in (essai _ _ originelle).
 
+(* pas d'application de la règle droite de ⊸ *)
+
+Program Fixpoint no_impl_R (e:env) (f:formula) (h: e ⊢ f) {struct h}: bool := 
+match h with
+  | Id p => true
+  | Impl_R Γ p q x => false
+  | Impl_L Γ Δ p q r x x0 => if no_impl_R _ _ x then no_impl_R _ _ x0 else false 
+  | Times_R Γ Δ p q x x0 => if no_impl_R _ _ x then no_impl_R _ _ x0 else false 
+  | Times_L Γ p q r x => no_impl_R _ _  x
+  | One_R => true 
+  | One_L Γ p x => no_impl_R _ _ x
+  | And_R Γ p q x x0 => if no_impl_R _ _ x then no_impl_R _ _ x0 else false 
+  | And_L_1 Γ p q r x => no_impl_R _ _ x
+  | And_L_2 Γ p q r x => no_impl_R _ _ x
+  | Oplus_L Γ p q r x x0 => if no_impl_R _ _ x then true else no_impl_R _ _ x0
+  | Oplus_R_1 Γ p q x => no_impl_R _ _ x
+  | Oplus_R_2 Γ p q x => no_impl_R _ _ x
+  | T_ Γ => true 
+  | Zero_ Γ p x => true 
+  | Bang_D Γ p q x => no_impl_R _ _ x
+  | Bang_C Γ p q x => no_impl_R _ _ x
+  | Bang_W Γ p q x => no_impl_R _ _ x
+  | Multiset Γ Γ' p x x0 =>  no_impl_R _ _ x0
+end.
+
+Eval vm_compute in (no_impl_R _ _ originelle).
+
+(*  *)
+Require Import Bool.
+Program Fixpoint exists_oplus_on_formula (cont: forall (e1:env) (f1:formula) (h1: e1 ⊢ f1) (e2:env) (f2:formula) (h2: e2 ⊢ f2),bool) (φl φr:formula)  (e:env) (f:formula) (h: e ⊢ f) {struct h}: bool := 
+match h with
+  | Id p => false
+  | Impl_R Γ p q x => exists_oplus_on_formula cont φl φr _ _ x
+  | Impl_L Γ Δ p q r x x0 => if exists_oplus_on_formula cont φl φr _ _ x then true else exists_oplus_on_formula cont φl φr _ _ x0
+  | Times_R Γ Δ p q x x0 => if exists_oplus_on_formula cont φl φr _ _ x then true else exists_oplus_on_formula cont φl φr _ _ x0
+  | Times_L Γ p q r x => exists_oplus_on_formula cont φl φr _ _ x
+  | One_R => false
+  | One_L Γ p x => exists_oplus_on_formula cont φl φr _ _ x
+  | And_R Γ p q x x0 => if exists_oplus_on_formula cont φl φr _ _ x then true else exists_oplus_on_formula cont φl φr _ _ x0
+  | And_L_1 Γ p q r x => exists_oplus_on_formula cont φl φr _ _ x
+  | And_L_2 Γ p q r x => exists_oplus_on_formula cont φl φr _ _ x
+  | Oplus_L Γ p q r x x0 => 
+    if FormulaOrdered.eq_dec p φl 
+      then if FormulaOrdered.eq_dec q φr 
+        then cont _ _  x _ _ x0
+        else if exists_oplus_on_formula cont φl φr _ _ x then true else exists_oplus_on_formula cont φl φr _ _ x0
+      else if exists_oplus_on_formula cont φl φr _ _ x then true else exists_oplus_on_formula cont φl φr _ _ x0
+  | Oplus_R_1 Γ p q x => exists_oplus_on_formula cont φl φr _ _ x
+  | Oplus_R_2 Γ p q x => exists_oplus_on_formula cont φl φr _ _ x
+  | T_ Γ => false
+  | Zero_ Γ p x => false
+  | Bang_D Γ p q x => exists_oplus_on_formula cont φl φr _ _ x
+  | Bang_C Γ p q x => exists_oplus_on_formula cont φl φr _ _ x
+  | Bang_W Γ p q x => exists_oplus_on_formula cont φl φr _ _ x
+  | Multiset Γ Γ' p x x0 =>  exists_oplus_on_formula cont φl φr _ _ x0
+end.
+
+Program Fixpoint forall_impl_l_on_formula 
+  (cont:forall (e1:env) (f1:formula) (h1: e1 ⊢ f1) (e2:env) (f2:formula) (h2: e2 ⊢ f2), bool) 
+  (φl φr:formula)  (e:env) (f:formula) (h: e ⊢ f) {struct h}: bool := 
+match h with
+  | Id p => true
+  | Impl_R Γ p q x => forall_impl_l_on_formula cont φl φr _ _ x
+  | Impl_L Γ Δ p q r x x0 => 
+    if FormulaOrdered.eq_dec p φl 
+      then if FormulaOrdered.eq_dec q φr 
+        then cont _ _ x _ _ x0 (*if (cont _ _  x) then false else negb (cont _ _  x0) *)
+        else 
+          if forall_impl_l_on_formula cont φl φr _ _ x 
+            then forall_impl_l_on_formula cont φl φr _ _ x0
+            else false 
+      else if forall_impl_l_on_formula cont φl φr _ _ x then forall_impl_l_on_formula cont φl φr _ _ x0 else false
+  | Times_R Γ Δ p q x x0 => if forall_impl_l_on_formula cont φl φr _ _ x then forall_impl_l_on_formula cont φl φr _ _ x0 else false 
+  | Times_L Γ p q r x => forall_impl_l_on_formula cont φl φr _ _ x
+  | One_R => true 
+  | One_L Γ p x => forall_impl_l_on_formula cont φl φr _ _ x
+  | And_R Γ p q x x0 => if forall_impl_l_on_formula cont φl φr _ _ x then forall_impl_l_on_formula cont φl φr _ _ x0 else false 
+  | And_L_1 Γ p q r x => forall_impl_l_on_formula cont φl φr _ _ x
+  | And_L_2 Γ p q r x => forall_impl_l_on_formula cont φl φr _ _ x
+  | Oplus_L Γ p q r x x0 => if forall_impl_l_on_formula cont φl φr _ _ x then forall_impl_l_on_formula cont φl φr _ _ x0 else false 
+  | Oplus_R_1 Γ p q x => forall_impl_l_on_formula cont φl φr _ _ x
+  | Oplus_R_2 Γ p q x => forall_impl_l_on_formula cont φl φr _ _ x
+  | T_ Γ => true
+  | Zero_ Γ p x => true 
+  | Bang_D Γ p q x => forall_impl_l_on_formula cont φl φr _ _ x
+  | Bang_C Γ p q x => forall_impl_l_on_formula cont φl φr _ _ x
+  | Bang_W Γ p q x => forall_impl_l_on_formula cont φl φr _ _ x
+  | Multiset Γ Γ' p x x0 =>  forall_impl_l_on_formula cont φl φr _ _ x0
+end.
+
+Definition not_exists_oplus_on_formula lhs rhs (e1:env) (f1:formula) (h1: e1 ⊢ f1) (e2:env) (f2:formula) (h2: e2 ⊢ f2) := 
+  negb (orb (exists_oplus_on_formula (fun _ _ _ _ _ _ => true) lhs rhs _ _ h1) (exists_oplus_on_formula (fun _ _ _ _ _ _ => true) lhs rhs _ _ h2)).
+
+Eval vm_compute in (forall_impl_l_on_formula (not_exists_oplus_on_formula (G⊸1) (G⊸V)) R E _ _ originelle).
+Eval vm_compute in (forall_impl_l_on_formula (not_exists_oplus_on_formula 1 ((B ⊸ V) & (B ⊸ 1))) G 1 _ _ originelle).
+
+
+Goal forall (p:  {P&1, R, G, B&1, !(V⊸A), (E⊸A)&1, (P⊸M)&1,(R⊸1)&(R⊸E), (G⊸1)⊕(G⊸V), 1⊕((B⊸V)&(B⊸1))  } ⊢ A ⊕ M), forall_impl_l_on_formula (exists_oplus_on_formula (G⊸1) (G⊸V)) R E _ _ p = true.
+Proof.
+  intros p.
+(* inversion *)
+Qed.
 
 
 Lemma marchepas : 
@@ -138,11 +239,3 @@ Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
   bang_d (V ⊸ A)...
   weak_impl_l V A... (* Dead. Il y a 2 A. *)
 Abort.
-
-Goal ~({A, A, P & 1, B & 1, (P ⊸ M) & 1, 1 ⊕ (B ⊸ V) & (B ⊸ 1)} ⊢ A ⊕ M).
-Proof.
-  intros abs.
-  set(Γ:={A, A, P & 1, B & 1, (P ⊸ M) & 1, 1 ⊕ (B ⊸ V) & (B ⊸ 1)}) in *.
-  vm_compute in Γ.
-  inversion abs.
-Qed.
