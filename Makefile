@@ -108,7 +108,8 @@ VFILES:=basic.v\
   meta.v\
   multiset_spec.v\
   multiset.v\
-  vars.v
+  vars.v\
+  restrict.v
 VOFILES:=$(VFILES:.v=.vo)
 VOFILES0:=$(filter-out ,$(VOFILES))
 GLOBFILES:=$(VFILES:.v=.glob)

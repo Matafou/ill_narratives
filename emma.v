@@ -284,14 +284,14 @@ Eval vm_compute in exists_AtheseA_on_formula (fun _ _ _ => true) A M _ _ titi.
 
 
 
-
+(*
 Goal forall (p:  {P&1, R, G, B&1, !(V⊸A), (E⊸A)&1, (P⊸M)&1,(R⊸1)&(R⊸E), (G⊸1)⊕(G⊸V), 1⊕((B⊸V)&(B⊸1))  } ⊢ A ⊕ M), forall_impl_l_on_formula (exists_oplus_on_formula (G⊸1) (G⊸V)) R E _ _ p = true.
 Proof.
   intros p.
 (* inversion *)
 Qed.
-
-
+*)
+(*
 Lemma marchepas : 
   ({P&1, R, G, B&1, !(V⊸A), (E⊸A)&1, (P⊸M)&1,(R⊸1)&(R⊸E), (G⊸1)⊕(G⊸V), 1⊕((B⊸V)&(B⊸1))  } ⊢ A ⊕ M ).
 Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
@@ -306,3 +306,56 @@ Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
   bang_d (V ⊸ A)...
   weak_impl_l V A... (* Dead. Il y a 2 A. *)
 Abort.
+*)
+
+
+
+
+
+Inductive Iexists (pred:∀ (e:env) (f:formula) (h: e ⊢ f), Prop): ∀ (e:env) (f:formula)(h: e ⊢ f) , Prop := 
+(* | IId: ∀ (f:formula) , pred {f} f (Id f) → Iexists pred {f} f (Id f) *)
+| IImpl_R: ∀ Γ p q (h:(p :: Γ ⊢ q)), Iexists pred _ _ h → Iexists pred _ _ (Impl_R Γ p q h)
+| IImpl_L2: ∀ Γ Δ p q r (h:Γ ⊢ p) (h':q::Δ ⊢ r),
+   Iexists pred _ _ h' → Iexists pred _ _ (Impl_L Γ Δ p q r h h')
+| IImpl_L1: ∀ Γ Δ p q r (h:Γ ⊢ p) (h':q::Δ ⊢ r),
+  Iexists pred _ _ h → Iexists pred _ _ (Impl_L Γ Δ p q r h h')
+| ITimes_R2: ∀ Γ Δ p q h h', Iexists pred _ _ h' → Iexists pred _ _ (Times_R Γ Δ p q h h')
+| ITimes_R1: ∀ Γ Δ p q h h', Iexists pred _ _ h → Iexists pred _ _ (Times_R Γ Δ p q h h')
+| ITimes_L: ∀ Γ p q r h, Iexists pred _ _ h → Iexists pred _ _ (Times_L Γ p q r h)
+| IOne_R: pred ∅ 1 One_R → Iexists pred ∅ 1 One_R 
+| IOne_L: ∀ Γ p h, Iexists pred _ _ h → Iexists pred _ _ (One_L Γ p h)
+| IAnd_R2: ∀ Γ p q h h', Iexists pred _ _ h' → Iexists pred _ _ (And_R  Γ p q h h')
+| IAnd_R1: ∀ Γ p q h h', Iexists pred _ _ h → Iexists pred _ _ (And_R  Γ p q h h')
+| IAnd_L_2: ∀ Γ p q r h, Iexists pred _ _ h → Iexists pred _ _ (And_L_2 Γ p q r h)
+| IAnd_L_1: ∀ Γ p q r h, Iexists pred _ _ h → Iexists pred _ _ (And_L_1 Γ p q r h)
+| IOplus_L2: ∀ Γ p q r h h', Iexists pred _ _ h' → Iexists pred _ _ (Oplus_L  Γ p q r h h')
+| IOplus_L1: ∀ Γ p q r h h', Iexists pred _ _ h → Iexists pred _ _ (Oplus_L  Γ p q r h h')
+| IOplus_R_2: ∀ Γ p q h, Iexists pred _ _ h  → Iexists pred _ _ (Oplus_R_2 Γ p q h)
+| IOplus_R_1: ∀ Γ p q h, Iexists pred _ _ h → Iexists pred _ _ (Oplus_R_1 Γ p q h)
+(* | IT_ : ∀ Γ,  (pred Γ Top (T_ Γ)) → (Iexists pred Γ Top (T_ Γ)) *)
+(* | IZero_: ∀ Γ p truein, (pred Γ p (Zero_ Γ p truein)) → (Iexists pred _ _ (Zero_ Γ p truein)) *)
+| IBang_D: ∀ Γ p q h, Iexists pred _ _ h → (Iexists pred _ _ (Bang_D Γ p q h))
+| IBang_C: ∀ Γ p q h, Iexists pred _ _ h → (Iexists pred _ _ (Bang_C Γ p q h))
+| IBang_W: ∀ Γ p q h, Iexists pred _ _ h → (Iexists pred _ _ (Bang_W Γ p q h))
+(* inutile si pred est compatible avec == *)
+| IMultiset: ∀ Γ Γ' p heq h,  Iexists pred _ _ h -> Iexists pred _ _ (Multiset Γ Γ' p heq h)
+| Found: ∀ Γ p (h:Γ ⊢ p), pred Γ p h → Iexists pred Γ p h
+.
+
+Definition triv := fun e f (h:e⊢f) =>True.
+
+Lemma triv_ok: Iexists triv _ _ originelle.
+  apply Found.
+  constructor.
+Qed.
+
+Set Printing Depth 10000.
+Definition athesea := fun e f (h:e⊢f) => (e=={f} /\ f = A).
+Lemma ata_orig: Iexists athesea _ _ originelle.
+  repeat progress constructor.
+Qed.
+(*
+Definition athesea' := fun e f (h:e⊢f) => (e=={f} /\ f = B).
+Lemma ata_orig': Iexists athesea' _ _ originelle.
+  repeat progress constructor.
+*)
