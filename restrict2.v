@@ -4,27 +4,29 @@ Import ILLVarInt.MILL. (* only this *)
 Import ILLVarInt.M. (* this *)
 Import FormulaMultiSet. (* and this *)
 
+
+(* This property is true when pred holds for all nodes above the root
+   of h (it has not to hold for the root). *)
 Inductive Istable (pred:∀ e f (h: e ⊢ f), Prop): ∀ e f (h: e ⊢ f) , Prop := 
 | IId: ∀ Γ (f:formula) (heq:Γ == {f}), Istable pred Γ f (Id _ _ heq)
-| IImpl_R: ∀ Γ p q (h:(p :: Γ ⊢ q)), pred _ _ h → Istable pred _ _ (Impl_R Γ p q h)
+| IImpl_R: ∀ Γ p q (h:(p :: Γ ⊢ q)), pred _ _ h → Istable pred _ _ h → Istable pred _ _ (Impl_R Γ p q h)
 | IImpl_L: ∀ Γ Δ Δ' p q r (hin:(p⊸q)∈Γ) (heq:remove (p⊸ q) Γ== Δ ∪ Δ') (h:Δ ⊢ p) (h':q::Δ' ⊢ r), 
-  pred _ _ h → pred _ _ h' → Istable pred _ _ (Impl_L Γ Δ Δ' p q r hin heq h h')
-| ITimes_R: ∀ Γ Δ Δ' p q heq h h', pred _ _ h → pred _ _ h' → Istable pred _ _ (Times_R Γ Δ Δ' p q heq h h')
-| ITimes_L: ∀ Γ p q r hin h, pred _ _ h → Istable pred _ _ (Times_L Γ p q r hin h)
+  pred _ _ h → pred _ _ h' →  Istable pred _ _ h → Istable pred _ _ h' → Istable pred _ _ (Impl_L Γ Δ Δ' p q r hin heq h h')
+| ITimes_R: ∀ Γ Δ Δ' p q heq h h', pred _ _ h → pred _ _ h' → Istable pred _ _ h → Istable pred _ _ h' → Istable pred _ _ (Times_R Γ Δ Δ' p q heq h h')
+| ITimes_L: ∀ Γ p q r hin h, pred _ _ h → Istable pred _ _ h → Istable pred _ _ (Times_L Γ p q r hin h)
 | IOne_R: ∀ Γ heq, Istable pred _ _ (One_R Γ heq)
-| IOne_L: ∀ Γ p hin h, pred _ _ h → Istable pred _ _ (One_L Γ p hin h)
-| IAnd_R: ∀ Γ p q h h', pred _ _ h → pred _ _ h' → Istable pred _ _ (And_R  Γ p q h h')
-| IAnd_L_2: ∀ Γ p q r hin h, pred _ _ h → Istable pred _ _ (And_L_2 Γ p q r hin h)
-| IAnd_L_1: ∀ Γ p q r hin h, pred _ _ h → Istable pred _ _ (And_L_1 Γ p q r hin h)
-| IOplus_L: ∀ Γ p q r hin h h', pred _ _ h → pred _ _ h' → Istable pred _ _ (Oplus_L  Γ p q r hin h h')
-| IOplus_R_2: ∀ Γ p q h, pred _ _ h  → Istable pred _ _ (Oplus_R_2 Γ p q h)
-| IOplus_R_1: ∀ Γ p q h, pred _ _ h → Istable pred _ _ (Oplus_R_1 Γ p q h)
-(* | IT_ : ∀ Γ,  (pred Γ Top (T_ Γ)) → (Istable pred Γ Top (T_ Γ)) *)
-(* | IZero_: ∀ Γ p truein, (pred Γ p (Zero_ Γ p truein)) → (Istable pred _ _ (Zero_ Γ p truein)) *)
-| IBang_D: ∀ Γ p q hin h, pred _ _ h → (Istable pred _ _ (Bang_D Γ p q hin h))
-| IBang_C: ∀ Γ p q hin h, pred _ _ h → (Istable pred _ _ (Bang_C Γ p q hin h))
-| IBang_W: ∀ Γ p q hin h, pred _ _ h → (Istable pred _ _ (Bang_W Γ p q hin h))
-.
+| IOne_L: ∀ Γ p hin h, pred _ _ h → Istable pred _ _ h → Istable pred _ _ (One_L Γ p hin h)
+| IAnd_R: ∀ Γ p q h h', pred _ _ h → pred _ _ h' → Istable pred _ _ h → Istable pred _ _ h' → Istable pred _ _ (And_R  Γ p q h h')
+| IAnd_L_2: ∀ Γ p q r hin h, pred _ _ h → Istable pred _ _ h → Istable pred _ _ (And_L_2 Γ p q r hin h)
+| IAnd_L_1: ∀ Γ p q r hin h, pred _ _ h → Istable pred _ _ h → Istable pred _ _ (And_L_1 Γ p q r hin h)
+| IOplus_L: ∀ Γ p q r hin h h', pred _ _ h → pred _ _ h' → Istable pred _ _ h → Istable pred _ _ h' → Istable pred _ _ (Oplus_L  Γ p q r hin h h')
+| IOplus_R_2: ∀ Γ p q h, Istable pred _ _ h  → Istable pred _ _ (Oplus_R_2 Γ p q h)
+| IOplus_R_1: ∀ Γ p q h, pred _ _ h → Istable pred _ _ h → Istable pred _ _ (Oplus_R_1 Γ p q h)
+| IT_ : ∀ Γ,  (Istable pred Γ Top (T_ Γ)) → (Istable pred Γ Top (T_ Γ))
+| IZero_: ∀ Γ p truein, (Istable pred Γ p (Zero_ Γ p truein)) → (Istable pred _ _ (Zero_ Γ p truein))
+| IBang_D: ∀ Γ p q hin h, pred _ _ h → Istable pred _ _ h → (Istable pred _ _ (Bang_D Γ p q hin h))
+| IBang_C: ∀ Γ p q hin h, pred _ _ h → Istable pred _ _ h → (Istable pred _ _ (Bang_C Γ p q hin h))
+| IBang_W: ∀ Γ p q hin h, pred _ _ h → Istable pred _ _ h → (Istable pred _ _ (Bang_W Γ p q hin h)).
 
 
 
@@ -47,8 +49,7 @@ with R: formula -> Prop:=
 | R2: ∀ n, R (Proposition n)
 | R3: ∀ φ, R φ → R (!φ)
 | R4: ∀ φ₁ φ₂, R φ₁ → R φ₂ → R (φ₁ ⊗ φ₂)
-| R5: ∀ φ₁ φ₂, R φ₁ → R φ₂ → R (φ₁ & φ₂)
-.
+| R5: ∀ φ₁ φ₂, R φ₁ → R φ₂ → R (φ₁ & φ₂).
 
 (*
 Lemma arrto1 : ∀ p q, arr (p ⊸ q) → arr p.
@@ -113,7 +114,7 @@ Qed.
 
 Definition Apall Γ f (h:Γ⊢f):Prop := (∀g:formula, g ∈ Γ  → Ap g) /\ Ac f.
 (* Definition Aall2 Γ f (h:Γ⊢f):Prop := (∀g:formula, g ∈ Γ → A g) /\ R f. *)
-  
+
 (* Axiom A_morph: ∀ Γ p q, Aall Γ (p ⊸ q) → A q. *)
 (* Axiom A_morph: ∀ Γ p q, Aall Γ (p ⊸ q) → A q. *)
 
@@ -195,15 +196,15 @@ Ltac tac :=
     | H : ∀ g : formula, g ∈ ((?p ⊸ ?q) :: ?Γ) → A g |- Ap ?q => 
       assert (A (p ⊸ q));[ |  assert (∀ g : formula, g ∈ Γ → A g); [ intros |  clear H]]
     | H : ∀ g : formula, g ∈ ((?p ⊗ ?q) :: ?Γ) → A g |- A ?p => 
-        assert (A (p ⊗ q));[ |  assert (∀ g : formula, g ∈ Γ → A g); [ intros |  clear H]]
+      assert (A (p ⊗ q));[ |  assert (∀ g : formula, g ∈ Γ → A g); [ intros |  clear H]]
     | H : ∀ g : formula, g ∈ ((?p ⊗ ?q) :: ?Γ) → A g |- A ?q => 
       assert (A (p ⊗ q));[ |  assert (∀ g : formula, g ∈ Γ → A g); [ intros |  clear H]]
     | H : ∀ g : formula, g ∈ ((?p ⊕ ?q) :: ?Γ) → A g |- A ?p => 
-        assert (A (p ⊕ q));[ |  assert (∀ g : formula, g ∈ Γ → A g); [ intros |  clear H]]
+      assert (A (p ⊕ q));[ |  assert (∀ g : formula, g ∈ Γ → A g); [ intros |  clear H]]
     | H : ∀ g : formula, g ∈ ((?p ⊕ ?q) :: ?Γ) → A g |- A ?q => 
       assert (A (p ⊕ q));[ |  assert (∀ g : formula, g ∈ Γ → A g); [ intros |  clear H]]
     | H : ∀ g : formula, g ∈ ((?p & ?q) :: ?Γ) → A g |- A ?p => 
-        assert (A (p & q));[ |  assert (∀ g : formula, g ∈ Γ → A g); [ intros |  clear H]]
+      assert (A (p & q));[ |  assert (∀ g : formula, g ∈ Γ → A g); [ intros |  clear H]]
     | H : ∀ g : formula, g ∈ ((?p & ?q) :: ?Γ) → A g |- A ?q => 
       assert (A (p & q));[ |  assert (∀ g : formula, g ∈ Γ → A g); [ intros |  clear H]]
     | H : ∀ g : formula, g ∈ ((!?p) :: ?Γ) → A g |- A ?p => 
@@ -328,14 +329,14 @@ Proof.
 Qed.  
 
 
-  Lemma mem_remove: ∀ Γ f Δ g,  Γ \ f == Δ → g ∈ Δ → g ∈ Γ.
-  Proof.
-    intros Γ f Δ g H H0.
-    apply mem_remove_2 with (b := f).    
-    rewrite <- mem_morph_eq with (Γ:=Δ);auto.
-    apply eq_sym.
-    assumption.
-  Qed.
+Lemma mem_remove: ∀ Γ f Δ g,  Γ \ f == Δ → g ∈ Δ → g ∈ Γ.
+Proof.
+  intros Γ f Δ g H H0.
+  apply mem_remove_2 with (b := f).    
+  rewrite <- mem_morph_eq with (Γ:=Δ);auto.
+  apply eq_sym.
+  assumption.
+Qed.
 
 Lemma Ac_Ap: ∀x, Ac x → Ap x.
 Proof.
@@ -382,16 +383,43 @@ Ltac zap :=
 
 Lemma essai : ∀ Γ φ (h:Γ ⊢ φ), Apall Γ φ h → Istable Apall _ _ h.
 Proof.
-  intros Γ φ h.
-  destruct h;
-    intros; try constructor;try (unfold Apall in *;decompose [and] H;clear H); try split;intros;auto;
-      try solve [ progress repeat progress tac;auto ];
-        try match goal with
-          | H:Ac _ |- _ => solve [inversion H]
-          | H:A _ |- _ => solve [inversion H]
-          | H:Ap _ |- _ => solve [inversion H]
-          | H:R _ |- _ => solve [inversion H]
-        end;try solve [repeat zap;subst;apply H0;repeat zap].
+  fix 3.
+  destruct h; intros; try constructor;try (unfold Apall in *;decompose [and] H;clear H); try split;intros; try solve [  repeat (zap;subst);apply H0;repeat zap
+].
+  Guarded.
+
+  apply essai;split;intros; repeat (zap;subst);apply H0;repeat zap.
+  Guarded.
+
+  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  
+  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  Guarded.
+
+  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  Guarded.
+
+  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  Guarded.
+
+  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  Guarded.
+
+  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  Guarded.
+
+  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  Guarded.
+
+  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  Guarded.
+
+  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  Guarded.
+
+  inversion H1.
+  Guarded.
+
   assert ( h : Ap 0) by auto.
   inversion h.
   inversion H.
@@ -405,8 +433,23 @@ Proof.
   inversion H2.
   constructor 2;assumption.
 
-  repeat zap;subst;apply H0;repeat zap.
+  repeat (zap;subst);apply H0;repeat zap.
+  Guarded.
 
-Qed.  
+  apply essai;split;intros.
+  2:assumption.
+  repeat zap.
+  inversion H;subst.
+  inversion H2.
+  constructor 1;assumption.
+  inversion H2.
+  constructor 2;assumption.
+  repeat (zap;subst);apply H0;repeat zap.
+  Guarded.
 
+  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  Guarded.
 
+  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  Guarded.
+Qed.
