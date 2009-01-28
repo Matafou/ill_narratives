@@ -1306,6 +1306,14 @@ Qed.
     tauto.
   Qed.
 
+  Lemma eq_mem : forall ms ms', eq ms ms' -> (forall a, mem a ms = mem a ms').
+  Proof.
+    unfold eq,mem.
+    intros ms ms'.
+    intros H a.
+    rewrite H.
+    reflexivity.
+  Qed.
 End PreMake.
 
 Module MakeAVL(X:OrderedType )<:S(X).

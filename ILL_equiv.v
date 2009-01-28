@@ -42,14 +42,21 @@ Module Proof_eq.
     intros φ Γ h.
     case h;constructor;apply refl.
   Qed.
-    
-  Lemma toto : ∀ φ Γ (h:Γ ⊢ φ) Γ' (heqΓ: Γ == Γ') , eq (ILL_proof_pre_morph φ Γ Γ' heqΓ h) h.
+
+  Lemma sym : ∀ φ Γ Γ' (h1:Γ⊢φ) (h2:Γ'⊢φ), eq h1 h2 -> eq h2 h1.
+  Proof.    
+    fix 6.
+    intros φ Γ Γ' h1 h2 H.
+    case H;intros;try complete (constructor; apply sym;assumption).
+  Qed.
+
+  Lemma eq_pre_morph : ∀ φ Γ (h:Γ ⊢ φ) Γ' (heqΓ: Γ == Γ') , eq (ILL_proof_pre_morph φ Γ Γ' heqΓ h) h.
   Proof.
     fix 3.
     intros φ Γ h.
-    case h;intros;simpl; try solve [ constructor;try apply refl;try apply toto].
+    case h;intros;simpl; try solve [ constructor;try apply refl;try apply eq_pre_morph].
   Qed.
-
+End Proof_eq.
 
 
 
