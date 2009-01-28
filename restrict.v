@@ -6,7 +6,7 @@ Import FormulaMultiSet. (* and this *)
 
 
 Inductive Istable (pred:∀ e f (h: e ⊢ f), Prop): ∀ e f (h: e ⊢ f) , Prop := 
-| IId: ∀ (f:formula) , Istable pred {f} f (Id f)
+| IId: ∀ Γ (f:formula) (heq:Γ == {f}), Istable pred Γ f (Id _ _ heq)
 | IImpl_R: ∀ Γ p q (h:(p :: Γ ⊢ q)), pred _ _ h → Istable pred _ _ (Impl_R Γ p q h)
 | IImpl_L: ∀ Γ Δ p q r (h:Γ ⊢ p) (h':q::Δ ⊢ r), pred _ _ h → pred _ _ h' → Istable pred _ _ (Impl_L Γ Δ p q r h h')
 | ITimes_R: ∀ Γ Δ p q h h', pred _ _ h → pred _ _ h' → Istable pred _ _ (Times_R Γ Δ p q h h')
@@ -14,23 +14,21 @@ Inductive Istable (pred:∀ e f (h: e ⊢ f), Prop): ∀ e f (h: e ⊢ f) , Prop
 | IOne_R: Istable pred ∅ 1 One_R 
 | IOne_L: ∀ Γ p h, pred _ _ h → Istable pred _ _ (One_L Γ p h)
 | IAnd_R: ∀ Γ p q h h', pred _ _ h → pred _ _ h' → Istable pred _ _ (And_R  Γ p q h h')
-| IAnd_L_2: ∀ Γ p q r h, pred _ _ h → Istable pred _ _ (And_L_2 Γ p q r h)
-| IAnd_L_1: ∀ Γ p q r h, pred _ _ h → Istable pred _ _ (And_L_1 Γ p q r h)
-| IOplus_L: ∀ Γ p q r h h', pred _ _ h → pred _ _ h' → Istable pred _ _ (Oplus_L  Γ p q r h h')
+| IAnd_L_2: ∀ Γ p q r hin h, pred _ _ h → Istable pred _ _ (And_L_2 Γ p q r hin h)
+| IAnd_L_1: ∀ Γ p q r hin h, pred _ _ h → Istable pred _ _ (And_L_1 Γ p q r hin h)
+| IOplus_L: ∀ Γ p q r hin h h', pred _ _ h → pred _ _ h' → Istable pred _ _ (Oplus_L  Γ p q r hin h h')
 | IOplus_R_2: ∀ Γ p q h, pred _ _ h  → Istable pred _ _ (Oplus_R_2 Γ p q h)
 | IOplus_R_1: ∀ Γ p q h, pred _ _ h → Istable pred _ _ (Oplus_R_1 Γ p q h)
 (* | IT_ : ∀ Γ,  (pred Γ Top (T_ Γ)) → (Istable pred Γ Top (T_ Γ)) *)
 (* | IZero_: ∀ Γ p truein, (pred Γ p (Zero_ Γ p truein)) → (Istable pred _ _ (Zero_ Γ p truein)) *)
-| IBang_D: ∀ Γ p q h, pred _ _ h → (Istable pred _ _ (Bang_D Γ p q h))
-| IBang_C: ∀ Γ p q h, pred _ _ h → (Istable pred _ _ (Bang_C Γ p q h))
-| IBang_W: ∀ Γ p q h, pred _ _ h → (Istable pred _ _ (Bang_W Γ p q h))
-(* inutile si pred est compatible avec == *)
-| IMultiset: ∀ Γ Γ' p heq h,  pred _ _ h -> Istable pred _ _ (Multiset Γ Γ' p heq h)
+| IBang_D: ∀ Γ p q hin h, pred _ _ h → (Istable pred _ _ (Bang_D Γ p q hin h))
+| IBang_C: ∀ Γ p q hin h, pred _ _ h → (Istable pred _ _ (Bang_C Γ p q hin h))
+| IBang_W: ∀ Γ p q hin h, pred _ _ h → (Istable pred _ _ (Bang_W Γ p q hin h))
 .
 
 
 
-Notation " x ∈ F " := (Maps'.In x F) (at level 60): ILL_scope.
+ Notation " x ∈ F " := (mem x F = true) (at level 60): ILL_scope. 
 
 
 Inductive arr : formula -> Prop :=
@@ -106,16 +104,25 @@ Proof.
 Qed.
 
 
-Definition arrall Γ f (h:Γ⊢f):Prop := (∀g:formula, g ∈ Γ → arr g) /\ arr f.
+Definition arrall Γ f (h:Γ⊢f):Prop := (∀g:formula, g ∈ Γ  → arr g) /\ arr f.
 Definition arrall2 Γ f (h:Γ⊢f):Prop := (∀g:formula, g ∈ Γ → arr g) /\ narr f.
   
 (* Axiom arr_morph: ∀ Γ p q, arrall Γ (p ⊸ q) → arr q. *)
 (* Axiom arr_morph: ∀ Γ p q, arrall Γ (p ⊸ q) → arr q. *)
 
-Notation "x ≡ y" := ((λ φ ψ : formula, FormulaOrdered.eq' φ ψ) x y) (at level 80) : ILL_scope.
+Notation "x ≡ y" := ((λ φ ψ : formula, FormulaOrdered.eq φ ψ) x y) (at level 80) : ILL_scope.
 Open Scope ILL_scope.
 
-Axiom inEnv:∀ g p Γ,  g ∈ (p :: Γ) → g=p ∨ g ∈ Γ.
+Lemma inEnv:∀ g p Γ,  g ∈ (p :: Γ) → g = p ∨ g ∈ Γ .
+Proof.
+  intros g p Γ H.
+  generalize (mem_destruct _ _ _ H).
+  intros [H1| H1];auto.
+  apply eq_is_eq in H1.
+  auto.
+Qed.  
+
+
 (*Proof.
   intros g p Γ H.
 
@@ -131,12 +138,37 @@ Axiom inEnv:∀ g p Γ,  g ∈ (p :: Γ) → g=p ∨ g ∈ Γ.
 Qed.
 *)
 
-Axiom inAdd1: ∀ f Γ, f ∈ (f :: Γ).
-Axiom inAdd2: ∀ f g Γ, f ∈ Γ → f ∈ (g :: Γ).
-Axiom inAddUnion1: ∀ g Δ Γ f, g ∈ Δ -> g ∈ (f :: Δ ∪ Γ).
-Axiom inAddUnion2: ∀ g Δ Γ f, g ∈ Γ -> g ∈ (f :: Δ ∪ Γ).
-Axiom inUnion1: ∀ g Δ Γ, g ∈ Δ -> g ∈ (Δ ∪ Γ).
-Axiom inUnion2: ∀ g Δ Γ, g ∈ Γ -> g ∈ (Δ ∪ Γ).
+Lemma inAdd1: ∀ f Γ, f ∈ (f :: Γ) .
+Proof.
+  intros f Γ.
+  apply add_is_mem.
+  apply FormulaOrdered.eq_refl.
+Qed.
+
+Lemma inAdd2: ∀ f g Γ, f ∈ Γ → f ∈ (g :: Γ).
+Proof.
+  apply mem_add_is_mem.
+Qed.
+Lemma inUnion1: ∀ g Δ Γ, g ∈ Δ -> g ∈ (Δ ∪ Γ).
+  apply mem_union_l.
+Qed.
+
+Lemma inUnion2: ∀ g Δ Γ, g ∈ Γ -> g ∈ (Δ ∪ Γ).
+  apply mem_union_r.
+Qed.
+
+Lemma inAddUnion1: ∀ g Δ Γ f, g ∈ Δ -> g ∈ (f :: Δ ∪ Γ).
+Proof.
+  intros g Δ Γ f H.
+  apply inAdd2.
+  apply inUnion1;assumption.
+Qed.
+Lemma inAddUnion2: ∀ g Δ Γ f, g ∈ Γ -> g ∈ (f :: Δ ∪ Γ).
+Proof.
+  intros g Δ Γ f H.
+  apply inAdd2.
+  apply inUnion2;assumption.
+Qed.
 
 Ltac tac :=
   match goal with
@@ -190,7 +222,7 @@ Ltac tac :=
     | H: _ -> ?x |- ?x => apply H
   end.
 
-Axiom memIn: ∀ x (y:env), Maps'.mem x y = true → Maps'.In x y.
+(* Axiom memIn: ∀ x (y:env), Maps'.mem x y = true → Maps'.In x y. *)
 
 Lemma notarr0 : ~ (arr 0).
 Proof.

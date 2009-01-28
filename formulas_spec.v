@@ -50,6 +50,33 @@ Module Type ILL_formulas(Vars : OrderedType).
   Notation  "⊤" := Top : ILL_scope.
   Set Printing Width 100.
 
-  Declare Module FormulaOrdered : OrderedType with Definition t:= formula.
+    Notation "A ⊸ B" := (Implies A B) : ILL_scope.
+  Notation  "A ⊕ B" := (Oplus A B) : ILL_scope.
+  Notation  "A ⊗ B" := (Otimes A B) : ILL_scope.
+  Notation "1" := One : ILL_scope.
+  Notation "0" := Zero : ILL_scope.
+  Notation  "! A" := (Bang A) : ILL_scope.
+  Notation  "A & B" := (And A B) : ILL_scope.
+  Notation  "⊤" := Top : ILL_scope.
+  Set Printing Width 100.
+  Open Scope ILL_scope.
+
+  Function eq (φ ψ:formula)  {struct φ}: Prop := 
+    match φ,ψ with 
+      | Proposition p,Proposition q => Vars.eq p q
+      |  φ₁ ⊸ φ₂, ψ₁ ⊸ ψ₂ => eq φ₁ ψ₁ /\ eq φ₂ ψ₂
+      | φ₁ ⊗ φ₂,ψ₁ ⊗ ψ₂ => eq φ₁ ψ₁ /\ eq φ₂ ψ₂
+      | φ₁ ⊕ φ₂,ψ₁ ⊕ ψ₂ => eq φ₁ ψ₁ /\ eq φ₂ ψ₂
+      | 1,1 => True
+      | 0,0 => True
+      | !φ,!ψ => eq φ ψ
+      | φ₁ & φ₂, ψ₁ & ψ₂ => eq φ₁ ψ₁ /\ eq φ₂ ψ₂
+      | ⊤,⊤ =>  True
+      | _,_ => False
+    end
+    .
+
+
+  Declare Module FormulaOrdered : OrderedType with Definition t:= formula with Definition eq := eq.
 
 End ILL_formulas.

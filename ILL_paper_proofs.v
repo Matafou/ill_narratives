@@ -19,9 +19,8 @@ Require Import Utf8_core.
 Require Import vars.
 
 Require Import ILL.
-
 (** Les preuves de epsrc_case_for_support.pdf. *)
-Module MakePaperProofs(Vars : OrderedType)(M : ILL_sig(Vars)).
+(* Module MakePaperProofs(Vars : OrderedType)(M : ILL_sig(Vars)).
   Import M.
   Import FormulaMultiSet.
   Module Import Tactics := ILL_tactics(Vars)(M).
@@ -39,8 +38,9 @@ Module MakePaperProofs(Vars : OrderedType)(M : ILL_sig(Vars)).
     Hypothesis P_neq_R : not (Vars.eq vP vR).
     Hypothesis P_neq_S : not (Vars.eq vP vS).
     Hypothesis R_neq_S : not (Vars.eq vR vS).
-    
-    
+    Require Import Setoid.
+ 
+
     Lemma Proof_from_figure_1:  {D, P & 1, R & 1, D ⊸ (((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)} ⊢ ((S ⊗ D) ⊕ D).
     Proof with (try complete (try constructor; prove_multiset_eq)).
       impl_l ({D}) ({(P&1) , (R&1) })
@@ -192,7 +192,7 @@ Module MakePaperProofs(Vars : OrderedType)(M : ILL_sig(Vars)).
 
   End figure_5.
 End MakePaperProofs.
-
+*)
 Require Import String.
 
 
@@ -297,25 +297,25 @@ Section figure_5.
   Local Notation "'μ'" := { !((D₁⊗M)⊸D₀),!((D₂⊗M)⊸D₁)}.
   Local Notation "'λ'" := { !((L⊗D₀)⊸(L⊗D₁)),!((L⊗D₁)⊸(L⊗D₂))}.
 
-  Ltac bang_c  p'   := 
-    match goal with 
-      |- ILL_proof ?env _ =>
-        match env with
-          | context C [(!p'::?env')] =>
-            let e := context C [ env' ] in  
-              with_multiset (!p'::e) ltac:(apply Bang_C)
-        end
-    end.
+  (* Ltac bang_c  p'   :=  *)
+  (*   match goal with  *)
+  (*     |- ILL_proof ?env _ => *)
+  (*       match env with *)
+  (*         | context C [(!p'::?env')] => *)
+  (*           let e := context C [ env' ] in   *)
+  (*             with_multiset (!p'::e) ltac:(apply Bang_C) *)
+  (*       end *)
+  (*   end. *)
 
-  Ltac bang_d  p'   := 
-    match goal with 
-      |- ILL_proof ?env _ =>
-        match env with
-          | context C [(!p'::?env')] =>
-            let e := context C [ env' ] in  
-              with_multiset (!p'::e) ltac:(apply Bang_D)
-        end
-    end.
+  (* Ltac bang_d  p'   :=  *)
+  (*   match goal with  *)
+  (*     |- ILL_proof ?env _ => *)
+  (*       match env with *)
+  (*         | context C [(!p'::?env')] => *)
+  (*           let e := context C [ env' ] in   *)
+  (*             with_multiset (!p'::e) ltac:(apply Bang_D) *)
+  (*       end *)
+  (*   end. *)
 
   Lemma figure_5 : 
     {H,L,G,D₂,G⊸!(H⊸(H⊗M)),(L⊗(D₂⊗H))⊸(L⊗(D₀⊗((L⊗D₂)⊸D)))}∪λ∪μ⊢D.

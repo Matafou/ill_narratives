@@ -43,27 +43,27 @@ Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
      règle. *)
   Definition env := FormulaMultiSet.t.
 
-  Inductive ILL_proof : env → formula → Type :=
-    Id : ∀ p, {p} ⊢ p
+  Inductive ILL_proof : env → formula → Prop :=
+    Id : ∀ Γ p, Γ == {p} -> Γ ⊢ p
   (* | Cut : ∀ Γ Δ p q, Γ ⊢ p → p::Δ ⊢ q → (Δ ∪ Γ) ⊢ q *)
   | Impl_R : ∀ Γ p q, p::Γ ⊢ q → Γ ⊢ p ⊸ q
-  | Impl_L : ∀ Γ Δ p q r, Γ ⊢ p → q::Δ ⊢ r → ((p ⊸ q) :: Δ ∪ Γ) ⊢ r
-  | Times_R : ∀ Γ Δ p q , Γ ⊢ p → Δ ⊢ q → (Γ ∪ Δ) ⊢ p ⊗ q
-  | Times_L : ∀ Γ p q r , q :: p :: Γ ⊢ r → ((p ⊗ q) :: Γ) ⊢ r
-  | One_R :  ∅ ⊢ 1
-  | One_L : ∀ Γ p , Γ ⊢ p → (1 :: Γ) ⊢ p
+  | Impl_L : ∀ Γ Δ Δ' p q r, mem (p ⊸ q) Γ = true -> remove (p ⊸ q) Γ == Δ ∪ Δ' ->  Δ ⊢ p → q::Δ' ⊢ r → Γ ⊢ r
+  | Times_R : ∀ Γ Δ Δ' p q , Γ == Δ ∪ Δ' -> Δ ⊢ p → Δ' ⊢ q → Γ ⊢ p ⊗ q
+  | Times_L : ∀ Γ p q r , mem (p ⊗ q) Γ = true -> q :: p :: (remove (p ⊗ q) Γ) ⊢ r → Γ ⊢ r
+  | One_R : ∀ Γ, Γ == ∅ -> Γ ⊢ 1
+  | One_L : ∀ Γ p , mem 1 Γ = true -> (remove 1 Γ) ⊢ p → Γ ⊢ p
   | And_R : ∀ Γ p q , Γ ⊢ p → Γ ⊢ q → Γ ⊢ (p & q)
-  | And_L_1 : ∀ Γ p q r , p::Γ ⊢ r → ((p & q) :: Γ) ⊢ r
-  | And_L_2 : ∀ Γ p q r , q::Γ ⊢ r → ((p & q) :: Γ) ⊢ r
-  | Oplus_L : ∀ Γ p q r , p :: Γ ⊢ r → q :: Γ ⊢ r → ((p ⊕ q) :: Γ) ⊢ r
+  | And_L_1 : ∀ Γ p q r , mem (p & q) Γ = true ->  p::(remove (p&q) Γ) ⊢ r → Γ ⊢ r
+  | And_L_2 : ∀ Γ p q r , mem (p & q) Γ = true ->  q::(remove (p&q) Γ) ⊢ r → Γ ⊢ r
+  | Oplus_L : ∀ Γ p q r , mem (p ⊕ q) Γ = true ->  p :: (remove (p ⊕ q) Γ) ⊢ r → q :: (remove (p⊕q) Γ) ⊢ r → Γ ⊢ r
   | Oplus_R_1 : ∀ Γ p q , Γ ⊢ p → Γ ⊢ p ⊕ q
   | Oplus_R_2 : ∀ Γ p q , Γ ⊢ q → Γ ⊢ p ⊕ q 
   | T_ : ∀ Γ, Γ ⊢ ⊤
   | Zero_ : ∀ Γ p , 0 ∈ Γ = true → Γ ⊢ p
-  | Bang_D : ∀ Γ p q , p :: Γ ⊢ q → (!p :: Γ) ⊢ q
-  | Bang_C : ∀ Γ p q , !p :: !p :: Γ ⊢ q → (!p :: Γ) ⊢ q
-  | Bang_W : ∀ Γ p q , Γ ⊢ q → (!p :: Γ) ⊢ q
-  | Multiset : ∀ Γ Γ' p, Γ == Γ' -> Γ ⊢ p -> Γ' ⊢ p
+  | Bang_D : ∀ Γ p q , !p∈Γ = true -> p :: (remove (!p) Γ) ⊢ q → Γ ⊢ q
+  | Bang_C : ∀ Γ p q , !p∈Γ = true -> !p :: Γ ⊢ q →  Γ ⊢ q
+  | Bang_W : ∀ Γ p q , !p∈Γ = true -> remove (!p) Γ ⊢ q →  Γ ⊢ q
+  (* | Multiset : ∀ Γ Γ' p, Γ == Γ' -> Γ ⊢ p -> Γ' ⊢ p *)
 
     (* Syntaxe définie en même temps que le type des preuve. *)
     where " x ⊢ y " := (ILL_proof x y) : ILL_scope.
@@ -83,6 +83,13 @@ Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
       as add_morph.
   Proof.
     exact add_morph_eq.
+  Qed.
+
+  Add Morphism remove
+    with signature (FormulaOrdered.eq ==> FormulaMultiSet.eq ==> FormulaMultiSet.eq)
+      as remove_morph.
+  Proof.
+    exact remove_morph_eq.
   Qed.
   
   Add Relation formula FormulaOrdered.eq
@@ -107,20 +114,108 @@ Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
     apply FormulaMultiSet.mem_morph_eq.
   Qed.
 
+
   (* l'égalité sur les environnements est compatible avec ⊢. *)
   Lemma ILL_proof_pre_morph : forall φ Γ Γ', Γ == Γ' ->  (Γ⊢φ) -> (Γ'⊢φ).
   Proof.
     intros φ Γ Γ' Heq H.
+    revert Γ' Heq.
+    induction H;intros Γ' Heq.
+
+    Focus 1.
+    constructor 1.
+    rewrite <- Heq;assumption.
+
+    Focus 1.
+    constructor 2.
+    apply IHILL_proof.
+    rewrite Heq;reflexivity.
+
+    Focus 1.
+    rewrite Heq in H.
+    rewrite Heq in H0.
+    econstructor (complete eauto).
+
+    Focus 1.
+    rewrite Heq in H.
     econstructor eassumption.
-  Qed.
+
+    Focus 1.
+    rewrite Heq in H.
+    econstructor 5. 
+    eexact H.
+    apply IHILL_proof.
+    rewrite Heq.
+    reflexivity.
+
+    Focus 1. 
+    constructor 6.
+    rewrite <-Heq;assumption.
+
+    Focus 1.
+    rewrite Heq in H.
+    econstructor 7.
+    eassumption.
+    apply IHILL_proof.
+    rewrite Heq;reflexivity.
+
+    Focus 1.
+    econstructor (complete eauto).     
+
+    Focus 1.
+    econstructor 9.
+    rewrite Heq in H;eexact H.
+    apply IHILL_proof. rewrite Heq;reflexivity.
+
+    Focus 1.
+    econstructor 10.
+    rewrite Heq in H;eexact H.
+    apply IHILL_proof. rewrite Heq;reflexivity.
+
+    Focus 1.
+    econstructor 11.
+    rewrite Heq in H;eexact H.
+    apply IHILL_proof1;rewrite Heq;reflexivity.
+    apply IHILL_proof2;rewrite Heq;reflexivity.
+
+    Focus 1.
+    econstructor (complete eauto). 
+
+    Focus 1.
+    constructor (complete auto).
+
+    Focus 1.
+    constructor fail.
+
+    Focus 1.
+    constructor 15.
+    rewrite <- Heq;assumption.
+
+    Focus 1.
+    econstructor 16.
+    rewrite Heq in H;eexact H.
+    apply IHILL_proof;rewrite Heq;reflexivity.
+
+    Focus 1.
+    econstructor 17.
+    rewrite Heq in H;eexact H.
+    apply IHILL_proof;rewrite Heq;reflexivity.
+
+    Focus 1.
+    econstructor 18.
+    rewrite Heq in H;eexact H.
+    apply IHILL_proof;rewrite Heq;reflexivity.
+  Defined. 
+  
 
   (* On peut réécrire à l'intérieur d'un ⊢. *)
-  Add Morphism ILL_proof with signature (FormulaMultiSet.eq ==> Logic.eq ==> equivT) as ILL_proof_morph.
+  Add Morphism ILL_proof with signature (FormulaMultiSet.eq ==> Logic.eq ==> iff) as ILL_proof_morph.
   Proof.
     intros Γ Γ' Heq φ;split;apply ILL_proof_pre_morph.
     assumption.
     symmetry;assumption.
   Qed.
+
 End ILL_Make.
 
 Module ILL_tactics(Vars:OrderedType)(M:ILL_sig(Vars)).
@@ -129,13 +224,17 @@ Module ILL_tactics(Vars:OrderedType)(M:ILL_sig(Vars)).
   Import FormulaMultiSet.
 
   (** Tactiques *)
+
   Ltac prove_multiset_eq := 
     reflexivity ||
-      vm_compute;
+      (
       repeat (
         setoid_rewrite union_rec_left
           ||setoid_rewrite union_empty_left
-            || setoid_rewrite union_empty_right);
+            || setoid_rewrite union_empty_right
+              || (setoid_rewrite (remove_diff_add);[|complete (simpl;intuition eauto)])
+                ||(setoid_rewrite remove_same_add;[| complete(simpl;intuition eauto)])
+      ));
       complete (
         repeat (reflexivity
           || match goal with 
@@ -146,8 +245,107 @@ Module ILL_tactics(Vars:OrderedType)(M:ILL_sig(Vars)).
                    | context[(add ?phi' (add phi ?env))] => 
                      setoid_rewrite (add_comm phi' phi env)
                  end 
-             end)).
+             end))
+.
 
+
+  Ltac prove_is_in := 
+      repeat (first [apply add_is_mem|apply mem_add_comm]).
+
+  Ltac and_l_1  p' q'  := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(add ( p' & q') ?env')] =>
+            let e := context C [ env' ] in  
+              apply And_L_1 with p' q';[prove_is_in| apply ILL_proof_pre_morph with (Γ:=p'::e); [prove_multiset_eq |]]
+        end
+    end.
+
+
+  Ltac times_l  p' q'  := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(add ( p' ⊗ q') ?env')] =>
+            let e := context C [ env' ] in  
+              apply Times_L with p' q';[prove_is_in| apply ILL_proof_pre_morph with (Γ:=p'::q'::e); [prove_multiset_eq|]]
+        end
+    end.
+
+
+  Ltac oplus_l  p' q'  := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(add ( p' ⊕ q') ?env')] =>
+            let e := context C [ env' ] in  
+              apply Oplus_L with p' q';[prove_is_in| apply ILL_proof_pre_morph with (Γ:=p'::e); [prove_multiset_eq |]|apply ILL_proof_pre_morph with (Γ:=q'::e); [prove_multiset_eq |]]
+        end
+    end.
+
+  Ltac and_l_2  p' q'  := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(add ( p' & q') ?env')] =>
+            let e := context C [ env' ] in  
+              apply And_L_2 with p' q';[prove_is_in| apply ILL_proof_pre_morph with (Γ:=q'::e); [prove_multiset_eq |]]
+        end
+    end.
+
+  Ltac impl_l Γ' Δ p q := 
+    apply Impl_L with Γ' Δ p q;[prove_is_in|prove_multiset_eq| | ].
+
+
+
+
+  Ltac one_l  := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(add 1 ?env')] =>
+            let e := context C [ env' ] in  
+              apply One_L;[prove_is_in|apply ILL_proof_pre_morph with (Γ:=e);[prove_multiset_eq|]]
+        end
+    end.
+
+
+  Ltac times_r Γ' Δ'' := 
+    apply Times_R with (Δ:= Γ') (Δ':= Δ'');[prove_multiset_eq | | ].
+
+  Ltac bang_w  p'   := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(!p':: ?env')] =>
+            let e := context C [ env' ] in  
+              apply Bang_W with p';[prove_is_in|apply ILL_proof_pre_morph with (Γ:=e);[prove_multiset_eq|]]
+        end
+    end.
+  Ltac bang_d  p'   := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(!p':: ?env')] =>
+            let e := context C [ env' ] in  
+              apply Bang_D with p';[prove_is_in|apply ILL_proof_pre_morph with (Γ:=p'::e);[prove_multiset_eq|]]
+        end
+    end.
+
+  Ltac bang_c  p'   := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(!p':: ?env')] =>
+            let e := context C [ env' ] in  
+              apply Bang_C with p';[prove_is_in| ]
+        end
+    end.
+
+
+
+(*
   Ltac with_multiset Γ' t := 
     apply Multiset with (Γ:=Γ');[prove_multiset_eq|t].
 
@@ -243,7 +441,7 @@ Module ILL_tactics(Vars:OrderedType)(M:ILL_sig(Vars)).
 
   Ltac times_r Γ' Δ' := 
   with_multiset (Γ'∪Δ') ltac:(apply Times_R with (Γ:= Γ') (Δ:= Δ')).
-    
+*)    
   Ltac same_env p p' :=
     match p' with 
       | p => idtac
@@ -331,7 +529,7 @@ Module ILL_tactics(Vars:OrderedType)(M:ILL_sig(Vars)).
               match e with 
                 | context C' [ p'::?env''] => 
                   let e' := context C' [env''] in 
-                    (impl_l {p'} e' p' q';[constructor|search_one_goal_strong g])
+                    (impl_l {p'} e' p' q';[constructor;prove_multiset_eq|search_one_goal_strong g])
                     (* apply Impl_L with (Γ:={p'}) (Δ:=e') (p:=p') (q:=q'); *)
                     (*   [constructor;prove_multiset_eq |search_one_goal_strong g|prove_multiset_eq] *)
               end
@@ -347,6 +545,7 @@ Module ILL_tactics(Vars:OrderedType)(M:ILL_sig(Vars)).
     end.
   
   Ltac finish_proof_strong := search_one_goal_strong ({⊤}⊢⊤).
+
 End ILL_tactics.
 
 Module ILL_tactics_refl(Vars:OrderedType)(M:ILL_sig(Vars)).
@@ -357,6 +556,105 @@ Module ILL_tactics_refl(Vars:OrderedType)(M:ILL_sig(Vars)).
   (** Tactiques *)
   Ltac prove_multiset_eq := apply eq_bool_correct;vm_compute;reflexivity.
 
+
+
+  Ltac prove_is_in := vm_compute;reflexivity.
+      (* repeat (first [apply add_is_mem|apply mem_add_comm]). *)
+
+  Ltac and_l_1  p' q'  := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(add ( p' & q') ?env')] =>
+            let e := context C [ env' ] in  
+              apply And_L_1 with p' q';[prove_is_in| apply ILL_proof_pre_morph with (Γ:=p'::e); [prove_multiset_eq |] ]
+        end
+    end.
+
+
+  Ltac times_l  p' q'  := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(add ( p' ⊗ q') ?env')] =>
+            let e := context C [ env' ] in  
+              apply Times_L with p' q';[prove_is_in|  apply ILL_proof_pre_morph with (Γ:=p'::q'::e); [prove_multiset_eq|] ]
+        end
+    end.
+
+
+  Ltac oplus_l  p' q'  := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(add ( p' ⊕ q') ?env')] =>
+            let e := context C [ env' ] in  
+              apply Oplus_L with p' q';[prove_is_in|  apply ILL_proof_pre_morph with (Γ:=p'::e); [prove_multiset_eq |] | apply ILL_proof_pre_morph with (Γ:=q'::e); [prove_multiset_eq |] ]
+        end
+    end.
+
+  Ltac and_l_2  p' q'  := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(add ( p' & q') ?env')] =>
+            let e := context C [ env' ] in  
+              apply And_L_2 with p' q';[prove_is_in|  apply ILL_proof_pre_morph with (Γ:=q'::e); [prove_multiset_eq |] ]
+        end
+    end.
+
+  Ltac impl_l Γ' Δ p q := 
+    apply Impl_L with Γ' Δ p q;[prove_is_in|prove_multiset_eq| | ].
+
+
+
+
+  Ltac one_l  := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(add 1 ?env')] =>
+            let e := context C [ env' ] in  
+              apply One_L;[prove_is_in| apply ILL_proof_pre_morph with (Γ:=e);[prove_multiset_eq|] ]
+        end
+    end.
+
+
+  Ltac times_r Γ' Δ'' := 
+    apply Times_R with (Δ:= Γ') (Δ':= Δ'');[prove_multiset_eq | | ].
+
+  Ltac bang_w  p'   := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(!p':: ?env')] =>
+            let e := context C [ env' ] in  
+              apply Bang_W with p';[prove_is_in| apply ILL_proof_pre_morph with (Γ:=e);[prove_multiset_eq|]  ]
+        end
+    end.
+
+  Ltac bang_d  p'   := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(!p':: ?env')] =>
+            let e := context C [ env' ] in  
+              apply Bang_D with p';[prove_is_in|  apply ILL_proof_pre_morph with (Γ:=p'::e);[prove_multiset_eq|] ]
+        end
+    end.
+
+  Ltac bang_c  p'   := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(!p':: ?env')] =>
+            let e := context C [ env' ] in  
+              apply Bang_C with p';[prove_is_in| ]
+        end
+    end.
+
+
+(*
   Ltac with_multiset Γ' t := 
     apply Multiset with (Γ:=Γ');[prove_multiset_eq|t].
 
@@ -452,7 +750,7 @@ Module ILL_tactics_refl(Vars:OrderedType)(M:ILL_sig(Vars)).
 
   Ltac times_r Γ' Δ' := 
   with_multiset (Γ'∪Δ') ltac:(apply Times_R with (Γ:= Γ') (Δ:= Δ')).
-    
+*)    
   Ltac same_env p p' :=
     match p' with 
       | p => idtac
@@ -540,7 +838,7 @@ Module ILL_tactics_refl(Vars:OrderedType)(M:ILL_sig(Vars)).
               match e with 
                 | context C' [ p'::?env''] => 
                   let e' := context C' [env''] in 
-                    (impl_l {p'} e' p' q';[constructor|search_one_goal_strong g])
+                    (impl_l {p'} e' p' q';[constructor;prove_multiset_eq|search_one_goal_strong g])
                     (* apply Impl_L with (Γ:={p'}) (Δ:=e') (p:=p') (q:=q'); *)
                     (*   [constructor;prove_multiset_eq |search_one_goal_strong g|prove_multiset_eq] *)
               end
@@ -556,4 +854,5 @@ Module ILL_tactics_refl(Vars:OrderedType)(M:ILL_sig(Vars)).
     end.
   
   Ltac finish_proof_strong := search_one_goal_strong ({⊤}⊢⊤).
+
 End ILL_tactics_refl.

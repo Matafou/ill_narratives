@@ -56,8 +56,25 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
   Set Printing Width 100.
   Open Scope ILL_scope.
   
+  Function eq (φ ψ:formula)  {struct φ}: Prop := 
+    match φ,ψ with 
+      | Proposition p,Proposition q => Vars.eq p q
+      |  φ₁ ⊸ φ₂, ψ₁ ⊸ ψ₂ => eq φ₁ ψ₁ /\ eq φ₂ ψ₂
+      | φ₁ ⊗ φ₂,ψ₁ ⊗ ψ₂ => eq φ₁ ψ₁ /\ eq φ₂ ψ₂
+      | φ₁ ⊕ φ₂,ψ₁ ⊕ ψ₂ => eq φ₁ ψ₁ /\ eq φ₂ ψ₂
+      | 1,1 => True
+      | 0,0 => True
+      | !φ,!ψ => eq φ ψ
+      | φ₁ & φ₂, ψ₁ & ψ₂ => eq φ₁ ψ₁ /\ eq φ₂ ψ₂
+      | ⊤,⊤ =>  True
+      | _,_ => False
+    end
+    .
+  
+  
   Module FormulaOrdered <: OrderedType with Definition t:= formula.
     Definition t := formula.
+    Definition eq := eq.
     Function compare' (phi rho:formula) { struct phi } : comparison := 
       match phi,rho with 
         | Proposition p1,Proposition p2 =>
@@ -113,33 +130,18 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
       end.
     Module VarsFacts := OrderedType.OrderedTypeFacts(Vars).
 
-    Function eq' (φ ψ:formula)  {struct φ}: Prop := 
-      match φ,ψ with 
-        | Proposition p,Proposition q => Vars.eq p q
-        |  φ₁ ⊸ φ₂, ψ₁ ⊸ ψ₂ => eq' φ₁ ψ₁ /\ eq' φ₂ ψ₂
-        | φ₁ ⊗ φ₂,ψ₁ ⊗ ψ₂ => eq' φ₁ ψ₁ /\ eq' φ₂ ψ₂
-        | φ₁ ⊕ φ₂,ψ₁ ⊕ ψ₂ => eq' φ₁ ψ₁ /\ eq' φ₂ ψ₂
-        | 1,1 => True
-        | 0,0 => True
-        | !φ,!ψ => eq' φ ψ
-        | φ₁ & φ₂, ψ₁ & ψ₂ => eq' φ₁ ψ₁ /\ eq' φ₂ ψ₂
-        | ⊤,⊤ =>  True
-        | _,_ => False
-      end
-      .
-
     Function lt (φ ψ:formula) {struct φ} : Prop :=
       match φ,ψ with 
         | Proposition p1, Proposition p2 => Vars.lt p1 p2 
         | Proposition _, _ => True 
         | _, Proposition _ => False
-        | φ1 ⊸ φ2 , ψ1 ⊸ ψ2 => (lt φ1 ψ1) \/ ((eq' φ1 ψ1) /\ (lt φ2 ψ2))
+        | φ1 ⊸ φ2 , ψ1 ⊸ ψ2 => (lt φ1 ψ1) \/ ((eq φ1 ψ1) /\ (lt φ2 ψ2))
         | _ ⊸ _ , _ => True
         | _ , _ ⊸ _ => False
-        | φ1 ⊗ φ2 , ψ1 ⊗ ψ2 => (lt φ1 ψ1) \/ ((eq' φ1 ψ1) /\ (lt φ2 ψ2))
+        | φ1 ⊗ φ2 , ψ1 ⊗ ψ2 => (lt φ1 ψ1) \/ ((eq φ1 ψ1) /\ (lt φ2 ψ2))
         | _ ⊗ _ , _ => True
         | _ , _ ⊗ _ => False
-        | φ1 ⊕ φ2 , ψ1 ⊕ ψ2 => (lt φ1 ψ1) \/ ((eq' φ1 ψ1) /\ (lt φ2 ψ2))
+        | φ1 ⊕ φ2 , ψ1 ⊕ ψ2 => (lt φ1 ψ1) \/ ((eq φ1 ψ1) /\ (lt φ2 ψ2))
         | _ ⊕ _ , _ => True
         | _ , _ ⊕ _ => False
         | One,One => False
@@ -151,15 +153,12 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
         | !φ,!ψ => (lt φ ψ )
         | ! _, _ => True
         | _, ! _ => False
-        | φ1 & φ2 , ψ1 & ψ2 => (lt φ1 ψ1) \/ ((eq' φ1 ψ1) /\ (lt φ2 ψ2))
+        | φ1 & φ2 , ψ1 & ψ2 => (lt φ1 ψ1) \/ ((eq φ1 ψ1) /\ (lt φ2 ψ2))
         | _ & _, _ => True
         | _, _ & _ => False
         | Top,Top => False
 
       end.
-
-    Definition eq φ ψ := eq' φ ψ.
-
 
     Lemma eq_refl : forall φ, eq φ φ.
     Proof.
@@ -177,13 +176,13 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
     Proof.
       intros φ ψ.
       unfold eq.
-      functional induction (eq' φ ψ);simpl;try intuition.
+      functional induction (Make.eq φ ψ);simpl;try intuition.
     Qed.
     
     Lemma eq_trans : forall φ ψ ρ, eq φ ψ -> eq ψ ρ -> eq φ ρ.
     Proof.
       unfold eq.
-      intros φ ψ;functional induction (eq' φ ψ).
+      intros φ ψ;functional induction (Make.eq φ ψ).
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto.
@@ -220,7 +219,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
       tauto.
     Qed.
 
-    Lemma lt_eq_trans : ∀ φ ψ ρ, lt φ ψ -> eq' ψ ρ -> lt φ ρ.
+    Lemma lt_eq_trans : ∀ φ ψ ρ, lt φ ψ -> eq ψ ρ -> lt φ ρ.
     Proof.
       unfold eq.
       intros φ ψ;functional induction (lt φ ψ);try tauto.
@@ -231,7 +230,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto.
-      destruct ψ;simpl;try tauto.
+      destruct _x0;simpl;try tauto.
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto.
@@ -244,7 +243,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
+      destruct _x1;simpl;try tauto.
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto;
@@ -254,7 +253,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
+      destruct _x1;simpl;try tauto.
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto;
@@ -264,15 +263,15 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
+      destruct _x1;simpl;try tauto.
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
+      destruct _x;simpl;try tauto.
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
+      destruct _x;simpl;try tauto.
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto.
@@ -280,7 +279,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
+      destruct _x0;simpl;try tauto.
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto.
@@ -290,10 +289,10 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
+      destruct _x1;simpl;try tauto.
     Qed.
 
-    Lemma eq_lt_trans : ∀ φ ψ ρ, eq' φ ψ -> lt ψ ρ -> lt φ ρ.
+    Lemma eq_lt_trans : ∀ φ ψ ρ, eq φ ψ -> lt ψ ρ -> lt φ ρ.
     Proof.
       unfold eq.
       intros φ ψ ρ;revert φ;functional induction (lt ψ ρ);try tauto.
@@ -304,7 +303,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
 
       Focus 1.
       intros φ;destruct φ;simpl;try tauto.
-      destruct ψ;simpl;try tauto.
+      destruct _x0;simpl;try tauto.
 
       Focus 1.
       intros φ;destruct φ;simpl;try tauto.
@@ -314,7 +313,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
 
       Focus 1.
       intros φ;destruct φ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
+      destruct _x1;simpl;try tauto.
 
       Focus 1.
       intros φ;destruct φ;simpl;try tauto.
@@ -324,7 +323,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
 
       Focus 1.
       intros φ;destruct φ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
+      destruct _x1;simpl;try tauto.
 
       Focus 1.
       intros φ;destruct φ;simpl;try tauto;
@@ -334,15 +333,15 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
 
       Focus 1.
       intros φ;destruct φ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
+      destruct _x1;simpl;try tauto.
 
       Focus 1.
       intros φ;destruct φ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
+      destruct _x;simpl;try tauto.
 
       Focus 1.
       intros φ;destruct φ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
+      destruct _x;simpl;try tauto.
 
       Focus 1.
       intros φ;destruct φ;simpl;try tauto;
@@ -350,7 +349,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
 
       Focus 1.
       intros φ;destruct φ;simpl;try tauto.
-      destruct ψ;simpl;try tauto.
+      destruct _x0;simpl;try tauto.
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto;
@@ -360,7 +359,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto.
-      destruct ψ;simpl;try tauto.
+      destruct _x1;simpl;try tauto.
     Qed.
 
 
@@ -374,7 +373,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto.
-      destruct ψ;simpl;try tauto.
+      destruct _x0;simpl;try tauto.
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto.
@@ -383,11 +382,11 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto. 
-      destruct ψ;simpl;try tauto.
+      destruct _x1;simpl;try tauto.
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto. 
-      destruct ψ;simpl;try tauto.
+      destruct _x1;simpl;try tauto.
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto.
@@ -396,7 +395,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
+      destruct _x1;simpl;try tauto.
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto. 
@@ -405,15 +404,15 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
+      destruct _x1;simpl;try tauto.
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
+      destruct _x;simpl;try tauto.
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
+      destruct _x;simpl;try tauto.
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto;
@@ -421,7 +420,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
+      destruct _x0;simpl;try tauto.
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto. 
@@ -430,7 +429,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
 
       Focus 1.
       intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
+      destruct _x1;simpl;try tauto.
     Qed.
     
     Lemma lt_not_eq : ∀ x y, lt x y -> not (eq x y).
@@ -443,44 +442,44 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
       apply Vars.lt_not_eq.
 
       Focus 1.
-      destruct ψ;simpl;try tauto.
+      destruct _x0;simpl;try tauto.
 
       Focus 1.
       simpl;intuition.
 
       Focus 1.
-      destruct ψ;simpl;try tauto.
+      destruct _x1;simpl;try tauto.
 
       Focus 1.
       simpl;intuition.
 
       Focus 1.
-      destruct ψ;simpl;try tauto.
+      destruct _x1;simpl;try tauto.
 
-      Focus 1.
-      simpl;intuition.
-    
-      Focus 1.
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      destruct ψ;simpl;try tauto.
-    
       Focus 1.
       simpl;intuition.
     
       Focus 1.
-      destruct ψ;simpl;try tauto.
+      destruct _x1;simpl;try tauto.
+
+      Focus 1.
+      destruct _x;simpl;try tauto.
+
+      Focus 1.
+      destruct _x;simpl;try tauto.
+
+      Focus 1.
+      destruct _x0;simpl;try tauto.
+    
+      Focus 1.
+      simpl;intuition.
+    
+      Focus 1.
+      destruct _x1;simpl;try tauto.
     Qed.
 
-    Lemma compare'_eq'_correct : 
-      forall φ ψ, compare' φ ψ = Eq -> eq' φ ψ.
+    Lemma compare'_eq_correct : 
+      forall φ ψ, compare' φ ψ = Eq -> eq φ ψ.
     Proof.
       intros φ ψ.
       functional induction (compare' φ ψ);try discriminate;
@@ -497,83 +496,82 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
       functional induction (compare' φ ψ);try discriminate;simpl;auto.
 
       Focus 1.
-      destruct rho;simpl;tauto.
+      destruct _x0;simpl;tauto.
 
       Focus 1.
       intros.
-      right;auto using compare'_eq'_correct.
+      right;auto using compare'_eq_correct.
 
       Focus 1.
-      destruct rho;simpl;tauto.
-
-      Focus 1.
-      intros.
-      right;auto using compare'_eq'_correct.
-
-      Focus 1.
-      destruct rho;simpl;tauto.
-
+      destruct _x1;simpl;tauto.
 
       Focus 1.
       intros.
-      right;auto using compare'_eq'_correct.
+      right;auto using compare'_eq_correct.
 
       Focus 1.
-      destruct rho;simpl;tauto.
+      destruct _x1;simpl;tauto.
 
-      Focus 1.
-      destruct rho;simpl;tauto.
 
       Focus 1.
       intros.
-      right;auto using compare'_eq'_correct.
+      right;auto using compare'_eq_correct.
 
       Focus 1.
-      destruct rho;simpl;tauto.
+      destruct _x1;simpl;tauto.
+
+      Focus 1.
+      destruct _x0;simpl;tauto.
+
+      Focus 1.
+      intros.
+      right;auto using compare'_eq_correct.
+
+      Focus 1.
+      destruct _x1;simpl;tauto.
     Qed.
 
     Lemma compare'_gt_correct : 
       forall φ ψ, compare' φ ψ = Gt -> lt ψ φ.
     Proof.
-      assert (eq'_sym:=eq_sym).
-      unfold eq in eq'_sym.
+      assert (eq_sym:=eq_sym).
       intros φ ψ.
       functional induction (compare' φ ψ);try discriminate;simpl;auto.
 
       Focus 1.
-      destruct phi;simpl;tauto.
+      destruct _x;simpl;tauto.
 
       Focus 1.
       intros.
-      right;auto using compare'_eq'_correct.
-
+      right;auto using compare'_eq_correct.
+      
       Focus 1.
-      destruct phi;simpl;tauto.
-
-      Focus 1.
-      intros.
-      right;auto using compare'_eq'_correct.
-
-      Focus 1.
-      destruct phi;simpl;tauto.
-
+      destruct _x;simpl;tauto.
 
       Focus 1.
       intros.
-      right;auto using compare'_eq'_correct.
+      right;auto using compare'_eq_correct.
 
       Focus 1.
-      destruct phi;simpl;tauto.
+      destruct _x;simpl;tauto.
 
-      Focus 1.
-      destruct phi;simpl;tauto.
 
       Focus 1.
       intros.
-      right;auto using compare'_eq'_correct.
+      right;auto using compare'_eq_correct.
 
       Focus 1.
-      destruct phi;simpl;tauto.
+      destruct _x;simpl;tauto.
+
+      Focus 1.
+      destruct _x;simpl;tauto.
+
+      Focus 1.
+      intros.
+      right;auto using compare'_eq_correct.
+
+      Focus 1.
+      destruct _x;simpl;tauto.
     Qed.
 
     Lemma compare : ∀ x y, Compare lt eq x y.
@@ -581,7 +579,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
       intros x y.
       case_eq (compare' x y);intros Heq.
       constructor 2.
-      apply compare'_eq'_correct;exact Heq.
+      apply compare'_eq_correct;exact Heq.
       constructor 1.
       apply compare'_lt_correct;exact Heq.
       constructor 3.
@@ -592,7 +590,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
     Proof.
       intros x y.
       case_eq (compare' x y).
-      left;apply compare'_eq'_correct;assumption.
+      left;apply compare'_eq_correct;assumption.
       right.
       apply lt_not_eq.
       apply compare'_lt_correct;exact H.
