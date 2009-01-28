@@ -522,7 +522,7 @@ Require Import Setoid.
    (exists Δ0, Δ == φ :: Δ0 /\ Δ0∪Δ' == Γ)\/
    (exists Δ0, Δ' == φ :: Δ0 /\ Δ0∪Δ == Γ).
  Proof.
- 
+   intros Γ Δ Δ' φ H. 
 
  Qed.
 Function appears (under_plus:bool) (v:nat) (f:formula) {struct f} : bool := 
