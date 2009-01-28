@@ -25,17 +25,25 @@ Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
   Require multiset.
   Module Import FormulaMultiSet := multiset.MakeList(FormulaOrdered).
 
-  (** Les notations classiques  *)
+  Reserved Notation "x ⊢ y" (at level 70, no associativity).
+  Reserved Notation "∪" (at level 60, right associativity).
+  Reserved Notation "∅" (at level 10, no associativity).
+
+  Infix "∪" := union (at level 65, right associativity) : ILL_scope.
+  Notation " a :: b " := (add a b) (at level 60, right associativity) : ILL_scope.
+  Notation "{ a , .. , b }" := (add a .. (add b empty) ..) (at level 40): ILL_scope.
+  Notation "{ }" := empty (at level 40) : ILL_scope.
   Notation "∅" := empty : ILL_scope.
-  Infix "∪" := union (at level 60, right associativity): ILL_scope.
-  Notation " a :: b " := (add a b) (at level 60, right associativity): ILL_scope.
-  Notation "{ a , .. , b }" := (add a .. (add b empty) ..): ILL_scope.
 
   (* Notation pour l'égalité des environnements (égalité des multisets). *)
   Notation " E == F " := (eq E F) (at level 80): ILL_scope.
 
   (* Notation pour l'appartenance à un environnement. *)
-  Notation " x ∈ F " := (mem x F) (at level 60): ILL_scope.
+  Notation " x ∈ F " := (mem x F = true) (at level 55): ILL_scope.
+
+  Notation " b '\' a " := (remove a b) (at level 64, right associativity) : ILL_scope.
+  Open Scope ILL_scope.
+
 
   (** La définition d'une reuve en LLI. On utilise l'égalité sur les
      environnements plutôt que de mettre le même environnement partout, afin de
@@ -45,27 +53,25 @@ Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
 
   Inductive ILL_proof : env → formula → Prop :=
     Id : ∀ Γ p, Γ == {p} -> Γ ⊢ p
-  (* | Cut : ∀ Γ Δ p q, Γ ⊢ p → p::Δ ⊢ q → (Δ ∪ Γ) ⊢ q *)
+(*   | Cut : ∀ Γ Δ p q, Γ ⊢ p → p::Δ ⊢ q → Δ ∪ Γ ⊢ q  *)
   | Impl_R : ∀ Γ p q, p::Γ ⊢ q → Γ ⊢ p ⊸ q
-  | Impl_L : ∀ Γ Δ Δ' p q r, mem (p ⊸ q) Γ = true -> remove (p ⊸ q) Γ == Δ ∪ Δ' ->  Δ ⊢ p → q::Δ' ⊢ r → Γ ⊢ r
+  | Impl_L : ∀ Γ Δ Δ' p q r, p ⊸ q ∈ Γ -> Γ \ p⊸q == Δ ∪ Δ' ->  Δ ⊢ p → q::Δ' ⊢ r → Γ ⊢ r
   | Times_R : ∀ Γ Δ Δ' p q , Γ == Δ ∪ Δ' -> Δ ⊢ p → Δ' ⊢ q → Γ ⊢ p ⊗ q
-  | Times_L : ∀ Γ p q r , mem (p ⊗ q) Γ = true -> q :: p :: (remove (p ⊗ q) Γ) ⊢ r → Γ ⊢ r
+  | Times_L : ∀ Γ p q r , p ⊗ q ∈ Γ -> q :: p :: Γ \ p⊗q ⊢ r → Γ ⊢ r
   | One_R : ∀ Γ, Γ == ∅ -> Γ ⊢ 1
-  | One_L : ∀ Γ p , mem 1 Γ = true -> (remove 1 Γ) ⊢ p → Γ ⊢ p
-  | And_R : ∀ Γ p q , Γ ⊢ p → Γ ⊢ q → Γ ⊢ (p & q)
-  | And_L_1 : ∀ Γ p q r , mem (p & q) Γ = true ->  p::(remove (p&q) Γ) ⊢ r → Γ ⊢ r
-  | And_L_2 : ∀ Γ p q r , mem (p & q) Γ = true ->  q::(remove (p&q) Γ) ⊢ r → Γ ⊢ r
-  | Oplus_L : ∀ Γ p q r , mem (p ⊕ q) Γ = true ->  p :: (remove (p ⊕ q) Γ) ⊢ r → q :: (remove (p⊕q) Γ) ⊢ r → Γ ⊢ r
+  | One_L : ∀ Γ p , 1 ∈ Γ -> Γ \ 1 ⊢ p → Γ ⊢ p
+  | And_R : ∀ Γ p q , Γ ⊢ p → Γ ⊢ q → Γ ⊢ p & q
+  | And_L_1 : ∀ Γ p q r , p&q ∈ Γ ->  p:: Γ \ p&q ⊢ r → Γ ⊢ r
+  | And_L_2 : ∀ Γ p q r , p&q ∈ Γ ->  q::Γ \ p&q ⊢ r → Γ ⊢ r
+  | Oplus_L : ∀ Γ p q r , p⊕q ∈ Γ ->  p :: Γ \ p⊕q ⊢ r → q :: Γ \ p⊕q ⊢ r → Γ ⊢ r
   | Oplus_R_1 : ∀ Γ p q , Γ ⊢ p → Γ ⊢ p ⊕ q
   | Oplus_R_2 : ∀ Γ p q , Γ ⊢ q → Γ ⊢ p ⊕ q 
   | T_ : ∀ Γ, Γ ⊢ ⊤
-  | Zero_ : ∀ Γ p , 0 ∈ Γ = true → Γ ⊢ p
-  | Bang_D : ∀ Γ p q , !p∈Γ = true -> p :: (remove (!p) Γ) ⊢ q → Γ ⊢ q
-  | Bang_C : ∀ Γ p q , !p∈Γ = true -> !p :: Γ ⊢ q →  Γ ⊢ q
-  | Bang_W : ∀ Γ p q , !p∈Γ = true -> remove (!p) Γ ⊢ q →  Γ ⊢ q
-  (* | Multiset : ∀ Γ Γ' p, Γ == Γ' -> Γ ⊢ p -> Γ' ⊢ p *)
-
-    (* Syntaxe définie en même temps que le type des preuve. *)
+  | Zero_ : ∀ Γ p , 0 ∈ Γ → Γ ⊢ p
+  | Bang_D : ∀ Γ p q , !p∈Γ -> p :: Γ \ !p ⊢ q → Γ ⊢ q
+  | Bang_C : ∀ Γ p q , !p∈Γ -> !p :: Γ ⊢ q →  Γ ⊢ q
+  | Bang_W : ∀ Γ p q , !p∈Γ -> Γ \ !p ⊢ q →  Γ ⊢ q
+  (* Syntax defined simutaneously. *)
     where " x ⊢ y " := (ILL_proof x y) : ILL_scope.
 
   (** Morphismes. Les morphismes déclar&és ci-dessous permettront d'utiliser les
@@ -503,6 +509,8 @@ Module ILL_tactics(Vars:OrderedType)(M:ILL_sig(Vars)).
         end
     end.
 
+  Notation "{ a , .. , b }" := (add a .. (add b empty) ..) (at level 40): ILL_scope.
+
   Ltac search_one_goal_strong g := 
     match goal with 
       | |- ?g' => 
@@ -529,7 +537,7 @@ Module ILL_tactics(Vars:OrderedType)(M:ILL_sig(Vars)).
               match e with 
                 | context C' [ p'::?env''] => 
                   let e' := context C' [env''] in 
-                    (impl_l {p'} e' p' q';[constructor;prove_multiset_eq|search_one_goal_strong g])
+                    (impl_l ({p'}) e' p' q';[constructor;prove_multiset_eq|search_one_goal_strong g])
                     (* apply Impl_L with (Γ:={p'}) (Δ:=e') (p:=p') (q:=q'); *)
                     (*   [constructor;prove_multiset_eq |search_one_goal_strong g|prove_multiset_eq] *)
               end
@@ -838,7 +846,7 @@ Module ILL_tactics_refl(Vars:OrderedType)(M:ILL_sig(Vars)).
               match e with 
                 | context C' [ p'::?env''] => 
                   let e' := context C' [env''] in 
-                    (impl_l {p'} e' p' q';[constructor;prove_multiset_eq|search_one_goal_strong g])
+                    (impl_l ({p'}) e' p' q';[constructor;prove_multiset_eq|search_one_goal_strong g])
                     (* apply Impl_L with (Γ:={p'}) (Δ:=e') (p:=p') (q:=q'); *)
                     (*   [constructor;prove_multiset_eq |search_one_goal_strong g|prove_multiset_eq] *)
               end

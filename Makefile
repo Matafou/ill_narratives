@@ -105,6 +105,7 @@ VFILES:=basic.v\
   ILL_spec.v\
   ILL.v\
   ILLVarInt.v\
+  ILL_equiv.v\
   meta.v\
   multiset_spec.v\
   multiset.v\

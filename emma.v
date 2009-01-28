@@ -278,8 +278,7 @@ Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
 Qed.
 Require Import Setoid.
 
- Notation " x ∈ F " := (mem x F = true) (at level 60): ILL_scope. 
-
+  Notation "'∅'" := (empty) : ILL_scope.
  Lemma env_decomp : ∀ Γ, (Γ == ∅)\/exists φ, exists Γ', Γ==φ::Γ'.
  Proof.
    intros Γ.
@@ -294,7 +293,7 @@ Require Import Setoid.
    dependent inversion sorted;clear sorted;subst.
    destruct (IHthis s);clear IHthis.
    destruct n.
-   exists ∅.
+   exists (∅).
    intros y.
    unfold Maps'.find;simpl.
    case (FormulaOrdered.compare y f);try reflexivity.
@@ -303,7 +302,7 @@ Require Import Setoid.
    unfold Maps'.find in H.
    rewrite H.
    vm_compute;reflexivity.
-   exists (add_multiple f n ∅).
+   exists (add_multiple f n (∅)).
    unfold add;simpl.
    unfold add_multiple;simpl.  
    rewrite MapsPtes.F.add_eq_o by apply FormulaOrdered.eq_refl.

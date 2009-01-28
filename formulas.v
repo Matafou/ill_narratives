@@ -21,12 +21,12 @@ Require Import formulas_spec.
 
 Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
 
-  Reserved Notation "x ⊸ y" (at level 64, no associativity).
-  Reserved Notation "x ⊕ y" (at level 63, no associativity).
-  Reserved Notation "x ⊗ y" (at level 62, no associativity).
+  Reserved Notation "x ⊸ y" (at level 54, no associativity).
+  Reserved Notation "x ⊕ y" (at level 53, no associativity).
+  Reserved Notation "x ⊗ y" (at level 52, no associativity).
   Reserved Notation "x ⊢ y" (at level 70, no associativity).
-  Reserved Notation "! x" (at level 50, no associativity).
-  Reserved Notation "x & y" (at level 61, no associativity).
+  Reserved Notation "! x" (at level 40, no associativity).
+  Reserved Notation "x & y" (at level 51, no associativity).
   Reserved Notation "⊤" (at level 10, no associativity).
 
   (** Le type des formules, les atomes sont dénotés par [Proposition]. *)
