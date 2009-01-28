@@ -21,6 +21,15 @@ Module PreMake(X:OrderedType)(Maps:FMapInterface.S with Module E:=X) <: S(X).
     end 
     . 
 
+  Fixpoint iter (B:Type) (f:A -> B -> B) (k:A) (v:nat) (acc:B) {struct v} : B := 
+    match v with 
+      | 0 => f k acc
+      | S n => iter B f k n (f k acc)
+    end.
+    
+  Definition fold (B:Type) (f:A -> B -> B) ms v0 := 
+    Maps.fold (iter B f) ms v0.
+
 (*  Definition add : A -> t -> t := fun a ms => add_multiple a 1 ms. *)
   Definition add : A -> t -> t := fun a ms => 
     match Maps.find a ms with 
@@ -1296,7 +1305,7 @@ Qed.
     rewrite MapsPtes.F.add_neq_b;auto.
     tauto.
   Qed.
-  
+
 End PreMake.
 
 Module MakeAVL(X:OrderedType )<:S(X).

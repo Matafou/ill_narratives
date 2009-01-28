@@ -282,7 +282,8 @@ Require Import Setoid.
  Lemma env_decomp : ∀ Γ, (Γ == ∅)\/exists φ, exists Γ', Γ==φ::Γ'.
  Proof.
    intros Γ.
-   destruct Γ.
+   destruct
+ Γ.
    revert sorted.
    induction this.
    left;apply eq_bool_correct;vm_compute;reflexivity.
@@ -446,6 +447,158 @@ Require Import Setoid.
    elim add_singleton_abs with (1:=H).
  Qed.
 
+
+
+Function appears (under_plus:bool) (v:nat) (f:formula) {struct f} : bool := 
+  match f with
+    | Proposition n => EqNat.beq_nat n v
+    | Otimes f1 f2  | And f1 f2 => 
+      orb (appears under_plus v f1) (appears under_plus v f2)
+    | Oplus f1 f2 | Implies f1 f2 => 
+      if under_plus 
+        then  orb (appears under_plus v f1) (appears under_plus v f2) 
+        else false
+    | Bang f => appears under_plus v f
+    | _ => false
+  end.
+
+Definition exists_in_env f gamma := 
+  fold _ (fun k acc => orb (f k) acc) gamma false.
+
+Definition appears_in_env v := exists_in_env (appears true v).
+
+Lemma appears_in_env_morph : ∀ v Γ Γ', Γ == Γ' -> appears_in_env v Γ = appears_in_env v Γ'.
+Proof.
+  intros v Γ Γ' H.
+  unfold appears_in_env, exists_in_env,fold.
+  revert Γ' H.
+  apply MapsPtes.fold_rec. 
+  Focus 1.
+  intros m H Γ' H0.
+  rewrite H0 in H.
+  rewrite MapsPtes.fold_Empty.
+  reflexivity.
+  auto.
+  assumption.
+  Unfocus.
+
+  Focus 1.
+  intros k e a m' m'' H H0 H1 H2 Γ' H3.
+  rewrite MapsPtes.fold_Add.
+  f_equal.
+  apply H2.
+  reflexivity.
+  auto.
+  clear.
+  red.
+  red.
+  intros x y H.
+  apply eq_is_eq in H.
+  subst.
+  red.
+  intros x y0 H.
+  subst.
+  red.
+  intros;subst;reflexivity.
+Focus 1.
+  clear.
+  red.
+  intros k k' e e' a _.
+  revert k' e' a.
+  induction e as [ | e].
+  simpl.
+  intros k' e'.
+  induction e' as [ | e'].
+  simpl;intros.
+  case(appears true v k);case (appears true v k');simpl;reflexivity. 
+  intros a.  
+  simpl.
+  rewrite IHe'.
+  case(appears true v k);case (appears true v k');simpl;reflexivity. 
+  intros k' e' a.
+  simpl.  
+  rewrite <- (IHe k' e').
+  f_equal.
+  case(appears true v k);simpl.
+  2:reflexivity.
+  clear.
+  induction e' as [|e'].
+  simpl.
+  auto with *.
+  simpl.
+  case (appears true v k');simpl;auto.
+  Unfocus.
+  assumption.
+  Focus 1. 
+  intro.
+  rewrite <- H3.
+  apply H1.
+  Unfocus.
+Qed.
+
+Add Morphism appears_in_env with signature (Logic.eq ==> eq ==> Logic.eq) as morph_appears_in_env.
+  exact appears_in_env_morph.
+Qed.
+
+Lemma appears_false_is_appears_true : forall n p, appears false n p = true -> appears true n p = true.
+Proof.
+  intros n p.
+  functional induction (appears false n p);simpl.
+  tauto.
+  intros H.  
+  rewrite Bool.orb_true_iff in H;destruct H.
+  rewrite IHb0;auto.
+  rewrite IHb1;auto with *.
+  intros H.  
+  rewrite Bool.orb_true_iff in H;destruct H.
+  rewrite IHb0;auto.
+  rewrite IHb1;auto with *.
+  intros H.  
+  rewrite Bool.orb_true_iff in H;destruct H.
+  rewrite IHb0;auto.
+  rewrite IHb1;auto with *.
+  discriminate.
+  intros H.  
+  rewrite Bool.orb_true_iff in H;destruct H.
+  rewrite IHb0;auto.
+  rewrite IHb1;auto with *.
+  discriminate.
+  auto.
+  discriminate.
+Qed.
+
+Lemma var_in_env : ∀ Γ φ n, (appears false n φ) = true -> appears_in_env n Γ = false -> Γ⊢φ -> False.
+Proof.
+  intros Γ φ n H H0 H1.
+  revert H H0.
+
+  induction H1;intros Heq1 Heq2;simpl in *.
+
+  Focus 1.
+  rewrite H in Heq2.
+  unfold appears_in_env,exists_in_env,fold,Maps'.fold in Heq2. simpl in Heq2.
+  apply appears_false_is_appears_true in Heq1.
+  rewrite Heq1 in Heq2.
+  discriminate Heq2.
+
+  Focus 1.
+  simpl in Heq1;discriminate Heq1.
+
+  Focus 1.
+  apply IHILL_proof2.
+  assumption.
+  admit.
+
+  Focus.
+  rewrite Bool.orb_true_iff in Heq1;destruct Heq1.
+  admit.
+  admit.
+
+  Focus.
+  admit.
+Admitted.
+  
+
   
   Ltac toto p := 
     (dependent simple inversion p||inversion p);clear p;subst;try discriminate;simpl;
@@ -469,54 +622,124 @@ Require Import Setoid.
 
   end.
 
-Goal forall (p:{ (V⊸A),V}⊢A⊕M), 
-  exists_AtheseA_on_formula (fun _ _ _ => trueP) A M _ _ p  = trueP.
+Ltac titi p := 
+    (dependent simple inversion p||inversion p);clear p;subst;try discriminate;simpl.
+
+Ltac tutu :=
+      match goal with 
+        | H: {_} == _ ∪ _ |- _ =>   
+          let h1 := fresh "H" in 
+            let h2 := fresh "H" in 
+              (symmetry in H;destruct (union_singleton_decompose _ _ _ H) as [[h1 h2]|[h1 h2]]);clear H
+        | H : ?t = ?t |- _ => clear H
+        | H: _ ∈ (add _ _) |- _ =>   destruct (mem_destruct _ _ _ H);clear H
+        | H: context C [ remove ?f ?env ] |- _ => 
+          match env with 
+            context C' [ add f ?env' ] => 
+            let e := context C' [ env' ] in 
+              setoid_replace (remove f env) with e in H by (apply eq_bool_correct;vm_compute;reflexivity)
+          end
+        | H : ?s == ?t |- _ => 
+          (complete (apply eq_bool_complete in H;vm_compute in H;discriminate))|| (progress repeat (rewrite H in *))
+        | H: _ ∈ _ |- _ => complete (vm_compute in H;discriminate)
+        | H: ILLVarInt.MILL.eq _ _ |- _ => apply eq_is_eq in H; try (injection H;clear H;intros;subst)
+        | H:(?x ⊸ ?y) = _  |- _ => try discriminate H;injection H;clear H;intros;subst
+        | H: (_ ⊕ _) = _  |- _ => try discriminate H;injection H;clear H;intros;subst
+        | H:(_ ⊗ _) = _ |- _  => try discriminate H;injection H;clear H;intros;subst
+        | H: _  & _ = _  |- _  => try discriminate H;injection H;clear H;intros;subst
+        | H: ?delta ⊢ _, H' : ?delta == ∅ |- _ => apply False_ind;rewrite H' in H;clear H';titi H;repeat tutu
+  end.
+
+
+Lemma not_a_seq_m : ∀ Δ,  A :: Δ ⊢ M -> Δ == ∅ -> False.
 Proof.
-  intros p.
-  toto p.
-  
-  Focus 1.
-  symmetry in e0.
-  destruct (union_singleton_decompose _ _ _ e0) as [[h1 h2]|[h1 h2]].
+  intros Δ H H'.
+  rewrite H' in H.
+  apply var_in_env with (n:=8) (3:=H);vm_compute;reflexivity.
+Qed.
+
+
+
+Lemma a_seq_a_plus_m : ∀ Δ  (i:A :: Δ ⊢ A⊕M), Δ == ∅ ->   exists_AtheseA_on_formula (fun _ _ _ => trueP) A M _ _ i  = trueP.
+Proof.
+  intros Δ H H'.
+  titi H;repeat tutu.
+  vm_compute;reflexivity.
+  elim (not_a_seq_m _ i H').
+Qed.
+
+
+Lemma finish_proof_1 :  
+  forall (Δ : t)
+    (Δ' : t)
+    (i : Δ ⊢ V)
+    (i0 : A :: Δ' ⊢ A ⊕ M)
+    (H : Δ == {V})
+    (H0 : Δ' == ∅),
+    (if exists_AtheseA_on_formula
+         (λ (e1 : env) (f1 : formula) (_ : e1 ⊢ f1), trueP) 
+         A M Δ V i
+    then trueP
+    else
+     exists_AtheseA_on_formula
+       (λ (e1 : env) (f1 : formula) (_ : e1 ⊢ f1), trueP) 
+       A M (A :: Δ') (A ⊕ M) i0) = trueP.
+Proof.
+  intros Δ Δ' i i0 H H0.
   case (exists_AtheseA_on_formula
          (λ (e1 : env) (f1 : formula) (_ : e1 ⊢ f1), trueP) 
          A M Δ V i).
   reflexivity.
-  clear - i0 h2.
-  toto i0.
-  vm_compute;reflexivity.
-  apply False_ind.
-  setoid_rewrite h2 in i;clear h2.
-  toto i.
-  apply False_ind;clear - i h2.
-  rewrite h2 in i;clear h2;toto i.
-  simpl;reflexivity.
-  apply False_ind.
-  toto i.
-  symmetry in H0; destruct (union_singleton_decompose _ _ _  H0) as [[h1 h2]|[h1 h2]].
-  clear - H2 h2; rewrite h2 in H2;clear h2;toto H2.
-  clear - H2 h1; rewrite h1 in H2;clear h1;toto H2.
+  apply a_seq_a_plus_m;assumption.
 Qed.
 
-****
-Goal forall (p:{P&1, B&1, (V⊸A)&1, (E⊸A)&1,(P⊸M)&1,B ⊸ 1,V}⊢A⊕M), 
+Lemma proof_1 : forall (p:{ (V⊸A),V}⊢A⊕M), 
   exists_AtheseA_on_formula (fun _ _ _ => trueP) A M _ _ p  = trueP.
 wProof.
   intros p.
-  dependent simple inversion p;clear p;subst. 
-  apply False_ind; apply eq_bool_complete in e; vm_compute in e;discriminate.
-  discriminate.
-  assert (p0=B /\ q=1).
-  admit.
-  destruct H;subst.
-  simpl.
-  clear e.
+  titi p;repeat tutu;simpl;try reflexivity.
+  
+  apply finish_proof_1;assumption.
 
-  setoid_replace (remove (B ⊸ 1)
-         {P & 1, B & 1, (V ⊸ A) & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, B ⊸ 1, V}) with ({P & 1, B & 1, (V ⊸ A) & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) in e0 by (vm_compute;reflexivity). 
+  elim var_in_env with (n:=8) (3:=i);vm_compute;reflexivity.
+Qed.
 
+
+
+Lemma proof_2 : forall (p:{(V⊸A)&1, V}⊢A⊕M), 
+  exists_AtheseA_on_formula (fun _ _ _ => trueP) A M _ _ p  = trueP.
+Proof.
+  intros p.
+  titi p; (repeat tutu);simpl;try reflexivity.
+
+  Focus 1.
+  titi i; repeat tutu;simpl;try reflexivity;try discriminate.
+  apply finish_proof_1;assumption.
+  elim var_in_env with (n:=8) (3:=i0);vm_compute;reflexivity.
+
+  Focus 1.
+  titi i; repeat tutu;simpl;try reflexivity;try discriminate.
+  titi i0; repeat tutu;simpl;try reflexivity;try discriminate.
+  elim var_in_env with (n:=8) (3:=i);vm_compute;reflexivity.
+  elim var_in_env with (n:=8) (3:=i0);vm_compute;reflexivity.
+
+  Focus 1.
+  elim var_in_env with (n:=8) (3:=i);vm_compute;reflexivity.
+Qed.
+
+Lemma proof_3 : forall (p:{1,1,1,(V⊸A)&1, V}⊢A⊕M), 
+  exists_AtheseA_on_formula (fun _ _ _ => trueP) A M _ _ p  = trueP.
+Proof.
+  intros p.
+  titi p; (repeat tutu);simpl;try reflexivity;try discriminate.
+
+  Focus 1.
+  titi i;repeat tutu;simpl;try reflexivity;try discriminate. 
+  titi i0;repeat tutu;simpl;try reflexivity;try discriminate. 
+********
 
 Qed.
+
 Goal forall (p:  {P&1, R, G, B&1,  (V⊸A)&1, (E⊸A)&1, (P⊸M)&1,(R⊸1)&(R⊸E), (G⊸1)⊕(G⊸V), 1⊕((B⊸V)&(B⊸1))  } ⊢ A ⊕ M), forall_impl_l_on_formula (exists_oplus_on_formula (G⊸1) (G⊸V)) R E _ _ p = trueP.
 Proof.
   intros p.
