@@ -57,18 +57,18 @@ Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
   | Impl_R : ∀ Γ p q, p::Γ ⊢ q → Γ ⊢ p ⊸ q
   | Impl_L : ∀ Γ Δ Δ' p q r, p ⊸ q ∈ Γ -> Γ \ p⊸q == Δ ∪ Δ' ->  Δ ⊢ p → q::Δ' ⊢ r → Γ ⊢ r
   | Times_R : ∀ Γ Δ Δ' p q , Γ == Δ ∪ Δ' -> Δ ⊢ p → Δ' ⊢ q → Γ ⊢ p ⊗ q
-  | Times_L : ∀ Γ p q r , p ⊗ q ∈ Γ -> q :: p :: Γ \ p⊗q ⊢ r → Γ ⊢ r
+  | Times_L : ∀ Γ p q r , p ⊗ q ∈ Γ -> q :: p :: (Γ \ p⊗q) ⊢ r → Γ ⊢ r
   | One_R : ∀ Γ, Γ == ∅ -> Γ ⊢ 1
   | One_L : ∀ Γ p , 1 ∈ Γ -> Γ \ 1 ⊢ p → Γ ⊢ p
   | And_R : ∀ Γ p q , Γ ⊢ p → Γ ⊢ q → Γ ⊢ p & q
-  | And_L_1 : ∀ Γ p q r , p&q ∈ Γ ->  p:: Γ \ p&q ⊢ r → Γ ⊢ r
-  | And_L_2 : ∀ Γ p q r , p&q ∈ Γ ->  q::Γ \ p&q ⊢ r → Γ ⊢ r
-  | Oplus_L : ∀ Γ p q r , p⊕q ∈ Γ ->  p :: Γ \ p⊕q ⊢ r → q :: Γ \ p⊕q ⊢ r → Γ ⊢ r
+  | And_L_1 : ∀ Γ p q r , p&q ∈ Γ ->  p:: (Γ \ p&q) ⊢ r → Γ ⊢ r
+  | And_L_2 : ∀ Γ p q r , p&q ∈ Γ ->  q:: (Γ \ p&q) ⊢ r → Γ ⊢ r
+  | Oplus_L : ∀ Γ p q r , p⊕q ∈ Γ ->  p :: (Γ \ p⊕q) ⊢ r → q :: (Γ \ p⊕q) ⊢ r → Γ ⊢ r
   | Oplus_R_1 : ∀ Γ p q , Γ ⊢ p → Γ ⊢ p ⊕ q
   | Oplus_R_2 : ∀ Γ p q , Γ ⊢ q → Γ ⊢ p ⊕ q 
   | T_ : ∀ Γ, Γ ⊢ ⊤
   | Zero_ : ∀ Γ p , 0 ∈ Γ → Γ ⊢ p
-  | Bang_D : ∀ Γ p q , !p∈Γ -> p :: Γ \ !p ⊢ q → Γ ⊢ q
+  | Bang_D : ∀ Γ p q , !p∈Γ -> p :: (Γ \ !p) ⊢ q → Γ ⊢ q
   | Bang_C : ∀ Γ p q , !p∈Γ -> !p :: Γ ⊢ q →  Γ ⊢ q
   | Bang_W : ∀ Γ p q , !p∈Γ -> Γ \ !p ⊢ q →  Γ ⊢ q
   (* Syntax defined simutaneously. *)

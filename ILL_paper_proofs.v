@@ -293,9 +293,9 @@ Section figure_5.
   Local Notation "'L'" := (Proposition "vL'"%string).
 
 
-  Local Notation "'ρ'" := { H,F,L,D₂, G⊸(!(H⊸(H⊗M))) }.
-  Local Notation "'μ'" := { !((D₁⊗M)⊸D₀),!((D₂⊗M)⊸D₁)}.
-  Local Notation "'λ'" := { !((L⊗D₀)⊸(L⊗D₁)),!((L⊗D₁)⊸(L⊗D₂))}.
+  Local Notation "'ρ'" := ({ H,F,L,D₂, G⊸(!(H⊸(H⊗M))) }).
+  Local Notation "'μ'" := ({ !((D₁⊗M)⊸D₀),!((D₂⊗M)⊸D₁)}).
+  Local Notation "'λ'" := ({ !((L⊗D₀)⊸(L⊗D₁)),!((L⊗D₁)⊸(L⊗D₂))}).
 
   (* Ltac bang_c  p'   :=  *)
   (*   match goal with  *)
@@ -332,7 +332,7 @@ Section figure_5.
       λ ∪ μ⊢D).
       bang_c ((D₂⊗M)⊸D₁).
       bang_d ((D₂⊗M)⊸D₁).
-      impl_l {M,D₂} ({H, L,  !(H ⊸ (H ⊗ M)), (L ⊗ (D₂ ⊗ H)) ⊸ (L ⊗ (D₀ ⊗ ((L ⊗ D₂) ⊸ D)))} ∪ λ ∪ μ) (D₂⊗M) (D₁).
+      impl_l ({M,D₂}) ({H, L,  !(H ⊸ (H ⊗ M)), (L ⊗ (D₂ ⊗ H)) ⊸ (L ⊗ (D₀ ⊗ ((L ⊗ D₂) ⊸ D)))} ∪ λ ∪ μ) (D₂⊗M) (D₁).
       times_r ({ D₂}) ({M})...
       search_one_goal_strong ({D₁,H, L,  (L ⊗ (D₂ ⊗ H)) ⊸ (L ⊗ (D₀ ⊗ ((L ⊗ D₂) ⊸ D)))} ∪ λ ⊢ D).
       bang_c ((L⊗D₁)⊸(L⊗D₂))...

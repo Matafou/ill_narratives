@@ -4,15 +4,16 @@ Import ILLVarInt.MILL. (* only this *)
 Import ILLVarInt.M. (* this *)
 Import FormulaMultiSet. (* and this *)
 
-
+Set Printing All.
 Inductive Istable (pred:∀ e f (h: e ⊢ f), Prop): ∀ e f (h: e ⊢ f) , Prop := 
 | IId: ∀ Γ (f:formula) (heq:Γ == {f}), Istable pred Γ f (Id _ _ heq)
 | IImpl_R: ∀ Γ p q (h:(p :: Γ ⊢ q)), pred _ _ h → Istable pred _ _ (Impl_R Γ p q h)
-| IImpl_L: ∀ Γ Δ p q r (h:Γ ⊢ p) (h':q::Δ ⊢ r), pred _ _ h → pred _ _ h' → Istable pred _ _ (Impl_L Γ Δ p q r h h')
-| ITimes_R: ∀ Γ Δ p q h h', pred _ _ h → pred _ _ h' → Istable pred _ _ (Times_R Γ Δ p q h h')
-| ITimes_L: ∀ Γ p q r h, pred _ _ h → Istable pred _ _ (Times_L Γ p q r h)
-| IOne_R: Istable pred ∅ 1 One_R 
-| IOne_L: ∀ Γ p h, pred _ _ h → Istable pred _ _ (One_L Γ p h)
+| IImpl_L: ∀ Γ Δ Δ' p q r (hin:(p⊸q)∈Γ) (heq:remove (p⊸ q) Γ== Δ ∪ Δ') (h:Δ ⊢ p) (h':q::Δ' ⊢ r), 
+  pred _ _ h → pred _ _ h' → Istable pred _ _ (Impl_L Γ Δ Δ' p q r hin heq h h')
+| ITimes_R: ∀ Γ Δ Δ' p q heq h h', pred _ _ h → pred _ _ h' → Istable pred _ _ (Times_R Γ Δ Δ' p q heq h h')
+| ITimes_L: ∀ Γ p q r hin h, pred _ _ h → Istable pred _ _ (Times_L Γ p q r hin h)
+| IOne_R: ∀ Γ heq, Istable pred _ _ (One_R Γ heq)
+| IOne_L: ∀ Γ p hin h, pred _ _ h → Istable pred _ _ (One_L Γ p hin h)
 | IAnd_R: ∀ Γ p q h h', pred _ _ h → pred _ _ h' → Istable pred _ _ (And_R  Γ p q h h')
 | IAnd_L_2: ∀ Γ p q r hin h, pred _ _ h → Istable pred _ _ (And_L_2 Γ p q r hin h)
 | IAnd_L_1: ∀ Γ p q r hin h, pred _ _ h → Istable pred _ _ (And_L_1 Γ p q r hin h)
@@ -26,9 +27,6 @@ Inductive Istable (pred:∀ e f (h: e ⊢ f), Prop): ∀ e f (h: e ⊢ f) , Prop
 | IBang_W: ∀ Γ p q hin h, pred _ _ h → (Istable pred _ _ (Bang_W Γ p q hin h))
 .
 
-
-
- Notation " x ∈ F " := (mem x F = true) (at level 60): ILL_scope. 
 
 
 Inductive arr : formula -> Prop :=
@@ -157,13 +155,13 @@ Lemma inUnion2: ∀ g Δ Γ, g ∈ Γ -> g ∈ (Δ ∪ Γ).
   apply mem_union_r.
 Qed.
 
-Lemma inAddUnion1: ∀ g Δ Γ f, g ∈ Δ -> g ∈ (f :: Δ ∪ Γ).
+Lemma inAddUnion1: ∀ g Δ Γ f, g ∈ Δ -> g ∈ (f :: (Δ ∪ Γ)).
 Proof.
   intros g Δ Γ f H.
   apply inAdd2.
   apply inUnion1;assumption.
 Qed.
-Lemma inAddUnion2: ∀ g Δ Γ f, g ∈ Γ -> g ∈ (f :: Δ ∪ Γ).
+Lemma inAddUnion2: ∀ g Δ Γ f, g ∈ Γ -> g ∈ (f :: (Δ ∪ Γ)).
 Proof.
   intros g Δ Γ f H.
   apply inAdd2.

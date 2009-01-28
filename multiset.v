@@ -1,3 +1,4 @@
+Require Import Utf8_core.
 Require Import FMapInterface.
 Require Import FMapFacts.
 Require Import FMapAVL.
@@ -24,7 +25,7 @@ Module PreMake(X:OrderedType)(Maps:FMapInterface.S with Module E:=X) <: S(X).
   Fixpoint iter (B:Type) (f:A -> B -> B) (k:A) (v:nat) (acc:B) {struct v} : B := 
     match v with 
       | 0 => f k acc
-      | S n => iter B f k n (f k acc)
+      | S n => f k (iter B f k n acc)
     end.
     
   Definition fold (B:Type) (f:A -> B -> B) ms v0 := 
@@ -278,6 +279,7 @@ Module PreMake(X:OrderedType)(Maps:FMapInterface.S with Module E:=X) <: S(X).
     rewrite <- MapsPtes.F.is_empty_iff.
     apply Maps.empty_1.
   Qed.  
+
 
   Lemma is_empty_no_mem : forall ms, is_empty ms = true <-> (forall a, mem a ms = false). 
   Proof.
@@ -1314,6 +1316,484 @@ Qed.
     rewrite H.
     reflexivity.
   Qed.
+
+  Reserved Notation "∪" (at level 60, right associativity).
+  Reserved Notation "∅" (at level 10, no associativity).
+
+  Infix "∪" := union (at level 65, right associativity) : ILL_scope.
+  Notation " a :: b " := (add a b) (at level 60, right associativity) : ILL_scope.
+  Notation "{ a , .. , b }" := (add a .. (add b empty) ..) (at level 40): ILL_scope.
+  Notation "{ }" := empty (at level 40) : ILL_scope.
+  Notation "∅" := (empty) : ILL_scope.
+  Notation " E == F " := (eq E F) (at level 80): ILL_scope.
+
+  (* Notation pour l'appartenance à un environnement. *)
+  Notation " x ∈ F " := (mem x F = true) (at level 55): ILL_scope.
+
+  Notation " b '\' a " := (remove a b) (at level 64, right associativity) : ILL_scope.
+  Open Scope ILL_scope.
+    
+  Lemma multiset_ind : forall (P:t -> Type), (forall Γ Γ', Γ==Γ' -> P Γ -> P Γ') -> P empty -> (forall x Γ, P Γ -> P (x::Γ)) -> forall Γ, P Γ.
+  Proof.
+    intros P X X0 X1 Γ.
+    induction Γ using MapsPtes.map_induction_bis.
+  
+    eauto.
+
+    apply X0.
+
+    induction e as [| n].
+  
+    generalize (X1 x Γ IHΓ).
+    unfold add.
+    rewrite MapsPtes.F.not_find_in_iff in H;rewrite H.
+    tauto.
+    generalize (X1 x _ IHn).
+    unfold add.
+    rewrite MapsPtes.F.add_eq_o;[|apply X.eq_refl].
+    clear - X;intros.
+    assert ((Maps.add x (S n) (Maps.add x n Γ)) == (Maps.add x (S n) Γ)).
+    intros y.
+    case (X.eq_dec y x);intros Heq.
+    rewrite Heq; do 2 (rewrite MapsPtes.F.add_eq_o;[|apply X.eq_refl]);
+      reflexivity.
+    do 3 (rewrite MapsPtes.F.add_neq_o;[|intros abs;elim Heq;apply X.eq_sym;exact abs]);reflexivity.
+    apply (X _ _ H);assumption.
+  Qed.
+
+  Lemma env_decomp : ∀ Γ, (Γ == ∅)\/exists φ, exists Γ', Γ==φ::Γ'.
+  Proof.
+    intros Γ.
+    induction Γ using multiset_ind.
+    
+    destruct IHΓ1.
+    left;rewrite H in H0;assumption.
+    right;destruct H0 as [φ [Γ' H1]];exists φ;exists Γ'.
+    rewrite H in H1;assumption.
+    
+    
+    left;reflexivity.
+ 
+    right.
+    exists x.
+    exists Γ.
+    reflexivity.
+  Qed.
+
+  Add Relation t eq
+  reflexivity proved by eq_refl
+  symmetry proved by eq_sym
+    transitivity proved by eq_trans as eq_rel.
+
+  (* On peut réécrire à l'intérieur d'un ::. *)
+  Add Morphism add
+    with signature (X.eq ==> eq ==> eq)
+      as add_morph.
+  Proof.
+    exact add_morph_eq.
+  Qed.
+  
+  (* On peut réécrire à l'intérieur d'une union d'environnements. *)
+  Add Morphism union
+    with signature (eq==> eq ==> eq)
+      as union_morph.
+  Proof.
+    exact union_morph_eq.
+  Qed.
+
+  (* On peut réécrire à l'intérieur d'un mem. *)
+  Add Morphism mem
+    with signature ( Logic.eq ==> eq ==> Logic.eq)
+      as mem_morph.
+  Proof.
+    apply mem_morph_eq.
+  Qed.
+
+
+
+ Lemma add_singleton_abs : 
+   ∀ φ φ' φ'' Γ, φ'::φ''::Γ == {φ} -> False.
+ Proof.
+   intros φ φ' φ'' Γ H.
+   case (X.eq_dec φ φ');intros Heq1.
+   rewrite <- Heq1 in H;clear Heq1.
+   case (X.eq_dec φ φ'');intros Heq2.
+   rewrite <- Heq2 in H;clear Heq2.
+   clear -H .
+   assert (u:=H φ);clear H.
+   unfold add,add_multiple in u.
+   rewrite MapsPtes.F.empty_o in u.
+   rewrite MapsPtes.F.add_eq_o in u by apply X.eq_refl.
+   destruct (Maps.find (elt:=nat) φ Γ) .
+   rewrite MapsPtes.F.add_eq_o in u by apply X.eq_refl.
+   rewrite MapsPtes.F.add_eq_o in u by apply X.eq_refl.
+   discriminate.
+   rewrite MapsPtes.F.add_eq_o in u by apply X.eq_refl.
+   rewrite MapsPtes.F.add_eq_o in u by apply X.eq_refl.
+   discriminate.
+   assert (u:=H φ'');clear -u Heq2.
+   unfold add,add_multiple in u.
+   rewrite MapsPtes.F.empty_o in u.
+   rewrite MapsPtes.F.add_neq_o in u by (intros abs;elim Heq2;rewrite abs;apply X.eq_refl).
+   rewrite MapsPtes.F.empty_o in u.
+   destruct (Maps.find (elt:=nat) φ'' Γ) .
+   rewrite MapsPtes.F.add_neq_o in u by (intros abs;elim Heq2;rewrite abs;apply X.eq_refl).
+   destruct (Maps.find (elt:=nat) φ Γ) .
+   rewrite MapsPtes.F.add_neq_o in u by (intros abs;elim Heq2;rewrite abs;apply X.eq_refl).
+   rewrite MapsPtes.F.add_eq_o in u by apply X.eq_refl.
+   discriminate.
+   rewrite MapsPtes.F.add_neq_o in u by (intros abs;elim Heq2;rewrite abs;apply X.eq_refl).
+   rewrite MapsPtes.F.add_eq_o in u by apply X.eq_refl.
+   discriminate.
+   rewrite MapsPtes.F.add_neq_o in u by (intros abs;elim Heq2;rewrite abs;apply X.eq_refl).
+   destruct (Maps.find (elt:=nat) φ Γ) .
+   rewrite MapsPtes.F.add_neq_o in u by (intros abs;elim Heq2;rewrite abs;apply X.eq_refl).
+   rewrite MapsPtes.F.add_eq_o in u by apply X.eq_refl.
+   discriminate.
+   rewrite MapsPtes.F.add_neq_o in u by (intros abs;elim Heq2;rewrite abs;apply X.eq_refl).
+   rewrite MapsPtes.F.add_eq_o in u by apply X.eq_refl.
+   discriminate.
+   assert (u:=H φ');clear -u Heq1.
+   unfold add,add_multiple in u.
+   rewrite MapsPtes.F.empty_o in u.
+   rewrite MapsPtes.F.add_neq_o in u by (intros abs;elim Heq1;rewrite abs;apply X.eq_refl).
+   rewrite MapsPtes.F.empty_o in u.
+   destruct (Maps.find (elt:=nat) φ'' Γ) .
+   case (X.eq_dec φ' φ'');intros Heq2.
+   rewrite MapsPtes.F.add_eq_o in u by (symmetry;assumption).
+   rewrite MapsPtes.F.add_eq_o in u by apply X.eq_refl.
+   discriminate.   
+   rewrite MapsPtes.F.add_neq_o in u by (intros abs;elim Heq2;rewrite abs;apply X.eq_refl).
+   destruct (Maps.find (elt:=nat) φ' Γ) .
+   rewrite MapsPtes.F.add_eq_o in u by apply X.eq_refl.
+   discriminate.
+   rewrite MapsPtes.F.add_eq_o in u by apply X.eq_refl.
+   discriminate.
+
+   case (X.eq_dec φ' φ'');intros Heq2.
+   rewrite MapsPtes.F.add_eq_o in u by (symmetry;assumption).
+   rewrite MapsPtes.F.add_eq_o in u by apply X.eq_refl.
+   discriminate.   
+   rewrite MapsPtes.F.add_neq_o in u by (intros abs;elim Heq2;rewrite abs;apply X.eq_refl).
+   destruct (Maps.find (elt:=nat) φ' Γ) .
+   rewrite MapsPtes.F.add_eq_o in u by apply X.eq_refl.
+   discriminate.
+   rewrite MapsPtes.F.add_eq_o in u by apply X.eq_refl.
+   discriminate.
+ Qed.
+
+
+   
+ Lemma union_singleton_decompose : 
+   ∀ Δ Δ' φ, Δ∪Δ' == {φ} -> (Δ=={φ}/\Δ'==∅)\/(Δ'=={φ}/\Δ==∅).
+ Proof.
+   intros Δ Δ' φ H.
+   destruct (env_decomp Δ).
+   right;split;auto.
+   rewrite H0 in H. 
+   rewrite union_empty_left in H;exact H.
+   destruct H0 as [φ' [Γ' H1]].
+   destruct (env_decomp Γ').
+   rewrite H0 in H1;clear H0.
+   left.
+   destruct (env_decomp Δ').
+   split;auto.   
+   rewrite H1 in H;rewrite H0 in H;rewrite H1;
+   rewrite union_empty_right in H;auto.
+   destruct H0 as [φ'' [Γ'' H2]].
+   apply False_ind.   
+   rewrite H1 in H;rewrite H2 in H.
+   clear -H.
+   rewrite union_rec_right in H.
+   rewrite union_rec_left in H.
+   apply add_singleton_abs with (1:=H).
+ 
+   rewrite H1 in H;clear H1.
+   destruct H0 as [φ'' [Γ'' H1]].
+   rewrite H1 in H;clear H1.
+   rewrite union_rec_left in H.
+   rewrite union_rec_left in H.
+   elim add_singleton_abs with (1:=H).
+ Qed.
+
+ Lemma mem_decompose : 
+   forall Γ φ, φ ∈ Γ -> exists Γ', Γ == φ :: Γ'.
+ Proof.
+   intros Γ. 
+   induction Γ using multiset_ind. 
+
+   intros φ H0.
+   rewrite <- H in H0.
+   destruct (IHΓ1 _ H0) as [Γ' H1].
+   exists Γ';rewrite H in H1;assumption.
+
+   intros φ H.
+   unfold mem in H;rewrite MapsPtes.F.empty_a in H;discriminate.
+
+   intros φ H.
+   destruct (mem_destruct _ _ _ H) as [H1|H1];clear H.
+   exists Γ;rewrite H1;reflexivity.
+   destruct (IHΓ _ H1) as [Γ' H2];clear H1.
+   exists (x::Γ').
+   rewrite H2.
+   rewrite add_comm;reflexivity.
+ Qed.
+
+ Lemma eq_add_inject : 
+   ∀ φ Γ Γ', φ::Γ == φ::Γ' -> Γ == Γ'.
+ Proof.
+   intros φ Γ Γ' H.
+   red in H.   
+   intro ψ.
+   case (X.eq_dec ψ φ);intro Heq.
+   rewrite Heq.
+   generalize (H φ).
+   unfold add.
+   case (Maps.find φ Γ);case (Maps.find φ Γ');simpl;try reflexivity;intros.
+   do 2 (rewrite MapsPtes.F.add_eq_o in H0;[|apply X.eq_refl]).
+   f_equal;injection H0;tauto.
+   do 2 (rewrite MapsPtes.F.add_eq_o in H0;[|apply X.eq_refl]);discriminate.
+   do 2 (rewrite MapsPtes.F.add_eq_o in H0;[|apply X.eq_refl]);discriminate.
+   generalize (H ψ).
+   unfold add.
+   case (Maps.find φ Γ);case (Maps.find φ Γ');simpl;try reflexivity;intros.
+   do 2 (rewrite MapsPtes.F.add_neq_o in H0;[|intros abs;elim Heq;rewrite abs;apply X.eq_refl]);assumption.
+   do 2 (rewrite MapsPtes.F.add_neq_o in H0;[|intros abs;elim Heq;rewrite abs;apply X.eq_refl]);assumption.
+   do 2 (rewrite MapsPtes.F.add_neq_o in H0;[|intros abs;elim Heq;rewrite abs;apply X.eq_refl]);assumption.
+   do 2 (rewrite MapsPtes.F.add_neq_o in H0;[|intros abs;elim Heq;rewrite abs;apply X.eq_refl]);assumption.
+ Qed.
+
+ Lemma union_sym : ∀ Γ Γ', Γ∪Γ' == Γ'∪Γ.
+ Proof.
+   intros Γ.
+   induction Γ using multiset_ind.
+
+   intros Γ'.
+   rewrite <- H;auto.
+   intros Γ'.
+   rewrite union_empty_right;rewrite union_empty_left;reflexivity.   
+
+   intros Γ'.
+   rewrite union_rec_right;rewrite union_rec_left; rewrite IHΓ;reflexivity.
+ Qed.
+
+ Lemma union_decompose : 
+   ∀ Γ Δ Δ' φ, Δ∪Δ' == φ::Γ -> 
+   (exists Δ0, Δ == φ :: Δ0 /\ Δ0∪Δ' == Γ)\/
+   (exists Δ0, Δ' == φ :: Δ0 /\ Δ0∪Δ == Γ).
+ Proof.
+   intros Γ.
+   
+   induction Γ using multiset_ind.
+   intros Δ Δ' φ H0.   
+   rewrite <- H in H0.
+   destruct (IHΓ1 _ _ _ H0) as [[Δ0 H1]|[Δ0 H1]].
+   left;exists Δ0;rewrite H in H1;assumption.
+   right;exists Δ0;rewrite H in H1;assumption.
+
+   intros Δ Δ' φ H.
+   destruct (union_singleton_decompose _ _ _ H) as [H1|H1];[left|right];
+     exists empty;rewrite union_empty_left;assumption.
+
+   intros Δ Δ' φ H. 
+   assert (H':=eq_mem _ _ H  φ).
+   rewrite add_is_mem in H';[|apply X.eq_refl]. 
+   destruct (mem_union_destruct _ _ _ H') as [H1|H1];clear H'.
+   destruct (mem_decompose _ _ H1) as [Δ0 H2];clear H1.
+   left;exists Δ0;split;auto.
+   rewrite H2 in H.
+   rewrite union_rec_left in H.
+   assert (H':=eq_add_inject _ _ _ H);clear H;assumption.
+   destruct (mem_decompose _ _ H1) as [Δ0 H2];clear H1.
+   right;exists Δ0;split;auto.
+   rewrite H2 in H.
+   rewrite union_rec_right in H.
+   assert (H':=eq_add_inject _ _ _ H);clear H. 
+   rewrite union_sym;assumption.
+ Qed.
+ 
+ Lemma union_empty_decompose : ∀ Δ Δ', Δ∪Δ'== ∅ -> Δ==∅/\Δ'==∅.
+ Proof.
+   intros Δ.
+   induction Δ using multiset_ind.
+ 
+   intros; rewrite <- H; rewrite <- H in H0;auto.
+
+   intros Δ' H.
+   rewrite union_empty_left in H;split;auto.
+   reflexivity.
+
+   intros Δ' H.
+   clear -H.
+   apply False_ind.
+   unfold eq,Maps.Equal in H.
+   generalize (H x).
+   rewrite MapsPtes.F.empty_o.
+   rewrite union_rec_left.
+   unfold add.
+   case (Maps.find x (Δ∪Δ'));[intro|];
+   (rewrite MapsPtes.F.add_eq_o;[discriminate|apply X.eq_refl]).
+ Qed.
+
+  Lemma is_empty_eq_empty : ∀ Γ, is_empty Γ = true -> Γ == empty.
+  Proof.
+  intro.
+  induction Γ using multiset_ind.
+
+  rewrite <- H;assumption.
+
+  reflexivity.
+
+  clear;intro abs.
+  unfold is_empty,add in abs.
+  destruct (Maps.find x Γ);  apply Maps.is_empty_2 in abs.
+  red in abs.
+  elim (abs x (S n)).
+  apply Maps.add_1;reflexivity.
+  red in abs.
+  elim (abs x 0);  apply Maps.add_1;reflexivity.
+Qed.
+
+
+Lemma add_maps_add : ∀ Γ k n, ~(Maps.In k Γ) -> 
+  (Maps.add k n Γ) == iter _ (fun k acc => k::acc) k n Γ.
+Proof.
+  intros Γ k n.
+
+  induction n;intros.
+
+  simpl. unfold add.
+  rewrite MapsFact.not_find_in_iff in H;rewrite H.
+  reflexivity.
+
+  simpl.
+  rewrite <- IHn;auto.
+  unfold add.
+  rewrite MapsPtes.F.add_eq_o;[|apply X.eq_refl].
+  intro y.
+  case (X.eq_dec k y);intros Heq.
+  do 2 (rewrite MapsPtes.F.add_eq_o;[|assumption]);reflexivity.
+  do 3 (rewrite MapsPtes.F.add_neq_o;[|intros abs;elim Heq;rewrite abs;apply X.eq_refl]);reflexivity.
+Qed.
+
+Lemma fold_rec_weak:
+  ∀ (B : Type) (P : t → B → Type) (f : A → B → B)
+  (i : B),
+  (∀ (m m' : t) (a : B),  m == m' → P m a → P m' a)
+  → P empty i
+    → (∀ k a (m : t),
+      P m a → P (add k m) (f k a))
+      → (∀ m : t, P m (fold _ f m i))
+.
+Proof.
+  intros B P f i X X0 X1 m.
+  unfold fold.
+  apply MapsPtes.fold_rec_weak.
+
+  assumption.
+
+  assumption.
+
+  intros k e a m0 H X2.
+  apply (X _ _ _ (eq_sym _ _ (add_maps_add _ _ e H))).
+  clear -X1 X2.
+  induction e.
+  simpl.
+  auto.
+  simpl;auto.
+Qed.
+
+Definition transpose_neqkey (B:Type) (eqB:B -> B -> Prop) (f:A -> B -> B)  := 
+  ∀ (k k' : A) (a : B),
+   ¬X.eq k k' → eqB (f k (f k' a)) (f k' (f k a)).
+
+Lemma iter_proper : 
+  ∀ (B : Type) (eqB : B → B → Prop),
+  ∀ f : A  → B → B,
+  Proper (X.eq ==> eqB ==> eqB) f -> 
+  Proper (X.eq ==> Logic.eq ==> eqB ==> eqB) (iter B f).
+Proof.
+  intros B eqB f H.
+  repeat red.
+  intros x y H1 x0 y0 H2 x1 y1 H3.
+  subst.
+  revert x y H1 x1 y1 H3.
+  induction y0 as [ | n];intros;simpl.
+  apply H;assumption.
+  apply H;try assumption.
+  auto.
+Qed.
+
+Lemma iter_transpose_neqkey : 
+  ∀ (B : Type) (eqB : B → B → Prop),
+  Equivalence eqB ->
+  ∀ f : A  → B → B,
+  Proper (X.eq ==> eqB ==> eqB) f -> 
+  transpose_neqkey B eqB f -> 
+  MapsPtes.transpose_neqkey eqB (iter B f).
+Proof.
+  intros B eqB eqBeq f H H0.
+  red.
+  intros k k' e e' a H1.  
+  induction e as [|e]; simpl.
+  induction e' as [|e'];  simpl.
+  apply H0;assumption.
+  rewrite <- IHe'.
+  apply H0;assumption.
+  
+  rewrite IHe.
+  clear IHe.
+  induction e' as [|e'];  simpl in *.
+  apply H0;assumption.
+  rewrite <- IHe'.
+  apply H0;assumption.
+Qed.  
+
+
+Lemma fold_morph : 
+  ∀ (B : Type) (eqB : B → B → Prop),
+  Equivalence eqB
+  → (∀ f : A  → B → B,
+     Proper (X.eq ==> eqB ==> eqB) f
+     → transpose_neqkey _  eqB f
+       → (∀ (m1 m2 : t) (i : B),
+           m1 == m2 → eqB (fold _ f m1 i) (fold _ f m2 i))).
+Proof.
+  intros B eqB H f H0 H1 m1 m2 i H2.
+  revert m2 H2.
+  unfold fold.
+  apply MapsPtes.fold_rec_weak.
+  
+  intros m m' a H2 H3 m2 H4.
+  apply H3.
+  rewrite H2;assumption.
+
+  intros m2 H2.
+  rewrite MapsPtes.fold_Equal with (eqA:=eqB);auto.
+  4:symmetry in H2;eexact H2.
+  rewrite MapsPtes.fold_Empty;auto.
+  destruct H.
+  apply Equivalence_Reflexive.
+  apply Maps.empty_1.
+  apply iter_proper;assumption.
+  apply iter_transpose_neqkey;assumption.
+
+
+  intros k e a m H2 H3 m2 H4.
+  rewrite MapsPtes.fold_Equal with (eqA:=eqB);auto.
+  4:symmetry in H4;eexact H4.
+  rewrite MapsPtes.fold_add.
+  assert (Proper (X.eq ==> Logic.eq ==> eqB ==> eqB) (iter B f)).
+  apply iter_proper;assumption.
+  rewrite <- H3;reflexivity.
+  assumption.
+  apply iter_proper;assumption.
+  apply iter_transpose_neqkey;assumption.
+  assumption.
+  apply iter_proper;assumption.
+  apply iter_transpose_neqkey;assumption.
+
+Qed.    
 End PreMake.
 
 Module MakeAVL(X:OrderedType )<:S(X).
