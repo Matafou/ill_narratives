@@ -447,10 +447,6 @@ Require Import Setoid.
    elim add_singleton_abs with (1:=H).
  Qed.
 
-Goal forall (p:{ (V⊸A),V}⊢A⊕M), 
-  exists_AtheseA_on_formula (fun _ _ _ => trueP) A M _ _ p  = trueP.
-Proof.
-  intros p.
   
   Ltac toto p := 
     (dependent simple inversion p||inversion p);clear p;subst;try discriminate;simpl;
@@ -467,7 +463,17 @@ Proof.
             let e := context C' [ env' ] in 
               setoid_replace (remove f env) with e in H by (apply eq_bool_correct;vm_compute;reflexivity)
           end
+        | H:(?x ⊸ ?y) = _  |- _ => try discriminate H;injection H;clear H;intros;subst
+        | H: (_ ⊕ _) = _  |- _ => try discriminate H;injection H;clear H;intros;subst
+        | H:(_ ⊗ _) = _ |- _  => try discriminate H;injection H;clear H;intros;subst
+        | H: _  & _ = _  |- _  => try discriminate H;injection H;clear H;intros;subst
+
   end.
+
+Goal forall (p:{ (V⊸A),V}⊢A⊕M), 
+  exists_AtheseA_on_formula (fun _ _ _ => trueP) A M _ _ p  = trueP.
+Proof.
+  intros p.
   toto p.
   
   Focus 1.
@@ -479,21 +485,13 @@ Proof.
   reflexivity.
   clear - i0 h2.
   toto i0.
-  injection H0;clear H0;intros;subst;vm_compute;reflexivity.
-  injection H0;clear H0;intros;subst. 
+  vm_compute;reflexivity.
   apply False_ind.
   setoid_rewrite h2 in i;clear h2.
   toto i.
   apply False_ind;clear - i h2.
   rewrite h2 in i;clear h2;toto i.
-
-
-  Focus 1.
-  injection H0;clear H0;intros;subst.
   simpl;reflexivity.
-
-  Focus 1.  
-  injection H0;clear H0;intros;subst.
   apply False_ind.
   toto i.
   symmetry in H0; destruct (union_singleton_decompose _ _ _  H0) as [[h1 h2]|[h1 h2]].
@@ -501,6 +499,7 @@ Proof.
   clear - H2 h1; rewrite h1 in H2;clear h1;toto H2.
 Qed.
 
+****
 Goal forall (p:{P&1, B&1, (V⊸A)&1, (E⊸A)&1,(P⊸M)&1,B ⊸ 1,V}⊢A⊕M), 
   exists_AtheseA_on_formula (fun _ _ _ => trueP) A M _ _ p  = trueP.
 wProof.
