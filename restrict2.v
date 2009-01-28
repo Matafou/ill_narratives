@@ -328,6 +328,57 @@ Proof.
 Qed.  
 
 
+  Lemma mem_remove: ∀ Γ f Δ g,  Γ \ f == Δ → g ∈ Δ → g ∈ Γ.
+  Proof.
+    intros Γ f Δ g H H0.
+    apply mem_remove_2 with (b := f).    
+    rewrite <- mem_morph_eq with (Γ:=Δ);auto.
+    apply eq_sym.
+    assumption.
+  Qed.
+
+Lemma Ac_Ap: ∀x, Ac x → Ap x.
+Proof.
+  intros x H.
+  induction H.
+  constructor 1;constructor 1.
+  constructor 2;constructor.
+  constructor 3;assumption.
+Qed.
+
+Ltac zap := 
+  match goal with
+    | |- ?x == ?x => apply eq_refl
+    | H: ILLVarInt.MILL.eq ?g ?q |- _ => apply eq_is_eq in H;subst
+    | H:?g ∈ (?q :: ?D') |- _ => destruct (mem_destruct _ _ _ H);clear H
+    | H: ?p ∈ ?Γ ,  H':∀ g : formula, g ∈ ?Γ → Ap g |- _ => assert (Ap (p)) by auto;clear H
+    | H:Ap (?p ⊸ ?q) |- _ => inversion H;clear H
+    | H:A (?p ⊸ ?q) |- _ => inversion H;clear H
+    | H:R (?p ⊸ ?q) |- _ => inversion H;clear H
+    | H:Ac (?p ⊸ ?q) |- _ => inversion H;clear H
+    | H:Ap (?p ⊕ ?q) |- _ => inversion H;clear H
+    | H:A (?p ⊕ ?q) |- _ => inversion H;clear H
+    | H:R (?p ⊕ ?q) |- _ => inversion H;clear H
+    | H:Ac (?p ⊕ ?q) |- _ => inversion H;clear H
+    | H:Ap (?p ⊗ ?q) |- _ => inversion H;clear H
+    | H:A (?p ⊗ ?q) |- _ => inversion H;clear H
+    | H:R (?p ⊗ ?q) |- _ => inversion H;clear H
+    | H:Ac (?p ⊗ ?q) |- _ => inversion H;clear H
+    | H:Ap (?p & ?q) |- _ => inversion H;clear H
+    | H:A (?p & ?q) |- _ => inversion H;clear H
+    | H:R (?p & ?q) |- _ => inversion H;clear H
+    | H:Ac (?p & ?q) |- _ => inversion H;clear H
+    | H: ?g ∈ ?Δ |- ?g ∈ (?Δ ∪ ?Δ') => apply mem_union_l;assumption
+    | H: ?g ∈ ?Δ |- ?g ∈ (?Δ' ∪ ?Δ) => apply mem_union_r;assumption
+    | H: ILLVarInt.MILL.eq ?g ?q |- _ => apply eq_is_eq in H;subst
+    | H: (?Γ \ ?p) == ?D |- ?g ∈ ?Γ => apply mem_remove with (Δ:=D) (f:=p);[auto|]
+    | H: ?g ∈ (?Γ \ ?p) |- ?g ∈ ?Γ => apply mem_remove with (Δ:=(Γ \ p)) (f:=p);[auto|]
+    | H:?Γ == ?Δ ∪ ?Δ' |- ?g ∈ ?Γ => rewrite (mem_morph_eq _ _ (Δ ∪ Δ'));[|auto]
+    | H:R ?p |- Ap ?p => constructor 2;assumption
+    | H: A ?p |- Ap ?p => constructor 1;assumption
+  end
+  ;try assumption.
+
 
 Lemma essai : ∀ Γ φ (h:Γ ⊢ φ), Apall Γ φ h → Istable Apall _ _ h.
 Proof.
@@ -340,134 +391,21 @@ Proof.
           | H:A _ |- _ => solve [inversion H]
           | H:Ap _ |- _ => solve [inversion H]
           | H:R _ |- _ => solve [inversion H]
-        end.
-  apply H0.
-  admit.
-  assert (Ap (p ⊸ q)) by auto.
-  repeat match goal with
-    | H:Ap (p ⊸ q) |- _ => inversion H;clear H
-    | H:A (p ⊸ q) |- _ => inversion H;clear H
-    | H:R (p ⊸ q) |- _ => inversion H;clear H
-         end;try assumption.
-  
-  destruct (mem_destruct _ _ _ H) as [H3| H3];clear H.
-  apply eq_is_eq in H3;subst.
-  assert (Ap (p ⊸ q)) by auto.
-  repeat match goal with
-    | H:Ap (p ⊸ q) |- _ => inversion H;clear H
-    | H:A (p ⊸ q) |- _ => inversion H;clear H
-    | H:R (p ⊸ q) |- _ => inversion H;clear H
-         end;try assumption.
-  apply H0.
-  admit.
-
-***
-
-  setoid_rewrite  H2 in H1.
-  apply eq_is_eq in H2;subst.
-  assert (h':A (p ⊗ q)).
-  auto.
-  inversion h';clear h';subst.
-  inversion H;constructor assumption.
-  destruct (mem_destruct _ _ _ H2) as [H3| H3];clear H2.
-  apply eq_is_eq in H3;subst.
-  assert (h':A (p ⊗ q)) by  auto.
-  inversion h';clear h';subst.
-  inversion H;constructor assumption.
-  apply mem_remove_2 in H3;auto.
-  
-  
-  apply H0. 
-  apply mem_union_l with (ms':=Δ') in H.
-  rewrite <- e0 in H.
-  eapply mem_remove_2;eexact H.
-  
-  assert (h:A (p ⊸ q)).
-  apply H0;assumption.
-  inversion h;clear h;subst.
-  constructor assumption.
+        end;try solve [repeat zap;subst;apply H0;repeat zap].
+  assert ( h : Ap 0) by auto.
+  inversion h.
+  inversion H.
   inversion H.
 
-  destruct (mem_destruct _ _ _ H);clear H.
-  apply eq_is_eq in H2;subst.
-  assert (h:A (p ⊸ q)).
-  apply H0;assumption.
-  inversion h;clear h;subst.
-  assumption.
-  inversion H.
+  repeat zap.
 
-  apply H0. 
-  apply mem_union_r with (ms:=Δ) in H2.
-  rewrite <- e0 in H2.
-  eapply mem_remove_2;eexact H2.
-
-  apply H0. 
-  apply mem_union_l with (ms':=Δ') in H.
-  rewrite <- e in H;assumption.
-
-  apply H0. 
-  apply mem_union_r with (ms:=Δ) in H.
-  rewrite <- e in H;assumption.
-
-  destruct (mem_destruct _ _ _ H) as [H2| H2];clear H.
-  apply eq_is_eq in H2;subst.
-  assert (h':A (p ⊗ q)).
-  auto.
-  inversion h';clear h';subst.
-  inversion H;constructor assumption.
-  destruct (mem_destruct _ _ _ H2) as [H3| H3];clear H2.
-  apply eq_is_eq in H3;subst.
-  assert (h':A (p ⊗ q)) by  auto.
-  inversion h';clear h';subst.
-  inversion H;constructor assumption.
-  apply mem_remove_2 in H3;auto.
-
-  apply mem_remove_2 in H;auto.
-
-  destruct (mem_destruct _ _ _ H) as [H3| H3];clear H.
-  apply eq_is_eq in H3;subst.
-  assert (h':A (p & q)) by  auto.
-  inversion h';clear h';subst.
-  inversion H;constructor assumption.
-  apply mem_remove_2 in H3;auto.
-
-
-  destruct (mem_destruct _ _ _ H) as [H3| H3];clear H.
-  apply eq_is_eq in H3;subst.
-  assert (h':A (p & q)) by  auto.
-  inversion h';clear h';subst.
-  inversion H;constructor assumption.
-  apply mem_remove_2 in H3;auto.
-
-  destruct (mem_destruct _ _ _ H) as [H3| H3];clear H.
-  apply eq_is_eq in H3;subst.
-  assert (h':A (p ⊕ q)) by  auto.
-  inversion h';clear h';subst.
-  inversion H;constructor assumption.
-  apply mem_remove_2 in H3;auto.
-
-  destruct (mem_destruct _ _ _ H) as [H3| H3];clear H.
-  apply eq_is_eq in H3;subst.
-  assert (h':A (p ⊕ q)) by  auto.
-  inversion h';clear h';subst.
-  inversion H;constructor assumption.
-  apply mem_remove_2 in H3;auto.
-
-  inversion H1.
-  inversion H.
-
-  assert (A 0) by auto.
-  inversion H.
+  inversion H;subst.
   inversion H2.
-  
-  destruct (mem_destruct _ _ _ H) as [H3| H3];clear H.
-  apply eq_is_eq in H3;subst.
-  assert (h':A (!p)) by  auto.
-  inversion h';clear h';subst.
-  inversion H;constructor assumption.
-  apply mem_remove_2 in H3;auto.
+  constructor 1;assumption.
+  inversion H2.
+  constructor 2;assumption.
 
-  apply mem_remove_2 in H;auto.
+  repeat zap;subst;apply H0;repeat zap.
 
 Qed.  
 
