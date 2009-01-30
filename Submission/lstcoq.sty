@@ -5,7 +5,7 @@
 %%
 \lstdefinelanguage{Coq}%
   {morekeywords={let,signature,polyinterpkind,termination,%
-      coq_certify_proof,termcrit,%
+      coq_certify_proof,termcrit,Goal,Notation,%
       Variable,Inductive,CoInductive,Fixpoint,CoFixpoint,%
       Definition,Lemma,Theorem,Axiom,Local,Save,Grammar,Syntax,intro,%
       trivial,Qed,intros,symmetry,simpl,rewrite,apply,elim,assumption,%
@@ -21,14 +21,15 @@
    escapeinside={(*@}{@*)},%
    morestring=[d]",%
    literate={=>}{{$\Rightarrow$}}1{>->}{{$\rightarrowtail$}}2%
-{->}{{$\to$}}2{~}{{$\ $}}1%
+{->}{{$\to$}}1{~}{{$\ $}}1%
 {/\\}{{$\land$}}2{\\/}{{$\lor$}}2%
 {forall}{{$\forall$}}1{exists}{{$\exists$}}1%
-{\\G}{{$\mathrm{\Gamma}$}}1{|-}{{$\vdash$}}1%
-{\\D}{{$\mathrm{\Delta}$}}1{-o}{{$\multimap$}}1%
+{\\G}{{$\mathrm{\Gamma}$}}1{|-}{{$\vdash$}}2%
+{\\D}{{$\mathrm{\Delta}$}}1{-o}{{$\multimap$}}3%
+{\\E}{{$\mathrm{\Delta\!}$\textquotesingle}}1%
 {**}{{$\otimes$}}1{++}{{$\oplus$}}1%
-{\\O}{{$\emptyset$}}1{\\in}{{$\in$}}1%
-{\\Top}{{$\top$}}1{\\U}{{$\cup$}}1%
+{\\O}{{$\emptyset$}}1{\\in}{{$\in$}}2%
+{\\Top}{{$\top$}}1{\\U}{{$\cup$}}3%
 {\\!}{{$\!$}}1%
 % {_0}{{${}_{\tt 0}${}}}1%
 % {_1}{{${}_{\tt 1}${}}}1%

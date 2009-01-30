@@ -1,7 +1,9 @@
 \documentclass[runningheads,a4paper]{llncs}
 \usepackage{marginote}%A enlever avant envoi
-
+\usepackage{textcomp}
 \usepackage{amssymb}
+\newcommand{\N}{\mathbb{N}}
+
 \setcounter{tocdepth}{3}
 \usepackage{graphicx}
 \usepackage{bnf}
@@ -256,56 +258,57 @@ automation for proving \emph{closed sequent}\marginote{r\'ef. vers la
 for reasoning on properties of proofs and even on \emph{all possible
   proofs of a sequent}. \marginote{r\'ef. vers la section idoine.}
 
-Formulae, proofs and corresponding convenient notations are defined as
-follows (type \texttt{env} being an modeling of multisets):
+
+Formulae, proofs and corresponding convenient (Unicode) notations are
+defined as follows. Type \texttt{env} is an instance of multisets
+equipped with an equivalence relation \texttt{==} and Vars.t (type of
+atomic propositions) is implemented as $\N$ in the following:
 
 \marginote{no Cut}
 \begin{lstlisting}
-  Inductive formula : Type := 
-  | Proposition : Vars.t -> formula
-  | Implies : formula -> formula -> formula 
-  | Otimes : formula -> formula -> formula 
-  | Oplus : formula -> formula -> formula 
-  | One : formula 
-  | Zero : formula 
-  | Bang : formula -> formula
-  | And : formula -> formula  -> formula 
-  | Top : formula.
+Inductive formula : Type := 
+| Proposition : Vars.t -> formula | Implies : formula -> formula -> formula 
+| Otimes : formula -> formula -> formula | One : formula 
+| Oplus : formula -> formula -> formula | Zero : formula | Top : formula
+| Bang : formula -> formula | And : formula -> formula  -> formula.
 
-  Notation "A -o B" := (Implies A B) : ILL_scope.
-  Notation  "A ++ B" := (Oplus A B) : ILL_scope.
-  Notation  "A ** B" := (Otimes A B) : ILL_scope.
-  Notation "1" := One : ILL_scope.
-  Notation "0" := Zero : ILL_scope.
-  Notation  "! A" := (Bang A) : ILL_scope.
-  Notation  "A & B" := (And A B) : ILL_scope.
-  Notation  "\Top" := Top : ILL_scope.
-  Notation  "x \in \G" := (mem x G = true) : ILL_scope.
-  Notation  "x \ \G" := (remove x G) : ILL_scope.
+Notation "A -o B" := (Implies A B).
+(* Other connectives... *) (*@ % Notation  "A ++ B" := (Oplus A B).
+  % Notation  "A ** B" := (Otimes A B).
+  % Notation "1" := One.
+  % Notation "0" := Zero.
+  % Notation  "! A" := (Bang A).
+  % Notation  "A & B" := (And A B).
+  % Notation  "\Top" := Top.
+  % Notation  "x \in \G" := (mem x G = true).
+@*)
+Notation  "x :: \G" := (add x G). (* Environment operation *)
+Notation  "x \ \G" := (remove x G). (* Environment operation *)
  
-  Inductive ILL_proof : env -> formula -> Prop :=
-    Id : forall \G p, \G == {p} -> \G |- p
-  | Impl_R : forall \G p q, p::\G |- q -> \G |- p -o q
-  | Impl_L : forall \G \D \D' p q r, (p -o q) \in \G -> (\G \ (p -o q)) == \D \U \D'
-(*@\hfill@*)->  \D |- p -> q::\D' |- r -> \G |- r
-  | Times_R : forall \G \D \D' p q , \G == \D \U \D' -> \D |- p -> \D' |- q -> \G |- p ** q
-  | Times_L : forall \G p q r , (p ** q) \in \G -> q :: p :: (\G \ (p ** q)) |- r -> \G |- r
-  | One_R : forall \G, \G == \O -> \G |- 1
-  | One_L : forall \G p , 1 \in \G -> (\G \ 1) |- p -> \G |- p
-  | And_R : forall \G p q , \G |- p -> \G |- q -> \G |- (p & q)
-  | And_L_1 : forall \G p q r , (p & q) \in \G ->  p::(\G \ (p&q)) |- r -> \G |- r
-  | And_L_2 : forall \G p q r , (p & q) \in \G ->  q::(\G \ (p&q)) |- r -> \G |- r
-  | Oplus_L : forall \G p q r ,  (p ++ q) \in \G
-(*@\hfill@*)->  p :: (\G \ (p ++ q)) |- r -> q :: (\G \ (p ++ q)) |- r -> \G |- r
-  | Oplus_R_1 : forall \G p q , \G |- p -> \G |- p ++ q
-  | Oplus_R_2 : forall \G p q , \G |- q -> \G |- p ++ q 
-  | T_ : forall \G, \G |- \Top
-  | Zero_ : forall \G p , 0 \in \G -> \G |- p
-  | Bang_D : forall \G p q , !p \in \G -> p :: (\G \ (!p)) |- q -> \G |- q
-  | Bang_C : forall \G p q , !p \in \G -> !p :: \G |- q ->  \G |- q
-  | Bang_W : forall \G p q , !p \in \G -> \G \ (!p) |- q ->  \G |- q
-    where " x |- y " := (ILL_proof x y) : ILL_scope.
+Inductive ILL_proof: env -> formula -> Prop:=
+|Id: forall \G p, \G == {p} -> \G |- p
+|Impl_R: forall \G p q, p::\G |- q -> \G |- p-oq
+|Impl_L: forall \G \D \E p q r, (p-oq)\in\G -> (\G\(p-oq))==\D\U\E -> \D |- p -> q:: \E |- r
+(*@\hfill@*) -> \G |- r
+|Times_R: forall \G \D \D' p q, \G == \D\U\D' -> \D |- p -> \D' |- q -> \G |- p ** q
+|Times_L: forall \G p q r, (p ** q)\in\G -> q::p::(\G\(p ** q)) |- r -> \G |- r
+|One_R: forall \G, \G == \O -> \G |- 1
+|One_L: forall \G p, 1\in\G -> (\G\1) |- p -> \G |- p
+|And_R: forall \G p q, \G |- p -> \G |- q -> \G |- (p & q)
+|And_L_1: forall \G p q r, (p & q)\in\G -> p::(\G\(p&q)) |- r -> \G |- r
+|And_L_2: forall \G p q r, (p & q)\in\G -> q::(\G\(p&q)) |- r -> \G |- r
+|Oplus_L: forall \G p q r, (p ++ q)\in\G -> p::(\G\(p ++ q)) |- r -> q::(\G\(p ++ q)) |- r
+(*@\hfill@*)-> \G |- r
+|Oplus_R_1: forall \G p q, \G |- p -> \G |- p ++ q
+|Oplus_R_2: forall \G p q, \G |- q -> \G |- p ++ q 
+|T_: forall \G, \G |- \Top
+|Zero_: forall \G p, 0\in\G -> \G |- p
+|Bang_D: forall \G p q, !p\in\G -> p::(\G\(!p)) |- q -> \G |- q
+|Bang_C: forall \G p q, !p\in\G -> !p::\G |- q -> \G |- q
+|Bang_W: forall \G p q, !p\in\G -> \G\(!p) |- q -> \G |- q
+where " x |- y ":= (ILL_proof x y).
 \end{lstlisting}
+
 
 Notice the use of the form ``$\phi\in\Gamma \to \Gamma\vdash\dots$''
 instead of ``$\phi,\Gamma\vdash\dots$''. This formulation avoids
@@ -325,9 +328,39 @@ Preuve en tant qu'objet de l'etude et non pas prouvabilite d'un sequent seulemen
 
 \textbf{Cas d'utilisation: une preuve du sequent qui suit l'ordre du roman, preuve assistee meme si pas full-auto}
 
+We consider the sequent given below, corresponding to the end of Emma
+Bovary (where \texttt{P}, \texttt{A} etc are predefined constants). 
+\begin{lstlisting}[language=Coq]
+Goal Emma: {P&1, R, G, B&1, !(V-oA), (E-oA)&1, (P-oM)&1,
+(*@\hfill@*)   (R-o1)&(R-oE), (G-o1) ++ (G-oV), 1++(B-oV)&(B-o1)} |- A ++ M.
+\end{lstlisting}
+We developed a small set of simple tactics helping to apply rules. For
+example on can apply the $\oplus_R$ rule on this goal to consider the
+alternative offered by external choice \lstinline|(G-o1) ++ (G-oV)!|.
+This is achieved by tactic: \lstinline|oplus_l (G-o1) (G-oV)|. The
+first of the two subgoals is of the form: 
+\begin{lstlisting}
+{G-o1, P&1, R, G, ... |- A ++ M.
+\end{lstlisting}
+which allows for rule $\multimap_l$ rule to perform a narrative action
+which ``uses'' \lstinline|G| using tactic: \lstinline|impl_l G 1|.
+\marginote{more automation?}
+
 Exemple de la preuve deroulee, de maniere assistee: une instance d'un sequent assez generatif. On montre comment on a produit la preuve en Coq, et on raconte l'histoire correspondante, avec les choix possibles de l'utilisateur. 
 
-Il faut que ca fasse "methode". Ideal, un truc du genre: l'utilisateur choisit une action narrative a executer, et une tactique Coq deroule la suite, jusqu'a ce qu'il y aie une nouvelle formule a decomposer. Le contexte est coupe en 2 en fait: il y a les formules qui correspondent a des actions narratives ou composition d'actions narratives, et des trucs qui sont "juste" des ressources ou des etats consommes par les actions. L'utilisateur ne travaille que sur les premieres et Coq l'aide pour les "details".
+Il faut que ca fasse "methode". Ideal, un truc du genre: l'utilisateur
+choisit une action narrative a executer, et une tactique Coq deroule
+la suite, jusqu'a ce qu'il y aie une nouvelle formule a decomposer. Le
+contexte est coupe en 2 en fait: il y a les formules qui correspondent
+a des actions narratives ou composition d'actions narratives, et des
+trucs qui sont "juste" des ressources ou des etats consommes par les
+actions. L'utilisateur ne travaille que sur les premieres et Coq
+l'aide pour les "details".
+
+Proposition Pierre: On consomme les $\multimap$, eventuellement en
+utilisant les bangs et les $\otimes$ tant qu'on peut, puis quand on
+peut plus rien consommer on attend que l'utilisateur casse un \&
+(interne) ou un $\oplus$ (externe).
 
 Considerations sur les possibles alternatives par rapport a la structure de la specification, pour lier avec la suite: les "choix internes" a la recherche de preuve, l'ordre d'execution des actions. 
 
