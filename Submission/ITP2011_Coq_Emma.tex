@@ -1,6 +1,7 @@
 \documentclass[runningheads,a4paper]{llncs}
 \usepackage{marginote}%A enlever avant envoi
 \usepackage{textcomp}
+\usepackage{amsmath}
 \usepackage{amssymb}
 \newcommand{\N}{\mathbb{N}}
 
@@ -27,6 +28,7 @@
 \newcommand{\plab}[1]{\RightLabel{($#1$)}}
 \newcommand{\uinf}[1]{\UnaryInfC{#1}}
 \newcommand{\binf}[1]{\BinaryInfC{#1}}
+\DeclareMathOperator{\wf}{WF}
 
 
 \begin{document}
@@ -157,8 +159,29 @@ Narrative actions can be composed for offering two types of choices. A composed 
 The resulting state of a narrative is modelled in the subset of ILL composed of $\otimes$ and $\oplus$ and $\&$. 
 $\mathtt{Goal_{1}} \otimes \mathtt{Goal_{2}}$ expresses that both $Goal_{i}$ states are accessible at the end of the interactive narrative. $\mathtt{Goal_{1}} \oplus \mathtt{Goal_{2}}$ expresses that either state $\mathtt{Goal_{i}}$ is accessible, and the choice depends on the proof search and might differ depending on the unfolding branch of the narrative.$\mathtt{Goal_{1}} \& \mathtt{Goal_{2}}$ expresses that either state should be accessible, and this choice depends on an event external to the narrative, such as user interaction for instance. Similarly to the situation with composed actions $\mathtt{Act_1}\oplus\mathtt{Act_2}$, the sub-proofs following the application of the $\&$ right rule will allow ensuring that the corresponding narratives are well-formed stories.
 %Note: we don't need $\multimap (R)$, $! (R)$ as the sequent language is stable: these connectors can't appear on the right side whatever the sequent appearing in the proof, see after.
+
 \subsubsection{Stability of the representation}
-We describe here a proof in Coq of the stability of the sequent specification of an interactive narrative. Given an ILL sequent specifying a narrative respecting the modelling method described on figure~\ref{fig:sequent_grammars}, all the sequent appearing in the proof will be of the form $\Gamma\vdash G $, where $\forall F\in\Gamma$, $F$ is a \texttt{Context} formula and $G$ is a \texttt{Goal} formula. In other words, modulo the application of the $\otimes$ left rule, all the sequents apearing in such a proof will be composed of a context describing resources and actions of a narrative, and of a left-hand side formula representing constraints on the ending state of the narrative.
+
+We describe here a proof in Coq of the stability of the sequent specification of an interactive narrative. Given an ILL sequent specifying a narrative respecting the grammar described on figure~\ref{fig:sequent_grammars}, all the sequent appearing in the proof will be of the form $\Gamma\vdash G $, where $\forall F\in\Gamma$, $F$ is a \texttt{Context} formula and $G$ is a \texttt{Goal} formula. In other words, modulo the application of the $\otimes$ left rule, all the sequents apearing in such a proof will be composed of a context describing resources and actions of a narrative, and of a left-hand side formula representing constraints on the ending state of the narrative.
+More formally, we define the following properties on sequents and
+proofs:
+\begin{definition}
+  Let $s$ be a sequent of the form $\Gamma\vdash G$, we say that $s$
+  is \emph{well formed} if $G\in\texttt{Goal}$ and $\forall
+  F\in\Gamma, f \in \texttt{Context}$. We shall write $\wf(s)$.
+\end{definition}
+\begin{definition}
+  A property $P$ on sequents is said to \emph{hold for a proof} $h$ of
+  a sequent $s$ if it holds for all sequents of the proof $h$ above
+  $s$. We shall note $\wf(h)$.
+\end{definition}
+\begin{definition}\label{def:stab}
+  $\wf$ is stable for ILL, that is for any sequent $s$ such that
+  $\wf(s)$ and any proof $h$ of $s$, $\wf(h)$.
+\end{definition}
+In section~\ref{sec:second-order-analys} we describe the proof of
+this property in Coq.
+
 
 TODO Dvper preuve
 %Lemme de Pierre: on a jamais d'implication en sous-formule gauche d'une application. Generaliser.
@@ -237,6 +260,7 @@ Interactive narratives are interpreted from proofs, from a structured trace of e
 We describe here the construction of a sequent modelling an extract of Flaubert's novel Madame Bovary, and one of the generated narrative. The sequent's proof in Coq is described in a later section and is only sketched here in the form of a tree.
 \section{Using the Coq proof assistant for Story Properties Analysis}
 \subsection{ILL encoding into Coq}
+\label{sec:ill-encoding-into}
 
 A lot of encodings of (different fragments and variants of) linear
 logic have been proposed in proof assistants. In~\cite{Power99} for
@@ -366,6 +390,7 @@ Considerations sur les possibles alternatives par rapport a la structure de la s
 
 Montrer qu'on ne peut pas construire d'histoires qui sont mal formees du point de vue des ressources disponibles (e.g. dans notre cas, commencer par aller voir Rodolphe et choisir de s'enfuir, donner l'intuition de la raison, liee a une competition pour les ressources).
 \subsection{Second order analysis of interactive narratives specification}
+\label{sec:second-order-analys}
 (Decrire le passage assiste par Coq au second ordre: C'est ce qu'on a en plus par rapport a un prouveur)
 \\
 Inspection des proprietes d'une preuve/histoire -> Inspection des proprietes de l'ensemble des histoires specifiees par un sequent.\\
@@ -379,6 +404,73 @@ Decrire la preuve de Julien: quelque soit la preuve du sequent, on aura toujours
 %\textbf{Cas d'utilisation 4: exhiber une instance particuliere de narration interactive, qui verifie une propriete structurelle donnee}
 %Avec l'exemple: exhiber une histoire interactive ayant plusieurs fins possibles suivant le "chemin" parcouru par l'utilisateur. ajout, au second ordre, de contraintes sur la recherche de preuve. Permet de resoudre des problemes non traites?
 %Lorsque tactiques pour automatiser seront definies, cela permettra de rechercher/generer des histoires verifiant certaines proprietes structurelles: presence de fins alternatives etc.
+
+\subsubsection{Restricting to well-formed sequents}
+\label{sec:restrict}
+
+Some expected properties of proofs are difficult to define for all
+proof of a sequent but may be easier on well-formed proofs. In order
+to use this fact we provide a proof the of property~\ref{def:stab} of
+stability of $\wf$ for ILL. To this end, we prove the stability of
+$\wf$ for each rule.
+
+The grammar of figure~\ref{fig:sequent_grammars} is defined as the following
+mutual inductive property\marginote{en annexe?}:
+\begin{lstlisting}
+Inductive Act : formula -> Prop := (* Act *)
+| A1: Act 1
+| A2:forall \phi1 \phi2, Cres \phi1 -> Context \phi2 -> Act (\phi1 -o \phi2)
+| A3: forall \phi1 \phi2, Act \phi1 -> Act \phi2 -> Act (\phi1 ++ \phi2)
+| A4: forall \phi1 \phi2, Act \phi1 -> Act \phi2 -> Act (\phi1 & \phi2)
+| A5: forall \phi, Act \phi -> Act (! \phi)
+with Cres: formula -> Prop:= (* CRes *)
+| Cres1: Cres 1
+| Cres2: forall n, Cres (Proposition n)
+| Cres3: forall \phi1 \phi2, Cres \phi1 -> Cres \phi2 -> Cres (\phi1 ** \phi2)
+with Context: formula -> Prop:= (* Context *)
+| Context1:forall \phi, Act \phi -> Context \phi
+| Context2:forall \phi, Res \phi -> Context \phi
+| Context3: forall \phi1 \phi2, Context \phi1 -> Context \phi2 -> Context (\phi1 ** \phi2)
+with Res: formula -> Prop:= (* Res *)
+  R1: Res 1
+| R2: forall n, Res (Proposition n)
+| R3: forall \phi, Res \phi -> Res (!\phi)
+| R4: forall \phi1 \phi2, Res \phi1 -> Res \phi2 -> Res (\phi1 ** \phi2)
+| R5: forall \phi1 \phi2, Res \phi1 -> Res \phi2 -> Res (\phi1 & \phi2).
+
+Inductive Goal : formula -> Prop :=
+| G1: Goal 1
+| G2: forall n, Goal (Proposition n)
+| G3: forall \phi1 \phi2, Goal \phi1 -> Goal \phi2 -> Goal (\phi1 ** \phi2)
+| G4: forall \phi1 \phi2, Goal \phi1 -> Goal \phi2 -> Goal (\phi1 ++ \phi2)
+| G5: forall \phi1 \phi2, Goal \phi1 -> Goal \phi2 -> Goal (\phi1 & \phi2).
+
+Definition Contextall \G f (_:\G|-f):= (forall g:formula, g\in\G  -> Context g) /\ Goal f.
+\end{lstlisting}
+
+
+
+The stability for each rule is given by an inductive property mirroring the type
+of proofs, stating that a property \texttt{pred} holds for all premiss sequents:
+
+\begin{lstlisting}
+Inductive Istable (pred:forall e f (h: e |- f), Prop): forall e f (h: e |- f) , Prop := 
+| IId: forall \G (f:formula) (heq:\G == {f}), Istable pred \G f (Id _ _ heq)
+| IImpl_R: forall \G p q (h:(p :: \G |- q)), pred _ _ h -> Istable pred _ _ h
+                           -> Istable pred _ _ (Impl_R \G p q h)
+| IImpl_L: forall \G \D \E p q r (hin:(p-oq)\in\G) (heq:remove (p-o q) \G==\D\U\E),
+           forall (h:\D |- p) (h':q::\E |- r), pred _ _ h -> pred _ _ h'
+                          -> Istable pred _ _ h -> Istable pred _ _ h'
+                          -> Istable pred _ _ (Impl_L \G \D \E p q r hin heq h h')
+| ...
+\end{lstlisting}
+The stability of the grammar is then stated as the following lemma:
+\begin{lstlisting}
+Lemma Grammar_Stable : forall \G \phi (h:\G |- \phi), Contextall \G \phi h -> Istable Contextall _ _ h.
+\end{lstlisting}
+It is proved by induction on \texttt{h}.
+
+
 \section{Conclusion}
 On a montre que: un couplage ILL et Proof assistant fourni un outil puissant pour etudier les proprietes structurelles de narrations interactives.\\
 On a fourni: une methode d'encodage narration vers sequent ILL, une methode pour prouver ce sequent en Coq, un algorithme d'interpretation d'une telle preuve en une narration interactive.\\
