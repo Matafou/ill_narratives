@@ -5,6 +5,7 @@
 \setcounter{tocdepth}{3}
 \usepackage{graphicx}
 \usepackage{bnf}
+\usepackage{bussproofs}
 
 \usepackage{url}
 %\urldef{\mailsa}\path|{alfred.hofmann, ursula.barth, ingrid.haas, frank.holzwarth,|
@@ -19,6 +20,11 @@
 \lstset{language=Coq,fontadjust=false,columns=fixed,showspaces=false,showstringspaces=false}
 \lstset{basicstyle=\tt\small,commentstyle=\it\ttfamily,basewidth={0.475em},keywordstyle=\bf\ttfamily}
 \lstset{captionpos=t,float,belowcaptionskip=\medskipamount}
+
+\newcommand{\seq}[2]{$#1\:\vdash\:#2$}
+\newcommand{\plab}[1]{\RightLabel{($#1$)}}
+\newcommand{\uinf}[1]{\UnaryInfC{#1}}
+\newcommand{\binf}[1]{\BinaryInfC{#1}}
 
 
 \begin{document}
@@ -73,9 +79,9 @@ More specifically, we describe a method for modelling narrative resources and ac
 %
 Narrative representations have always played a prominent role in AI research and Cognitive Science (see~\cite{Richards09} for a recent review and current trends, and~\cite{AAAI10}). More recently, the emergence of new media has created an opportunity for real-world applications of computational models of narratives~\cite{Laurel93,Murray98}. Research in Interactive Storytelling, whose long-term goal is to create narratives which can respond and adapt in real-time to user's reaction, has thus recently become a sustained interest within the AI community~\cite{AAAI07,AAAI09}.
 
-Recent research in Interactive Storytelling has converged on the use of AI techniques (mostly Planning~\cite{Young99}) to generate consistent plots (seen as a sequence of actions corresponding to the backbone of the narrative), but has paradoxically failed to capitalise on narrative representations. Initial hopes of developing computational narratology on the same bases as computational linguistics using narrative models developed in the field of humanities~\cite{Greimas66,Bremond73} have been dashed by the finding that they were closer to ontologies than to proper logical or computational formalisms~\cite{Cavazza06}.
+Recent research in Interactive Storytelling has converged on the use of AI techniques (mostly Planning~\cite{Young99}) to generate consistent plots (seen as a sequence of actions corresponding to the backbone of the narrative), but has paradoxically failed to capitalise on narrative representations. Initial hopes of developing computational narratology on the same basis as computational linguistics using narrative models developed in the field of humanities~\cite{Greimas66,Bremond73} have been dashed by the finding that they were closer to ontologies than to proper logical or computational formalisms~\cite{Cavazza06}.
 
-In order to overcome this dead-end, we have recently described in~\cite{bosser10} how Linear Logic(LL)~\cite{GirardTCS87}, and in particular Intuitionistic Linear Logic~\cite{GirardILL87} can provide a suitable conceptual model for Narratives on a structural basis. Interactive Narratives are modelled as proofs of a sequent written in Linear Logic which describes initial resources and possible narrative actions. This allows to express naturally key properties for Interactive Narratives while supporting a return to first principles of narrative action representation (causality and competition for resources).
+In order to overcome this dead-end, we have recently described in~\cite{bosser10} how Linear Logic(LL)~\cite{GirardTCS87}, and in particular Intuitionistic Linear Logic~\cite{GirardILL87} can provide a suitable conceptual model for Narratives on a structural basis. Interactive Narratives are modelled as proofs of a sequent written in Linear Logic which describes initial resources and possible narrative actions. This allows to express naturally key properties for Interactive Narratives while suporting a return to first principles of narrative action representation (causality and competition for resources).
 
 %a affiner/preciser. ce paragraphe doit etre accrocheur pour la communaute.
 Building on this work, we propose here a first step towards the automation of the structural analysis of interactive narratives using the Coq Proof-Assistant. We describe how to specify narratives on a structural basis only in the form of an ILL sequent, and a dedicated ILL encoding into Coq, with tactics allowing to obtain proofs of such a sequent. We describe how such proofs are interpreted as well-formed narratives. Our encoding of ILL into Coq supports, as have previous work, the assisted generation of ILL proofs, but also assists the reasoning on the properties of proofs and on all the possible proofs of an ILL sequent, through lemmas and tactics. This allows us to explore second order structural properties traversing all the interactive narratives which can be generated from a description of initial and atomic narrative actions and resources.
@@ -107,7 +113,7 @@ Our approach is based on a formal specification of interactive narratives resour
 %
 The subset language of ILL we define here allows to describe the initial resources of the narrative, the available narrative actions, and constraints on the possible ending states of the narrative. Key to our interpretation, narrative actions are modelled using $\multimap$ which allows a precise description of their impact on the narrative environment. As we work in an open world assumption, external impact on the narrative (for instance user interaction) is modelled by using the $\oplus$ connector for describing choices between possible narrative actions, and by using $\&$ for describing a choice between two possible ending states.
 
-Such a specification of narratives encompasses the description of the available resources and states of the narratives, the description of the semantic of narrative actions through their impact on the context of execution, and the possible ending states of the narrative. The initial sequent thus takes the form $\Gamma , \Delta \vdash \mathtt{Goal}$, where $\Gamma$ is a multiset representing resources and initial conditions, $\Delta$ is a multiset representing the possible narrative actions, and $Goal$ a formula representing the possible ending state of the narrative. A sequent thus provides the knowledge representation base of a set of interactive narratives. 
+Such a specification of narratives encompasses the description of the available resources and states of the narratives, the description of the semantic of narrative actions through their impact on the context of execution, and the possible ending states of the narrative. The initial sequent thus takes the form $\Gamma , \Delta \vdash \mathtt{Goal}$, where $\Gamma$ is a multiset representing resources and initial conditions, $\Delta$ is a multiset representing the possible narrative actions, and $Goal$ a formula representing the possible ending state of the narrative. A sequent thus provides the knowledge representation base of a set of narratives. 
 
 While the description of the sequent places us in the whole ILL fragment, the modeling language we use for this paper causes restrictions on the structure of formulae. This will in turn cause certain restrictions on the properties of the generated proofs which we can verify. (TODO Si temps permet?)
 
@@ -167,13 +173,53 @@ TODO Dvper preuve
 
 %Pour simplifier l'expression de la propriete et sa demonstration, on peut unifier un peu plus en enrichissant le language de description dans figure~\ref{sequent_grammars}. On considere tous les sequents $\Gamma \vdash \phi$ ou $F\in\Gamma$ est $F::= R|A| F_{1}\otimes F_{2}$.
 \subsection{Interpreting a proof as an Interactive narrative\label{subsec:proof_to_narrative}}
-Interactive narratives are interpreted from proofs, from a structured trace of execution of the $\multimap$ left rule. The produced interactive narrative is interpreted using the $\nu$ interpretation function described on figure~\ref{fig:interpretation}. The obtained narratives are thus described using simple narrative actions (modelled in the initial sequent using the $\multimap$ connector), and the following list of operators:
+Interactive narratives are interpreted from proofs, from a structured trace of execution of the $\multimap$ left rule. Other ILL rules of particular significance for this interpretation are the $\oplus$ left, and $\otimes$ and $\&$ right rules. Interactive narratives are obtained from proofs using the $\nu$ function described on figure~\ref{fig:interpretation}. The obtained narratives are thus described using simple narrative actions (modelled in the initial sequent using the $\multimap$ connector), and the following list of operators:
 \begin{itemize}
 \item [$\succ$] is a precedence relationship, defining a partial order on the execution of narrative actions: $\nu=\nu_1\succ n-action \succ \nu_2$ is a narrative where the narrative $\nu_1$ precedes the narrative action $n-action$ which precedes the narrative $\nu_2$.
 \item [$\triangledown$] is a branching of the narrative in an open-world assumption: $\nu=\nu_1\triangledown\nu_2$ is a narrative where both sub-narratives $\nu_1$ and $\nu_2$ are possible, but only one will actually be unfolded depending on an external event such as user-interaction for instance.
-\item [$\|$] represents a concurrency relationship between two narratives: $\nu=\nu_1\|\nu_2$ is a narrative consisting of both $\nu_1$ and $\nu_2$ where the two sub-narratives will be unfolded concurrently and independantly.
+\item [$\|$] represents a concurrency relationship between two narratives: $\nu=\nu_1\|\nu_2$ is a narrative consisting of both $\nu_1$ and $\nu_2$ where the two sub-narratives will be unfolded concurrently and independently.
 \end{itemize}
 \begin{figure}
+\begin{minipage}{0.5\columnwidth}
+\begin{prooftree}
+\AxiomC{\seq{\Gamma}{A}}
+    \AxiomC{\seq{\Delta , B}{C}}
+    \plab{\multimap_{left}}
+\binf{\seq{\Gamma , \Delta , A \multimap B}{C}}
+\end{prooftree}
+\end{minipage}
+%
+\begin{minipage}{0.5\columnwidth}
+\center
+\begin{prooftree}
+\AxiomC{\seq{\Gamma , A}{C}}
+    \AxiomC{\seq{\Gamma , B}{C}}
+\plab{\oplus_{left}}
+\binf{\seq{\Gamma , A \oplus B}{C}}
+\end{prooftree}
+\end{minipage}
+%
+\begin{minipage}{0.5\columnwidth}
+\center
+\begin{prooftree}
+\AxiomC{\seq{\Gamma}{A}}
+    \AxiomC{\seq{\Gamma}{B}}
+\plab{\&_{right}}
+\binf{\seq{\Gamma}{A\& B}}
+\end{prooftree}
+\end{minipage}
+%
+\begin{minipage}{0.5\columnwidth}
+\begin{prooftree}
+\AxiomC{\seq{\Gamma}{A}}
+    \AxiomC{\seq{\Delta}{B}}
+\plab{\otimes_{right}}
+\binf{\seq{\Gamma , \Delta}{A \otimes B}}
+\end{prooftree}
+\end{minipage}
+
+
+\begin{center}
 \begin{tabular}{r l}
  $\nu(l)$                                              & $= \emptyset$\\
  $\nu(unary[P])$                                           & $ = \nu(P)$\\
@@ -182,7 +228,8 @@ Interactive narratives are interpreted from proofs, from a structured trace of e
  $\nu(\&_{right}[P_{left};P_{right}])$                       & $= \nu(P_{left}) \triangledown \nu(P_{right})$\\
  $\nu(\otimes_{right}[P_{left};P_{right}]$                   & $= \nu(P_{left}) \| \nu(P_{right})$
 \end{tabular}
-\caption{Proof to Narrative Interpretation function $\nu$: the function is defined recursively on sub-proofs from the last applied rule, first on leafs, unary rules, and finally branching rules. $\nu(A\multimap B)$ is the narrative action initially modelled by the formula $A\multimap B$ \label{fig:interpretation}}
+\end{center}
+\caption{Key ILL Rules and Proof to Narrative Interpretation Function $\nu$: the function is defined recursively on sub-proofs from the last applied rule, first on leafs, unary rules, and finally branching rules. $\nu(A\multimap B)$ is the narrative action initially modelled by the formula $A\multimap B$ \label{fig:interpretation}}
 \end{figure}
 \subsection{Examples:} Construction of the sequent, generated interactive narrative.
 We describe here the construction of a sequent modelling an extract of Flaubert's novel Madame Bovary, and one of the generated narrative. The sequent's proof in Coq is described in a later section and is only sketched here in the form of a tree.
