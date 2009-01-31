@@ -9,6 +9,7 @@
 \usepackage{graphicx}
 \usepackage{bnf}
 \usepackage{bussproofs}
+\usepackage{multirow}
 
 \usepackage{url}
 %\urldef{\mailsa}\path|{alfred.hofmann, ursula.barth, ingrid.haas, frank.holzwarth,|
@@ -181,22 +182,7 @@ proofs:
 \end{definition}
 In section~\ref{sec:second-order-analys} we describe the proof of
 this property in Coq.
-
-
-TODO Dvper preuve
-%Lemme de Pierre: on a jamais d'implication en sous-formule gauche d'une application. Generaliser.
-%If the initial sequent is of the form $\Gamma , \Delta \vdash \phi$ as defined on figure~\ref{sequent_grammars} then all the sequents appearing in the proof respect the same construction modulo application of the $\otimes$ rule: at every step of the proof, the left context is always composed of resources, actions, and $\otimes$ of resources and actions, and the left formula is always in the language of $\phi$.
-
-%Intuition:\\
-%Partie droite du sequent: la seule maniere de faire apparaitre une formule qui n'est pas une sous formule de $\phi$ c'est d'utiliser $\multimap(L)$. Or cela introduit a droite des formules de type $Ac$ qui sont dans un sous ensemble du language de $\phi$.\\
-%Partie gauche du sequent:\\
-%Regles permettant d'ajouter une formule a gauche qui n'est pas une sous formule d'une formule de gauche: seulement  $\multimap(R)$ et on ne l'a pas puisque pas dans le language de phi.\\
-%Regles decomposant une formule a gauche:\\
-%$\multimap(L)$ fait apparaitre soit une ressource dans le language de $R \in \Gamma$, soit une action dans le langage de $A\in\Delta$ soit une formule qui est un $\otimes$ d'actions et de resources, et se decompose donc en ressources et actions.\\
-%$\oplus(L)$ n'est utilise qu'avec des actions a droite et a gauche donc se decompose en 2 actions\\
-%$\&(L)$ n'est utilise qu'avec 2 actions, ou 2 resources.\\
-
-%Pour simplifier l'expression de la propriete et sa demonstration, on peut unifier un peu plus en enrichissant le language de description dans figure~\ref{sequent_grammars}. On considere tous les sequents $\Gamma \vdash \phi$ ou $F\in\Gamma$ est $F::= R|A| F_{1}\otimes F_{2}$.
+%
 \subsection{Interpreting a proof as an Interactive narrative\label{subsec:proof_to_narrative}}
 Interactive narratives are interpreted from proofs, from a structured trace of execution of the $\multimap$ left rule. Other ILL rules of particular significance for this interpretation are the $\oplus$ left, and $\otimes$ and $\&$ right rules. Interactive narratives are obtained from proofs using the $\nu$ function described on figure~\ref{fig:interpretation}. The obtained narratives are thus described using simple narrative actions (modelled in the initial sequent using the $\multimap$ connector), and the following list of operators:
 \begin{itemize}
@@ -258,6 +244,77 @@ Interactive narratives are interpreted from proofs, from a structured trace of e
 \end{figure}
 \subsection{Examples:} Construction of the sequent, generated interactive narrative.
 We describe here the construction of a sequent modelling an extract of Flaubert's novel Madame Bovary, and one of the generated narrative. The sequent's proof in Coq is described in a later section and is only sketched here in the form of a tree.
+\begin{figure}
+Narrative Resources and Actions:
+
+\vspace{0.1in}
+\begin{tabular} {|l|l|}
+\hline
+Atomic Resource & Description\\
+P      & Poison\\
+R      & A discussion with Rodolphe\\
+B      & A discussion with Binet\\
+G      & A discussion with Guillaumin\\
+\hline
+\end{tabular}
+\begin{tabular}{|l|l|}
+\hline
+Atomic Goals  & Description\\
+A     & Emma is alive\\
+D     & Emma is dead\\
+\hline
+\end{tabular}
+
+\vspace{0.1in}
+\begin{tabular}{|p{0.22\columnwidth}|p{0.88\columnwidth}|}
+\hline
+Narrative Actions & Description\\
+S$\multimap$A & Emma sells herself which saves her life\\
+E$\multimap$A & Emma escapes with Rodolphe which saves her life\\
+P$\multimap$M & Emma takes poison and dies\\ 
+R$\multimap$1 & Emma discusses with Rodolphe. This leads to nothing new.\\
+R$\multimap$E & Emma discusses with Rodolphe. It leads to the agreement to escape together.\\
+G$\multimap$1 & Emma discusses with Guillaumin. This leads to nothing new.\\
+G$\multimap$S & Emma discusses with Guillaumin. It leads to the agreement that Emma would sell herself in exchange for Guillaumin's help.\\
+B$\multimap$1 & Emma discusses with Binet. This leads to nothing new.\\
+B$\multimap$S & Emma discusses with Binet. It leads to the agreement that Emma would sell herself in exchange for Binet's help.\\
+\hline
+\end{tabular}
+
+\vspace{0.1in}
+\begin{tabular} {|l|| l|}%{p{0.24\columnwidth} p{0.76\columnwidth}}%{|p{0.2\columnwidth |p{0.8\columnwidth}|}
+\hline
+Initial Resources $\mathcal{R}$ &  $P \& 1, R, G, B\& 1$\\ \hline
+\multirow{2}{*}{Narrative actions $\mathcal{A}$} & $!(V \multimap A), (E \multimap A) \& 1, (P \multimap M) \& 1,(R \multimap 1)\&(R \multimap E),$\\
+ & $(G \multimap 1) \oplus (G \multimap V), 1 \oplus ((B \multimap V)\&(B \multimap 1))$\\ \hline
+\end{tabular}
+%\end{minipage}
+
+Sketch of the proof:\\
+\begin{prooftree}
+\AxiomC{$\multimap_{left}: P\multimap M $}
+\uinf{$\multimap_{left}: B\multimap 1 $}
+\uinf{$\multimap_{left}: R\multimap 1 $}
+\uinf{$\multimap_{left}: B\multimap 1 $}
+    \AxiomC{$\multimap_{left}: E\multimap A $}
+    \uinf{$\multimap_{left}: R\multimap E $}
+\binf{$\oplus{left}: 1 \oplus ((B \multimap V)\&(B \multimap 1))$}
+\uinf{$\multimap_{left}: G\multimap 1 $}
+	\AxiomC{$\multimap_{left}: S\multimap A $}
+		\AxiomC{$\multimap_{left}: S\multimap A $}
+		\uinf{$\multimap_{left}: B\multimap 1 $}
+	\binf{$\oplus{left}: 1 \oplus ((B \multimap V)\&(B \multimap 1))$}
+	\uinf{$\multimap_{left}: R\multimap 1 $}
+	\uinf{$\multimap_{left}: G\multimap S $}    
+\binf{$\oplus_{left} :(G \multimap 1) \oplus (G \multimap V)$}
+\uinf{$\mathcal{R},\mathcal{A}  \vdash A \oplus M$}
+\end{prooftree}
+
+Interpreted narrative:
+$ $
+\caption{Example of the specification of a narrative environment into an ILL sequent, a corresponding proof obtained with Coq, and the corresponding interpreted narrative: The end of Emma Bovary\label{fig:example}}
+\end{figure}
+
 \section{Using the Coq proof assistant for Story Properties Analysis}
 \subsection{ILL encoding into Coq}
 \label{sec:ill-encoding-into}
