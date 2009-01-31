@@ -160,10 +160,10 @@ Narrative actions can be composed for offering two types of choices. A composed 
 The resulting state of a narrative is modelled in the subset of ILL composed of $\otimes$ and $\oplus$ and $\&$. 
 $\mathtt{Goal_{1}} \otimes \mathtt{Goal_{2}}$ expresses that both $Goal_{i}$ states are accessible at the end of the interactive narrative. $\mathtt{Goal_{1}} \oplus \mathtt{Goal_{2}}$ expresses that either state $\mathtt{Goal_{i}}$ is accessible, and the choice depends on the proof search and might differ depending on the unfolding branch of the narrative.$\mathtt{Goal_{1}} \& \mathtt{Goal_{2}}$ expresses that either state should be accessible, and this choice depends on an event external to the narrative, such as user interaction for instance. Similarly to the situation with composed actions $\mathtt{Act_1}\oplus\mathtt{Act_2}$, the sub-proofs following the application of the $\&$ right rule will allow ensuring that the corresponding narratives are well-formed stories.
 %Note: we don't need $\multimap (R)$, $! (R)$ as the sequent language is stable: these connectors can't appear on the right side whatever the sequent appearing in the proof, see after.
-
+%
 \subsubsection{Stability of the representation}
-
-We describe here a proof in Coq of the stability of the sequent specification of an interactive narrative. Given an ILL sequent specifying a narrative respecting the grammar described on figure~\ref{fig:sequent_grammars}, all the sequent appearing in the proof will be of the form $\Gamma\vdash G $, where $\forall F\in\Gamma$, $F$ is a \texttt{Context} formula and $G$ is a \texttt{Goal} formula. In other words, modulo the application of the $\otimes$ left rule, all the sequents apearing in such a proof will be composed of a context describing resources and actions of a narrative, and of a left-hand side formula representing constraints on the ending state of the narrative.
+%
+Given an ILL sequent specifying a narrative respecting the grammar described on figure~\ref{fig:sequent_grammars}, all the sequent appearing in the proof will be of the form $\Gamma\vdash G $, where $\forall F\in\Gamma$, $F$ is a \texttt{Context} formula and $G$ is a \texttt{Goal} formula. In other words, modulo the application of the $\otimes$ left rule, all the sequents apearing in such a proof will be composed of a context describing resources and actions of a narrative, and of a left-hand side formula representing constraints on the ending state of the narrative.
 More formally, we define the following properties on sequents and
 proofs:
 \begin{definition}
@@ -229,7 +229,6 @@ Interactive narratives are interpreted from proofs, from a structured trace of e
 \end{prooftree}
 \end{minipage}
 
-
 \begin{center}
 \begin{tabular}{r l}
  $\nu(l)$                                              & $= \emptyset$\\
@@ -240,17 +239,85 @@ Interactive narratives are interpreted from proofs, from a structured trace of e
  $\nu(\otimes_{right}[P_{left};P_{right}]$                   & $= \nu(P_{left}) \| \nu(P_{right})$
 \end{tabular}
 \end{center}
+
+Autre presentation de la meme fonction: qu'est-ce qui est le plus lisible/comprehensible?
+
+\begin{minipage}{0.5\columnwidth}
+\begin{prooftree}
+\AxiomC{\seq{\Gamma}{A} : $\nu_1$}
+    \AxiomC{\seq{\Delta , B}{C} : $\nu_2$}
+    \plab{\multimap_{left}}
+\binf{\seq{\Gamma , \Delta , A \multimap B}{C} : $\nu_1 \succ \nu_{A\multimap B} \succ \nu_2$}
+\end{prooftree}
+\end{minipage}
+%
+\begin{minipage}{0.5\columnwidth}
+\begin{prooftree}
+\AxiomC{}
+\plab{Leaf\: rule}
+\uinf{\seq{\Gamma}{A} : $\emptyset$}
+\end{prooftree}
+\end{minipage}
+%
+\begin{minipage}{0.5\columnwidth}
+\begin{prooftree}
+\AxiomC{\seq{\Gamma}{A} : $\nu_1$}
+    \AxiomC{\seq{\Delta}{B} : $\nu_2$}
+\plab{\otimes_{right}}
+\binf{\seq{\Gamma , \Delta}{A \otimes B} : $\nu_1 \| \nu_2$}
+\end{prooftree}
+\end{minipage}
+%
+\begin{minipage}{0.5\columnwidth}
+\begin{prooftree}
+\AxiomC{\seq{\Gamma}{A} : $\nu$}
+\plab{Unary\: rule}
+\uinf{\seq{\Gamma'}{A'} : $\nu$}
+\end{prooftree}
+\end{minipage}
+%
+\begin{minipage}{0.5\columnwidth}
+\center
+\begin{prooftree}
+\AxiomC{\seq{\Gamma , A}{C} : $\nu_1$}
+    \AxiomC{\seq{\Gamma , B}{C} : $\nu_2$}
+\plab{\oplus_{left}}
+\binf{\seq{\Gamma , A \oplus B}{C} : $\nu_1 \triangledown \nu_2$}
+\end{prooftree}
+\end{minipage}
+%
+\begin{minipage}{0.5\columnwidth}
+\center
+\begin{prooftree}
+\AxiomC{\seq{\Gamma}{A} : $\nu_1$}
+    \AxiomC{\seq{\Gamma}{B} : $\nu_2$}
+\plab{\&_{right}}
+\binf{\seq{\Gamma}{A\& B} : $\nu_1 \triangledown \nu_2$}
+\end{prooftree}
+\end{minipage}
+%
 \caption{Key ILL Rules and Proof to Narrative Interpretation Function $\nu$: the function is defined recursively on sub-proofs from the last applied rule, first on leafs, unary rules, and finally branching rules. $\nu(A\multimap B)$ is the narrative action initially modelled by the formula $A\multimap B$ \label{fig:interpretation}}
 \end{figure}
-\subsection{Examples:} Construction of the sequent, generated interactive narrative.
-We describe here the construction of a sequent modelling an extract of Flaubert's novel Madame Bovary, and one of the generated narrative. The sequent's proof in Coq is described in a later section and is only sketched here in the form of a tree.
+\subsection{From narrative specification to narrative: an example}
+We can now illustrate our approach through a complete example of narrative generation based on a specification of initial narrative resources and actions. This process is described on Figure~\ref{fig:example}. We use an extract of Flaubert's classical Madame Bovary novel. 
+
+We start from an identification of atomic resources and simple narrative actions: we add alternatives to some of the narrative actions occuring in the novel, inspired by each of the character's possible choice. Based on this identification, we model a narrative context and goals as an ILL sequent. Composed actions and resources are defined, in order to reflect branching narrative possibilities depending on the impact of external events in an open-world assumption (for instance, the composed action $(G\multimap 1) \oplus (G \multimap S)$), in order to allow for the generation of different courses of actions (for instance, the action $(E\multimap A) \& 1$ can potentially generate a narrative where the narrative action corresponding to $E\multimap A$ occurs or not), and so on. 
+
+Once the sequent has been specified, we use Coq with simple tactics to generate a proof (sketched on Figure~\ref{fig:example}). The proof can then be interpreted as a given narrative.
+
+The rest of the paper describes how we have taken advantadge of Coq's features to develop simple tactics allowing to generate well-formed stories, but also, more importantly, to consider the proofs (and thus, modulo interpretation, the narratives) as objects of study.
+
+In particular, we demonstrate certain properties on the particular shape of the proofs that our subset specification language generates, opening future perspectives regarding the normalisation of narratives.
+
+We also illustrate how, by allowing to express properties regarding the set of all possible proofs of a given sequent, Coq can be used to formally evidence properties which are verified by all the narratives generated by a given specification.
 \begin{figure}
-Narrative Resources and Actions:
+\begin{enumerate}
+\item Narrative Resources and Actions:
 
 \vspace{0.1in}
 \begin{tabular} {|l|l|}
 \hline
-Atomic Resource & Description\\
+\multicolumn{2}{|c|}{Atomic resources}\\ \hline
 P      & Poison\\
 R      & A discussion with Rodolphe\\
 B      & A discussion with Binet\\
@@ -259,16 +326,16 @@ G      & A discussion with Guillaumin\\
 \end{tabular}
 \begin{tabular}{|l|l|}
 \hline
-Atomic Goals  & Description\\
+\multicolumn{2}{|c|}{Atomic goals}\\ \hline
 A     & Emma is alive\\
-D     & Emma is dead\\
+M     & Emma is dead\\
 \hline
 \end{tabular}
 
 \vspace{0.1in}
-\begin{tabular}{|p{0.22\columnwidth}|p{0.88\columnwidth}|}
+\begin{tabular}{|p{0.08\columnwidth}|p{0.92\columnwidth}|}
 \hline
-Narrative Actions & Description\\
+\multicolumn{2}{|c|}{Simple Narrative Actions}\\ \hline
 S$\multimap$A & Emma sells herself which saves her life\\
 E$\multimap$A & Emma escapes with Rodolphe which saves her life\\
 P$\multimap$M & Emma takes poison and dies\\ 
@@ -282,6 +349,7 @@ B$\multimap$S & Emma discusses with Binet. It leads to the agreement that Emma w
 \end{tabular}
 
 \vspace{0.1in}
+\item Sequent Description\\
 \begin{tabular} {|l|| l|}%{p{0.24\columnwidth} p{0.76\columnwidth}}%{|p{0.2\columnwidth |p{0.8\columnwidth}|}
 \hline
 Initial Resources $\mathcal{R}$ &  $P \& 1, R, G, B\& 1$\\ \hline
@@ -290,10 +358,9 @@ Initial Resources $\mathcal{R}$ &  $P \& 1, R, G, B\& 1$\\ \hline
 \end{tabular}
 %\end{minipage}
 
-Sketch of the proof:\\
+\item Sketch of the proof:\\
 \begin{prooftree}
 \AxiomC{$\multimap_{left}: P\multimap M $}
-\uinf{$\multimap_{left}: B\multimap 1 $}
 \uinf{$\multimap_{left}: R\multimap 1 $}
 \uinf{$\multimap_{left}: B\multimap 1 $}
     \AxiomC{$\multimap_{left}: E\multimap A $}
@@ -310,9 +377,10 @@ Sketch of the proof:\\
 \uinf{$\mathcal{R},\mathcal{A}  \vdash A \oplus M$}
 \end{prooftree}
 
-Interpreted narrative:\\
-$( \nu(G\multimap 1) \succ ( \nu(B \multimap 1) \succ \nu(R \multimap 1) \succ \nu(P \multimap M)) \triangledown ( \nu(R \multimap E) \succ \nu(E\multimap A))) \triangledown$\\
-$ (\nu(G\multimap S) \succ \nu(R\multimap 1) \succ (\nu(S\multimap A) \triangledown (\nu(B\multimap 1) \succ \nu(S\multimap A)))) $
+\item Interpreted narrative:\\
+$(\nu_{G\multimap 1}\succ((\nu_{B \multimap 1} \succ \nu_{R \multimap 1} \succ \nu_{P \multimap M}) \triangledown ( \nu_{R \multimap E} \succ \nu_{E\multimap A}))) \triangledown$\\
+$ (\nu_{G\multimap S} \succ \nu_{R\multimap 1} \succ (\nu_{S\multimap A} \triangledown (\nu_{B\multimap 1} \succ \nu_{\multimap A}))$
+\end{enumerate}
 \caption{Example of the specification of a narrative environment into an ILL sequent, a corresponding proof obtained with Coq, and the corresponding interpreted narrative: The end of Emma Bovary\label{fig:example}}
 \end{figure}
 
@@ -340,7 +408,7 @@ lemmas and tactics for reasoning on properties of proofs and even on
 \emph{all possible proofs of a sequent}
 (section~\ref{sec:second-order-analys}). The relation between the
 shape of a proof and the properties of the corresponding interactive
-narrative is to aour knoledge an original use of the proof-as-term
+narrative is to our knoledge an original use of the proof-as-term
 paradigm.
 
 
@@ -399,10 +467,9 @@ tedious manipulations on the environment to match rules. Simple
 tactics allow to apply rules and premisses of the form $\phi\in\Gamma$
 are discharged automatically (on closed environments) by reduction.
 Notice also that we do not provide the Cut rule as it is not necessary
-to our purpose\marginote{justif?}.
+to our purpose\marginote{justif? Yep, classique: dans une interpretation preuve/programme, on veut une trace de l'execution, donc on elimine les coupures}.
 
-
-
+As we are looking for a trace of the execution of the narrative actions through the application of the corresponding rule, we are only searching for cut-free proofs.
 %quelques details techniques. Comparer avec encodings existants si necessaire (y'en a peu, mais certains pour Isabelle sont plus aboutis avec tactiques). Le truc est simple, expliquer pourquoi.
 %\subsection{Specifying Interactive Narratives}
 %methode/cuisine pour ecrire le sequent. Faut que ca paraisse facile, et suive naturellement la description de la theorie representationnelle.
@@ -430,7 +497,7 @@ first of the two subgoals is of the form:
 \lstinline!{G-o1, P&1, R, G, ... } |- A ++ M!. which allows for rule
 $\multimap_l$ rule to perform a narrative action which ``uses''
 \lstinline|G| using tactic: \lstinline|impl_l G 1|. \marginote{more
-  automation?}
+  automation? peut etre juste plus de clarte pour faire style on a une methode? Par exemple, peut on s'en sortir en n'appliquant les tactiques que sur des actions (composees)}
 
 To illustrate the impossibility of building incorrect narratives, we
 give here an example of a wrong internal choice which leads to an
@@ -508,8 +575,8 @@ Inspection n'est pas basee forcement sur des proprietes generiques, on inspecte 
 
 We make use of the advantage of a proof assistant based on
 Curry-Howard isomorphism by considering proofs (i.e. narratives) as
-object that one can compute and prove on\marginote{english?}. One
-important property of an interactive narrative is that there exists at
+object that one can compute and prove on\marginote{english? proofs as first order objects?}. One
+important property of a narrative is that there exists at
 least one of the possible stories (i.e. branch) that leads to a
 particular event (for instance: Emma survives). We make use of the
 \texttt{Program Fixpoint} feature of Coq to build a dependently typed
@@ -595,7 +662,7 @@ Lemma eq_compat_check : forall f1 f2 \G \G' \phi (h1:\G|-\phi) (h2:\G'|-\phi),  
 \label{sec:restrict}
 
 Some expected properties of proofs are difficult to define for all
-proofs of a sequent but may be easier on well-formed proofs. In order
+proofs of a sequent but may be easier on well-formed proofs.\marginote{Toutes les preuves sont well formed non? Tu veux dire Sequent peut etre?} In order
 to use this fact we provide a proof of stability of $\wf$ for ILL
 (property~\ref{def:stab}). To this end, we prove the stability of
 $\wf$ for each rule as follows: first the grammar of
