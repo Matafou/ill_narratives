@@ -458,25 +458,45 @@ makes the proof impossible and would indeed lead to an impossible
 narrative in which Emma escapes twice.
 
 
-Exemple de la preuve deroulee, de maniere assistee: une instance d'un sequent assez generatif. On montre comment on a produit la preuve en Coq, et on raconte l'histoire correspondante, avec les choix possibles de l'utilisateur. 
+%DONE PAS COMPLETEMENT
+%Exemple de la preuve deroulee, de maniere assistee: une instance d'un
+%sequent assez generatif. On montre comment on a produit la preuve en
+%Coq, et on raconte l'histoire correspondante, avec les choix possibles
+%de l'utilisateur.
 
-Il faut que ca fasse "methode". Ideal, un truc du genre: l'utilisateur
-choisit une action narrative a executer, et une tactique Coq deroule
-la suite, jusqu'a ce qu'il y aie une nouvelle formule a decomposer. Le
-contexte est coupe en 2 en fait: il y a les formules qui correspondent
-a des actions narratives ou composition d'actions narratives, et des
-trucs qui sont "juste" des ressources ou des etats consommes par les
-actions. L'utilisateur ne travaille que sur les premieres et Coq
-l'aide pour les "details".
 
-Proposition Pierre: On consomme les $\multimap$, eventuellement en
-utilisant les bangs et les $\otimes$ tant qu'on peut, puis quand on
-peut plus rien consommer on attend que l'utilisateur casse un \&
-(interne) ou un $\oplus$ (externe).
 
-Considerations sur les possibles alternatives par rapport a la structure de la specification, pour lier avec la suite: les "choix internes" a la recherche de preuve, l'ordre d'execution des actions. 
+%Il faut que ca fasse "methode". Ideal, un truc du genre: l'utilisateur
+%choisit une action narrative a executer, et une tactique Coq deroule
+%la suite, jusqu'a ce qu'il y aie une nouvelle formule a decomposer. Le
+%contexte est coupe en 2 en fait: il y a les formules qui correspondent
+%a des actions narratives ou composition d'actions narratives, et des
+%trucs qui sont "juste" des ressources ou des etats consommes par les
+%actions. L'utilisateur ne travaille que sur les premieres et Coq
+%l'aide pour les "details".
 
-Montrer qu'on ne peut pas construire d'histoires qui sont mal formees du point de vue des ressources disponibles (e.g. dans notre cas, commencer par aller voir Rodolphe et choisir de s'enfuir, donner l'intuition de la raison, liee a une competition pour les ressources).
+
+%Proposition Pierre: On consomme les $\multimap$, eventuellement en
+%utilisant les bangs et les $\otimes$ tant qu'on peut, puis quand on
+%peut plus rien consommer on attend que l'utilisateur casse un \&
+%(interne) ou un $\oplus$ (externe).
+
+
+%Considerations sur les possibles alternatives par rapport a la
+%structure de la specification, pour lier avec la suite: les "choix
+%internes" a la recherche de preuve, l'ordre d'execution des actions.
+
+
+% DONE:
+%Montrer qu'on ne peut pas construire d'histoires qui sont mal formees
+%du point de vue des ressources disponibles (e.g. dans notre cas,
+%commencer par aller voir Rodolphe et choisir de s'enfuir, donner
+%l'intuition de la raison, liee a une competition pour les
+%ressources).
+
+
+
+
 \subsection{Second order analysis of interactive narratives specification}
 \label{sec:second-order-analys}
 (Decrire le passage assiste par Coq au second ordre: C'est ce qu'on a en plus par rapport a un prouveur)
@@ -485,13 +505,91 @@ Inspection des proprietes d'une preuve/histoire -> Inspection des proprietes de 
 Inspection n'est pas basee forcement sur des proprietes generiques, on inspecte ce qu'on veut!
 
 \textbf{Cas d'utilisation: prouver des proprietes structurelles au second ordre, e.g. sur toutes les histoires que genere le sequent.}
-Exemple de proprietes-meta, de type "toute histoire generee par cette specification de ressources, conditions initiales, et actions narratives, verifie telle propriete":\\ preuves sur l'accessibilite d'une fin donnee quelque soit la preuve.
 
-Decrire la preuve de Julien: quelque soit la preuve du sequent, on aura toujours une branche qui correspondra a l'application de la regle $\oplus$ droite avec la formule $A$ == on aura toujours une facon de derouler l'histoire qui menera a l'etat final modelise par $A$.
-%- preuve qu'une action donnee se produira toujours avant une autre, meme sans rapports de precedence/causalite directement encode dans le sequent. Dans l'exemple, a cause d'une configuration particuliere de competition pour la consommation de ressources narratives provoquee par une "interaction" possible. \textbf{Cela met dans cet exemple en evidence une relation structurelle de la specification, qui emerge de l'analyse, et qui est a priori non evidente: elle n'est pas encodee directement dans les specifications.}
-%\textbf{Cas d'utilisation 4: exhiber une instance particuliere de narration interactive, qui verifie une propriete structurelle donnee}
-%Avec l'exemple: exhiber une histoire interactive ayant plusieurs fins possibles suivant le "chemin" parcouru par l'utilisateur. ajout, au second ordre, de contraintes sur la recherche de preuve. Permet de resoudre des problemes non traites?
-%Lorsque tactiques pour automatiser seront definies, cela permettra de rechercher/generer des histoires verifiant certaines proprietes structurelles: presence de fins alternatives etc.
+We make use of the advantage of a proof assistant based on
+Curry-Howard isomorphism by considering proofs (i.e. narratives) as
+object that one can compute and prove on\marginote{english?}. One
+important property of an interactive narrative is that there exists at
+least one of the possible stories (i.e. branch) that leads to a
+particular event (for instance: Emma survives). We make use of the
+\texttt{Program Fixpoint} feature of Coq to build a dependently typed
+function checking this property for a closed proof. that is that at
+least one branch ends with sequent \lstinline!{A} |- A!:
+\begin{lstlisting}
+Program Fixpoint check \phil \phir {e} {f} (h: e |- f) {struct h}: boolP := 
+match h with
+ | One_R _ _ => falseP
+ | One_L \G p _ x => check \phil \phir x
+ | Oplus_R_1 \G p q x =>
+    if andP (p ?= \phil) (q ?= \phir) then trueP else check \phil \phir x
+ | ...
+end.
+Eval vm_compute in check A M Emma. (* true*)
+\end{lstlisting}
+
+An even more interesting property is that \texttt{check} should return
+\texttt{true} for \emph{any proof of} \texttt{Emma} and not only for
+the proof we built. This is much more difficult to prove in coq as
+there is an infinite set of such proofs. We deal with this problem in
+different ways. First we define a notion of equivalence between proofs
+if they correspond to the same tree and second we restrict to proofs
+of sequent that belong to the grammar described in
+figure~\ref{fig:sequent_grammars}. We shall described these two
+development in the following.
+
+\subsubsection{Identify proofs corresponding too the same tree}
+\label{sec:identif-same-tree}
+
+We identify proofs that differ only by the way side premisses (like
+\lstinline!p \in \G! or \lstinline!\G \in \D\U\E!) are proven. We then
+prove that \texttt{check} and other definitions are compatible with
+this equivalence.
+\begin{lstlisting}
+Inductive eq: forall \G \G' f, (\G |- f) -> (\G' |- f) -> Prop := 
+| EQId: forall \G1 \G2, forall f, forall heq heq', eq (Id \G1 f heq) (Id \G2 f heq')
+| EQImpl_R: forall \G1 \G2 p q h h',  eq h h' -> eq (Impl_R \G1 p q h) (Impl_R \G2 p q h')
+| EQTimes_R: forall \G1 \D1 \D1' \G2 \D2 \D2' p q heq heq' h1 h1' h2 h2',
+  eq h1 h1' -> eq h2 h2' -> eq (Times_R \G1 \D1 \D1' p q heq h1 h2)
+(Times_R \G2 \D2 \D2' p q heq' h1' h2')
+| ...
+
+Lemma eq_compat_check : forall f1 f2 \G \G' \phi (h1:\G|-\phi) (h2:\G'|-\phi),  Proof_eq.eq h1 h2 -> 
+  check (fun _ _ _ => trueP) f1 f2 h1 = check (fun _ _ _ => trueP) f1 f2 h2.
+\end{lstlisting}
+
+
+
+
+% Exemple de proprietes-meta, de type "toute histoire generee par
+% cette specification de ressources, conditions initiales, et actions
+% narratives, verifie telle propriete":\\ preuves sur l'accessibilite
+% d'une fin donnee quelque soit la preuve.
+
+
+% Decrire la preuve de Julien: quelque soit la preuve du sequent, on
+% aura toujours une branche qui correspondra a l'application de la
+% regle $\oplus$ droite avec la formule $A$ == on aura toujours une
+% facon de derouler l'histoire qui menera a l'etat final modelise par
+% $A$.
+
+
+% - preuve qu'une action donnee se produira toujours avant une autre,
+% meme sans rapports de precedence/causalite directement encode dans
+% le sequent. Dans l'exemple, a cause d'une configuration particuliere
+% de competition pour la consommation de ressources narratives
+% provoquee par une "interaction" possible. \textbf{Cela met dans cet
+%   exemple en evidence une relation structurelle de la specification,
+%   qui emerge de l'analyse, et qui est a priori non evidente: elle
+%   n'est pas encodee directement dans les specifications.}
+% \textbf{Cas d'utilisation 4: exhiber une instance particuliere de
+%   narration interactive, qui verifie une propriete structurelle
+%   donnee} Avec l'exemple: exhiber une histoire interactive ayant
+% plusieurs fins possibles suivant le "chemin" parcouru par
+% l'utilisateur. ajout, au second ordre, de contraintes sur la
+% recherche de preuve. Permet de resoudre des problemes non traites?
+% Lorsque tactiques pour automatiser seront definies, cela permettra
+% de rechercher/generer des histoires verifiant certaines proprietes
+% structurelles: presence de fins alternatives etc.
 
 \subsubsection{Restricting to well-formed sequents}
 \label{sec:restrict}
