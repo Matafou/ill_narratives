@@ -285,8 +285,8 @@ B$\multimap$S & Emma discusses with Binet. It leads to the agreement that Emma w
 \begin{tabular} {|l|| l|}%{p{0.24\columnwidth} p{0.76\columnwidth}}%{|p{0.2\columnwidth |p{0.8\columnwidth}|}
 \hline
 Initial Resources $\mathcal{R}$ &  $P \& 1, R, G, B\& 1$\\ \hline
-\multirow{2}{*}{Narrative actions $\mathcal{A}$} & $!(V \multimap A), (E \multimap A) \& 1, (P \multimap M) \& 1,(R \multimap 1)\&(R \multimap E),$\\
- & $(G \multimap 1) \oplus (G \multimap V), 1 \oplus ((B \multimap V)\&(B \multimap 1))$\\ \hline
+\multirow{2}{*}{Narrative actions $\mathcal{A}$} & $!(S \multimap A), (E \multimap A) \& 1, (P \multimap M) \& 1,(R \multimap 1)\&(R \multimap E),$\\
+ & $(G \multimap 1) \oplus (G \multimap S), 1 \oplus ((B \multimap S)\&(B \multimap 1))$\\ \hline
 \end{tabular}
 %\end{minipage}
 
@@ -298,15 +298,15 @@ Sketch of the proof:\\
 \uinf{$\multimap_{left}: B\multimap 1 $}
     \AxiomC{$\multimap_{left}: E\multimap A $}
     \uinf{$\multimap_{left}: R\multimap E $}
-\binf{$\oplus{left}: 1 \oplus ((B \multimap V)\&(B \multimap 1))$}
+\binf{$\oplus{left}: 1 \oplus ((B \multimap S)\&(B \multimap 1))$}
 \uinf{$\multimap_{left}: G\multimap 1 $}
 	\AxiomC{$\multimap_{left}: S\multimap A $}
 		\AxiomC{$\multimap_{left}: S\multimap A $}
 		\uinf{$\multimap_{left}: B\multimap 1 $}
-	\binf{$\oplus{left}: 1 \oplus ((B \multimap V)\&(B \multimap 1))$}
+	\binf{$\oplus{left}: 1 \oplus ((B \multimap S)\&(B \multimap 1))$}
 	\uinf{$\multimap_{left}: R\multimap 1 $}
 	\uinf{$\multimap_{left}: G\multimap S $}    
-\binf{$\oplus_{left} :(G \multimap 1) \oplus (G \multimap V)$}
+\binf{$\oplus_{left} :(G \multimap 1) \oplus (G \multimap S)$}
 \uinf{$\mathcal{R},\mathcal{A}  \vdash A \oplus M$}
 \end{prooftree}
 
