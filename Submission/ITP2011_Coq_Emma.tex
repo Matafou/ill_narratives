@@ -23,7 +23,7 @@
 \usepackage{lstcoq}
 \lstset{language=Coq,fontadjust=false,columns=fixed,showspaces=false,showstringspaces=false}
 \lstset{basicstyle=\tt\small,commentstyle=\it\ttfamily,basewidth={0.475em},keywordstyle=\bf\ttfamily}
-\lstset{captionpos=t,float,belowcaptionskip=\medskipamount}
+\lstset{captionpos=t,float,belowskip=\smallskipamount,aboveskip=\smallskipamount}
 
 \newcommand{\seq}[2]{$#1\:\vdash\:#2$}
 \newcommand{\plab}[1]{\RightLabel{($#1$)}}
@@ -322,8 +322,7 @@ $ $
 A lot of encodings of (different fragments and variants of) linear
 logic have been proposed in proof assistants. In~\cite{Power99} for
 instance, authors present a shallow embedding of ILL in Coq and
-performs some simple generic proofs about Hanoi towers for an
-arbitrary number of discs using induction.
+perform some simple generic proofs using induction.
 In~\cite{Sadrzadeh03modallinear} authors present a shallow embedding
 of the sequent calculus of classical modal linear logic and performs
 some \emph{epistemic} proofs. In~\cite{Kalvala95mechanizinglinear} an
@@ -334,18 +333,22 @@ In many aspects our modeling of ILL in Coq is similar to these work.
 The main original feature of this development is the focus on
 properties of \emph{proofs} themselves, not only on provability of
 sequents. As in these previous works we provide some (limited)
-automation for proving \emph{closed sequent}\marginote{r\'ef. vers la
-  section idoine.}, but we also provide reasoning lemmas and tactics
-for reasoning on properties of proofs and even on \emph{all possible
-  proofs of a sequent}. \marginote{r\'ef. vers la section idoine.}
+automation for proving \emph{closed sequents}
+(section~\ref{sec:proving-an-ill}), but we also provide reasoning
+lemmas and tactics for reasoning on properties of proofs and even on
+\emph{all possible proofs of a sequent}
+(section~\ref{sec:second-order-analys}). The relation between the
+shape of a proof and the properties of the corresponding interactive
+narrative is to aour knoledge an original use of the proof-as-term
+paradigm.
 
 
 Formulae, proofs and corresponding convenient (Unicode) notations are
 defined as follows. Type \texttt{env} is an instance of multisets
 equipped with an equivalence relation \texttt{==} and Vars.t (type of
-atomic propositions) is implemented as $\N$ in the following:
+atomic propositions) is implemented\footnote{by functorial
+  application} as $\N$ in the following:
 
-\marginote{no Cut}
 \begin{lstlisting}
 Inductive formula : Type := 
 | Proposition : Vars.t -> formula | Implies : formula -> formula -> formula 
@@ -354,7 +357,7 @@ Inductive formula : Type :=
 | Bang : formula -> formula | And : formula -> formula  -> formula.
 
 Notation "A -o B" := (Implies A B).
-(* Other connectives... *) (*@ % Notation  "A ++ B" := (Oplus A B).
+(* ...Other connectives... *) (*@ % Notation  "A ++ B" := (Oplus A B).
   % Notation  "A ** B" := (Otimes A B).
   % Notation "1" := One.
   % Notation "0" := Zero.
@@ -369,8 +372,7 @@ Notation  "x \ \G" := (remove x G). (* Environment operation *)
 Inductive ILL_proof: env -> formula -> Prop:=
 |Id: forall \G p, \G == {p} -> \G |- p
 |Impl_R: forall \G p q, p::\G |- q -> \G |- p-oq
-|Impl_L: forall \G \D \E p q r, (p-oq)\in\G -> (\G\(p-oq))==\D\U\E -> \D |- p -> q:: \E |- r
-(*@\hfill@*) -> \G |- r
+|Impl_L: forall\G\D\Epqr,(p-oq)\in\G -> (\G\(p-oq))==\D\U\E -> \D|-p -> q:: \E|-r -> \G |- r
 |Times_R: forall \G \D \D' p q, \G == \D\U\D' -> \D |- p -> \D' |- q -> \G |- p ** q
 |Times_L: forall \G p q r, (p ** q)\in\G -> q::p::(\G\(p ** q)) |- r -> \G |- r
 |One_R: forall \G, \G == \O -> \G |- 1
@@ -378,8 +380,7 @@ Inductive ILL_proof: env -> formula -> Prop:=
 |And_R: forall \G p q, \G |- p -> \G |- q -> \G |- (p & q)
 |And_L_1: forall \G p q r, (p & q)\in\G -> p::(\G\(p&q)) |- r -> \G |- r
 |And_L_2: forall \G p q r, (p & q)\in\G -> q::(\G\(p&q)) |- r -> \G |- r
-|Oplus_L: forall \G p q r, (p ++ q)\in\G -> p::(\G\(p ++ q)) |- r -> q::(\G\(p ++ q)) |- r
-(*@\hfill@*)-> \G |- r
+|Oplus_L: forall\Gpqr, (p ++ q)\in\G -> p::(\G\(p ++ q))|-r -> q::(\G\(p ++ q))|-r -> \G|-r
 |Oplus_R_1: forall \G p q, \G |- p -> \G |- p ++ q
 |Oplus_R_2: forall \G p q, \G |- q -> \G |- p ++ q 
 |T_: forall \G, \G |- \Top
@@ -395,7 +396,9 @@ Notice the use of the form ``$\phi\in\Gamma \to \Gamma\vdash\dots$''
 instead of ``$\phi,\Gamma\vdash\dots$''. This formulation avoids
 tedious manipulations on the environment to match rules. Simple
 tactics allow to apply rules and premisses of the form $\phi\in\Gamma$
-are discharged automatically (on closed environments).
+are discharged automatically (on closed environments) by reduction.
+Notice also that we do not provide the Cut rule as it is not necessary
+to our purpose\marginote{justif?}.
 
 
 
@@ -403,6 +406,8 @@ are discharged automatically (on closed environments).
 %\subsection{Specifying Interactive Narratives}
 %methode/cuisine pour ecrire le sequent. Faut que ca paraisse facile, et suive naturellement la description de la theorie representationnelle.
 \subsection{Proving an ILL Sequent in Coq as narrative generation}
+\label{sec:proving-an-ill}
+
 Generation "assistee" d'histoires interactives \emph{well-formed}. Bien dire que si pour l'instant on ne fait que de la verif, il est possible de definir des tactiques efficaces (e.g full auto), meme pour ILL. Ca na pas ete tres recherche mais Dixon a certains resultats preliminaires. Un objectif futur est de travailler sur des tactiques, y compris ad-hoc et correspondant a des usage patterns (voir ce qui a ete fait en computational linguistics avec succes), et qu'il n'est pas completement sans espoir de penser a une tactique "trivial" future (full-automation) meme si c'est un vrai probleme car full ILL est indecidable. Des arguments places ici doivent etre retires de l'etat de l'art et vice-versa, voir ce qui rend le mieux.
 
 Preuve en tant qu'objet de l'etude et non pas prouvabilite d'un sequent seulement.
@@ -410,22 +415,47 @@ Preuve en tant qu'objet de l'etude et non pas prouvabilite d'un sequent seulemen
 \textbf{Cas d'utilisation: une preuve du sequent qui suit l'ordre du roman, preuve assistee meme si pas full-auto}
 
 We consider the sequent given below, corresponding to the end of Emma
-Bovary (where \texttt{P}, \texttt{A} etc are predefined constants). 
+Bovary (where \texttt{P}, \texttt{A} etc are predefined atomic
+propositions).
 \begin{lstlisting}[language=Coq]
-Goal Emma: {P&1, R, G, B&1, !(V-oA), (E-oA)&1, (P-oM)&1,
-(*@\hfill@*)   (R-o1)&(R-oE), (G-o1) ++ (G-oV), 1++(B-oV)&(B-o1)} |- A ++ M.
+Goal Emma: {P&1, R, G, B&1, !(S-oA), (E-oA)&1, (P-oM)&1,
+(*@\hfill@*)   (R-o1)&(R-oE), (G-o1) ++ (G-oS), 1++(B-oS)&(B-o1)} |- A ++ M.
 \end{lstlisting}
 We developed a small set of simple tactics helping to apply rules. For
-example on can apply the $\oplus_R$ rule on this goal to consider the
-alternative offered by external choice \lstinline|(G-o1) ++ (G-oV)!|.
-This is achieved by tactic: \lstinline|oplus_l (G-o1) (G-oV)|. The
-first of the two subgoals is of the form: 
+example one can apply the $\oplus_R$ rule on this goal to consider the
+alternative offered by external choice \lstinline|(G-o1) ++ (G-oS)|.
+This is achieved by tactic: \lstinline|oplus_l (G-o1) (G-oS)|. The
+first of the two subgoals is of the form:
+\lstinline!{G-o1, P&1, R, G, ... } |- A ++ M!. which allows for rule
+$\multimap_l$ rule to perform a narrative action which ``uses''
+\lstinline|G| using tactic: \lstinline|impl_l G 1|. \marginote{more
+  automation?}
+
+To illustrate the impossibility of building incorrect narratives, we
+give here an example of a wrong internal choice which leads to an
+unprovable sequent. Let us suppose we start the proof of \texttt{Emma}
+by applying $\&_{l2}$ rule to the formula \lstinline!(R-o1)&(R-oE)!.
+This means we decide (internally) that seeing Rodolphe does allow Emma
+to escape before knowing if Emma accepts the proposition of
+Guillaumin.Let us suppose we apply rules as follows:
 \begin{lstlisting}
-{G-o1, P&1, R, G, ... |- A ++ M.
+Goal Emma: ... .
+  and_l_2 (R-o1) (R-oE).
+  oplus_l (G -o 1) (G -o S).
 \end{lstlisting}
-which allows for rule $\multimap_l$ rule to perform a narrative action
-which ``uses'' \lstinline|G| using tactic: \lstinline|impl_l G 1|.
-\marginote{more automation?}
+we see that in the third branch we obtain the sequent:
+\begin{lstlisting}
+{G,G -o S,R, R -o E, !(S -o A), (E -o A) & 1, ...} |- A ++ M
+\end{lstlisting}
+which forces the choices allowing to ``use'' \texttt{G} and \texttt{S}
+(\lstinline!impl_l!):
+\begin{lstlisting}
+{S,E, !(S -o A), (E -o A) & 1, ...} |- A ++ M
+\end{lstlisting}
+which will lead to having two \texttt{A} in the environment, which
+makes the proof impossible and would indeed lead to an impossible
+narrative in which Emma escapes twice.
+
 
 Exemple de la preuve deroulee, de maniere assistee: une instance d'un sequent assez generatif. On montre comment on a produit la preuve en Coq, et on raconte l'histoire correspondante, avec les choix possibles de l'utilisateur. 
 
@@ -466,20 +496,19 @@ Decrire la preuve de Julien: quelque soit la preuve du sequent, on aura toujours
 \label{sec:restrict}
 
 Some expected properties of proofs are difficult to define for all
-proof of a sequent but may be easier on well-formed proofs. In order
-to use this fact we provide a proof the of property~\ref{def:stab} of
-stability of $\wf$ for ILL. To this end, we prove the stability of
-$\wf$ for each rule.
-
-The grammar of figure~\ref{fig:sequent_grammars} is defined as the following
-mutual inductive property\marginote{en annexe?}:
+proofs of a sequent but may be easier on well-formed proofs. In order
+to use this fact we provide a proof of stability of $\wf$ for ILL
+(property~\ref{def:stab}). To this end, we prove the stability of
+$\wf$ for each rule as follows: first the grammar of
+figure~\ref{fig:sequent_grammars} is defined by the follwing (mutual)
+inductive properties:
 \begin{lstlisting}
 Inductive Act : formula -> Prop := (* Act *)
 | A1: Act 1
 | A2:forall \phi1 \phi2, Cres \phi1 -> Context \phi2 -> Act (\phi1 -o \phi2)
 | A3: forall \phi1 \phi2, Act \phi1 -> Act \phi2 -> Act (\phi1 ++ \phi2)
 | A4: forall \phi1 \phi2, Act \phi1 -> Act \phi2 -> Act (\phi1 & \phi2)
-| A5: forall \phi, Act \phi -> Act (! \phi)
+| A5: forall \phi, Act \phi -> Act (!\phi)
 with Cres: formula -> Prop:= (* CRes *)
 | Cres1: Cres 1
 | Cres2: forall n, Cres (Proposition n)
@@ -502,28 +531,42 @@ Inductive Goal : formula -> Prop :=
 | G4: forall \phi1 \phi2, Goal \phi1 -> Goal \phi2 -> Goal (\phi1 ++ \phi2)
 | G5: forall \phi1 \phi2, Goal \phi1 -> Goal \phi2 -> Goal (\phi1 & \phi2).
 
-Definition Contextall \G f (_:\G|-f):= (forall g:formula, g\in\G  -> Context g) /\ Goal f.
+Definition Contextall \G f (_:\G|-f):= Goal f/\forall g:formula, g\in\G -> Context g.
 \end{lstlisting}
-
-
-
-The stability for each rule is given by an inductive property mirroring the type
-of proofs, stating that a property \texttt{pred} holds for all premiss sequents:
-
+then the stability for each rule is given by an inductive property
+\texttt{Istable} mirroring the type of proofs, stating that a property
+\texttt{pred} holds for all premisses sequents of all rules.
 \begin{lstlisting}
-Inductive Istable (pred:forall e f (h: e |- f), Prop): forall e f (h: e |- f) , Prop := 
-| IId: forall \G (f:formula) (heq:\G == {f}), Istable pred \G f (Id _ _ heq)
-| IImpl_R: forall \G p q (h:(p :: \G |- q)), pred _ _ h -> Istable pred _ _ h
-                           -> Istable pred _ _ (Impl_R \G p q h)
-| IImpl_L: forall \G \D \E p q r (hin:(p-oq)\in\G) (heq:remove (p-o q) \G==\D\U\E),
-           forall (h:\D |- p) (h':q::\E |- r), pred _ _ h -> pred _ _ h'
-                          -> Istable pred _ _ h -> Istable pred _ _ h'
-                          -> Istable pred _ _ (Impl_L \G \D \E p q r hin heq h h')
+(** This property is true when pred holds for all nodes above the root
+   of h (it has not to hold for the root itself). *)
+Inductive Istable: forall {e} {f} (h: e |- f) , Prop := 
+| IId: forall \G p heq, Istable (Id \G p heq)
+| IImpl_R: forall \G p q h, pred h -> Istable h -> Istable (Impl_R \G p q h)
+| IImpl_L: forall \G \D \E p q r hin heq h h', pred h -> pred h'
+(*@\hfill@*) -> Istable h -> Istable h' -> Istable (Impl_L \G \D \E p q r hin heq h h')
+(*@
+%| ITimes_R: forall \G \D \E p q heq h h', pred h -> pred h' -> Istable h -> Istable h' -> Istable (Times_R \G \D \E p q heq h h')
+% | ITimes_L: forall \G p q r hin h, pred h -> Istable h -> Istable (Times_L \G p q r hin h)
+% | IOne_R: forall \G heq, Istable (One_R \G heq)
+% | IOne_L: forall \G p hin h, pred h -> Istable h -> Istable (One_L \G p hin h)
+% | IAnd_R: forall \G p q h h', pred h -> pred h' -> Istable h -> Istable h' -> Istable (And_R  \G p q h h')
+% | IAnd_L_2: forall \G p q r hin h, pred h -> Istable h -> Istable (And_L_2 \G p q r hin h)
+% | IAnd_L_1: forall \G p q r hin h, pred h -> Istable h -> Istable (And_L_1 \G p q r hin h)
+% | IOplus_L: forall \G p q r hin h h', pred h -> pred h' -> Istable h -> Istable h' -> Istable (Oplus_L  \G p q r hin h h')
+% | IOplus_R_2: forall \G p q h, Istable h  -> Istable (Oplus_R_2 \G p q h)
+% | IOplus_R_1: forall \G p q h, pred h -> Istable h -> Istable (Oplus_R_1 \G p q h)
+% | IT_ : forall \G,  (Istable (T_ \G)) -> (Istable (T_ \G))
+% | IZero_: forall \G p truein, (Istable (Zero_ \G p truein)) -> (Istable (Zero_ \G p truein))
+% | IBang_D: forall \G p q hin h, pred h -> Istable h -> (Istable (Bang_D \G p q hin h))
+% | IBang_C: forall \G p q hin h, pred h -> Istable h -> (Istable (Bang_C \G p q hin h))
+% | IBang_W: forall \G p q hin h, pred h -> Istable h -> (Istable
+% (Bang_W \G p q hin h)).
+%@*)
 | ...
 \end{lstlisting}
-The stability of the grammar is then stated as the following lemma:
+and then the stability of the grammar is then stated as the following lemma:
 \begin{lstlisting}
-Lemma Grammar_Stable : forall \G \phi (h:\G |- \phi), Contextall \G \phi h -> Istable Contextall _ _ h.
+Lemma Grammar_Stable : forall \G \phi (h:\G |- \phi), Contextall h -> Istable Contextall h.
 \end{lstlisting}
 It is proved by induction on \texttt{h}.
 
@@ -550,4 +593,4 @@ Future work: travail sur la normalisation de preuve. vers la definition de class
 %%% TeX-master: t
 %%% End: 
 
-% LocalWords:  sequent Coq multisets
+% LocalWords:  sequent Coq multisets Guillaumin Rodolphe
