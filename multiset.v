@@ -587,6 +587,12 @@ Module PreMake(X:OrderedType)(Maps:FMapInterface.S with Module E:=X) <: S(X).
     Unfocus.
   Qed.
 
+  Lemma empty_no_mem : forall a, mem a empty = false.
+  Proof.
+    unfold mem.
+    apply MapsPtes.F.empty_a.
+  Qed.
+
   Lemma union_empty_right : forall ms, eq (union ms empty) ms.
   Proof.
     intros ms.
