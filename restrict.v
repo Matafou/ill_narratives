@@ -11,7 +11,7 @@ Inductive Istable (pred:∀ e f (h: e ⊢ f), Prop): ∀ e f (h: e ⊢ f) , Prop
 | IImpl_L: ∀ Γ Δ p q r (h:Γ ⊢ p) (h':q::Δ ⊢ r), pred _ _ h → pred _ _ h' → Istable pred _ _ (Impl_L Γ Δ p q r h h')
 | ITimes_R: ∀ Γ Δ p q h h', pred _ _ h → pred _ _ h' → Istable pred _ _ (Times_R Γ Δ p q h h')
 | ITimes_L: ∀ Γ p q r h, pred _ _ h → Istable pred _ _ (Times_L Γ p q r h)
-| IOne_R: pred ∅ 1 One_R → Istable pred ∅ 1 One_R 
+| IOne_R: Istable pred ∅ 1 One_R 
 | IOne_L: ∀ Γ p h, pred _ _ h → Istable pred _ _ (One_L Γ p h)
 | IAnd_R: ∀ Γ p q h h', pred _ _ h → pred _ _ h' → Istable pred _ _ (And_R  Γ p q h h')
 | IAnd_L_2: ∀ Γ p q r h, pred _ _ h → Istable pred _ _ (And_L_2 Γ p q r h)
@@ -186,6 +186,8 @@ Ltac tac :=
     | |- arr (?p ⊗ ?q) => constructor
     | |- arr (?p & ?q) => constructor
     | |- narr ?p => constructor
+    | |- arrall _ _ _ => split; intros
+    | H: _ -> ?x |- ?x => apply H
   end.
 
 Axiom memIn: ∀ x (y:env), Maps'.mem x y = true → Maps'.In x y.
@@ -210,10 +212,10 @@ Qed.
 Lemma essai : ∀ Γ φ (h:Γ ⊢ φ), arrall Γ φ h → Istable arrall _ _ h.
 Proof.
   intros Γ φ h.
-  destruct h;intros; try constructor;try (unfold arrall in *;decompose [and] H); try split;intros;auto; 
+  destruct h;intros; try constructor;try (unfold arrall in *;decompose [and] H; clear H); try split;intros;auto; 
     try solve [ progress repeat progress tac;auto ].
   inversion H1.
-  inversion H2.
+  inversion H.
 
   assert (abs:arr 0).
   apply H0.
@@ -226,16 +228,72 @@ Proof.
   tac.
   repeat tac.
   repeat tac.
-  inversion H2;subst.
+  inversion H;subst.
   inversion H0;subst.
   constructor.
   assumption.
   repeat tac.
 
   apply H0.
-Set Printing Depth 10000.
   setoid_rewrite <- (@MapsPtes.F.In_m _ g g (Maps'.E.eq_refl g) Γ Γ' e).
   assumption.
 Qed.  
+
+
+
+
+Inductive IstableRec (pred:∀ e f (h: e ⊢ f), Prop): ∀ e f (h: e ⊢ f) , Prop := 
+| IIdR: ∀ (f:formula) , IstableRec pred {f} f (Id f)
+| IImpl_RR: ∀ Γ p q (h:(p :: Γ ⊢ q)), IstableRec pred _ _ h → IstableRec pred _ _ (Impl_R Γ p q h)
+| IImpl_LR: ∀ Γ Δ p q r (h:Γ ⊢ p) (h':q::Δ ⊢ r), IstableRec pred _ _ h → pred _ _ h' → IstableRec pred _ _ (Impl_L Γ Δ p q r h h')
+| ITimes_RR: ∀ Γ Δ p q h h', IstableRec pred _ _ h → pred _ _ h' → IstableRec pred _ _ (Times_R Γ Δ p q h h')
+| ITimes_LR: ∀ Γ p q r h, IstableRec pred _ _ h → IstableRec pred _ _ (Times_L Γ p q r h)
+| IOne_RR:  IstableRec pred ∅ 1 One_R 
+| IOne_LR: ∀ Γ p h, IstableRec pred _ _ h → IstableRec pred _ _ (One_L Γ p h)
+| IAnd_RR: ∀ Γ p q h h', IstableRec pred _ _ h → pred _ _ h' → IstableRec pred _ _ (And_R  Γ p q h h')
+| IAnd_L_2R: ∀ Γ p q r h, IstableRec pred _ _ h → IstableRec pred _ _ (And_L_2 Γ p q r h)
+| IAnd_L_1R: ∀ Γ p q r h, IstableRec pred _ _ h → IstableRec pred _ _ (And_L_1 Γ p q r h)
+| IOplus_LR: ∀ Γ p q r h h', IstableRec pred _ _ h → pred _ _ h' → IstableRec pred _ _ (Oplus_L  Γ p q r h h')
+| IOplus_R_2R: ∀ Γ p q h, IstableRec pred _ _ h  → IstableRec pred _ _ (Oplus_R_2 Γ p q h)
+| IOplus_R_1R: ∀ Γ p q h, IstableRec pred _ _ h → IstableRec pred _ _ (Oplus_R_1 Γ p q h)
+(* | IT_ R: ∀ Γ,  (pred Γ Top (T_ Γ)) → (IstableRec pred Γ Top (T_ Γ)) *)
+(* | IZero_R: ∀ Γ p truein, (pred Γ p (Zero_ Γ p truein)) → (IstableRec pred _ _ (Zero_ Γ p truein)) *)
+| IBang_DR: ∀ Γ p q h, IstableRec pred _ _ h → (IstableRec pred _ _ (Bang_D Γ p q h))
+| IBang_CR: ∀ Γ p q h, IstableRec pred _ _ h → (IstableRec pred _ _ (Bang_C Γ p q h))
+| IBang_WR: ∀ Γ p q h, IstableRec pred _ _ h → (IstableRec pred _ _ (Bang_W Γ p q h))
+(* inutile si pred est compatible avec == *)
+| IMultisetR: ∀ Γ Γ' p heq h,  IstableRec pred _ _ h -> IstableRec pred _ _ (Multiset Γ Γ' p heq h)
+.
+
+
+Lemma essai': ∀ Γ φ (h:Γ ⊢ φ), arrall Γ φ h → IstableRec arrall Γ φ h.
+Proof.
+  intros Γ φ h.
+  induction h; intros h';   unfold arrall in h';decompose [and] h'; clear h';
+    try solve [ constructor; repeat tac;auto ].
+
+  inversion H0.
+  inversion H1.
+
+  assert (abs:arr 0).
+  apply H.
+  apply memIn.
+  assumption.
+  destruct (notarr0);assumption.
+
+  constructor.
+  repeat tac.
+  inversion H1.
+  inversion H.
+  tac.
+  assumption.
+
+  constructor.
+  apply IHh.
+  split;intros;try assumption.
+  apply H.  
+  setoid_rewrite <- (@MapsPtes.F.In_m _ g g (Maps'.E.eq_refl g) Γ Γ' e).
+  assumption.
+Qed.
 
 

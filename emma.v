@@ -4,6 +4,8 @@ Import ILLVarInt.MILL. (* only this *)
 Import ILLVarInt.M. (* this *)
 Import FormulaMultiSet. (* and this *)
 
+Delimit Scope Emma with Emma.
+
 (* Declaration of basic propositions. *)
 Local Notation "'P'" := (Proposition 1%nat):Emma.
 Local Notation "'R'" := (Proposition 2%nat):Emma. (* Meets Rodolph *)
