@@ -101,7 +101,7 @@ While the description of the whole sequent places us in the whole ILL fragment, 
 Part of the left-hand side of the sequent consists in the description of the available resources and initial states. The subset language for these formulas is described on figure~\ref{sequent_grammars}. A resource can be an atom, 1, or composed. The formula $R_{1}\&R_{2}$, expresses the availability of one of the resources. One only of $R_{i}$ will be used and the choice depends on the proof, or on the branches of the proof. This allows us to describe how the initial conditions can adapt to a given unfolding of the story. The formula $R_{1} \otimes R_{2}$ allows to express the availability of both resources. The formula $!R$ allows to express the unbounded availability of the resource $R$.
 \begin{figure}
 Resources in $\Gamma$: $R::= 1| atom | R_{1}\&R_{2} | R_{1} \otimes R_{2} | !R $\\
-Action consumption: $Ac ::= 1 | atom | Ac_{1}\7Ac_{2} | Ac_{1} \otimes Ac_{2}$\\
+Action consumption: $Ac ::= 1 | atom | Ac_{1}\&Ac_{2} | Ac_{1} \otimes Ac_{2}$\\
 Action product: $Ap::= R | A | Ap_{1} \otimes Ap_{2} | Ap_{1}\& Ap_{2} | !Ap$\\
 Actions in $\Delta$: $A::= 1 | Ac \multimap Ap | A_{1} \oplus A_{2} | A\& A$
 
