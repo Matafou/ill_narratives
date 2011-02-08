@@ -1,4 +1,5 @@
 \documentclass[runningheads,a4paper]{llncs}
+\usepackage{marginote}%A enlever avant envoi
 
 \usepackage{amssymb}
 \setcounter{tocdepth}{3}
@@ -10,6 +11,14 @@
 %\urldef{\mailsc}\path|erika.siebert-cole, peter.strasser, lncs}@springer.com|    
 \newcommand{\keywords}[1]{\par\addvspace\baselineskip
 \noindent\keywordname\enspace\ignorespaces#1}
+
+\usepackage{listings}
+\usepackage{bold-extra}
+\usepackage{lstcoq}
+\lstset{language=Coq,fontadjust=false,columns=fixed,showspaces=false,showstringspaces=false}
+\lstset{basicstyle=\tt\small,commentstyle=\it\ttfamily,basewidth={0.475em},keywordstyle=\bf\ttfamily}
+\lstset{captionpos=t,float,belowcaptionskip=\medskipamount}
+
 
 \begin{document}
 
@@ -79,9 +88,8 @@ computational linguistics: a ete utilise pour la representation d'actions. Ici o
 LL and planning: idem, representation d'actions.\\
 Referer a ECAI-LL-Emma comme "evidence" que LL presente une theorie de l'action particulierement adaptee a la narration interactive.
 \subsection{Proof Assistants and Automatic Provers support for LL}
-Encodings existants (plusieurs naifs, certains sans proof-terms (juste oui/non) ce qui ne convient pas, c'est la preuve qui nous interesse pas le fait que ce soit prouvable seulement. 
+Encodings existants (plusieurs naifs, certains sans proof-terms (juste oui/non) ce qui ne convient pas, c'est la preuve qui nous interesse pas le fait que ce soit prouvable seulement.Les proches:Dixon, LLP, Prover de Ronan?: 
 
-Les proches:Dixon, LLP, Prover de Ronan?: 
 Dixon: usage "proche" car pour de la planif + le seul exemple d'encodage d'ILL avec des tactiques un peu elaborees dans un assistant de preuve. Nous, on a pas de tactiques definies, mais cet exemple montre que c'est possible et qu'il y a tout un champ qui a ete tres peu investigue par la recherche, et qui a un gros potentiel d'automatisation/semi-automatisation. Les approches Prouveur automatique  a la LLProver (qui mouline 3 semaines sans que rien ne sorte...) et Petri nets ne permettent pas en l'etat actuel des connaissances de passer au niveau du fragment ILL qui est suffisament expressif. L'approche Assistant de Preuve semi-automatique est une premiere etape, permettant d'etudier dans le futur des tactiques performantes, sans avoir a restreindre l'expressivite du fragment considere. Ces consideration sont pour des travaux futurs sur une automatisation ou automatisation partielle.
 
 Pour notre sujet, l'analyse de proprietes de narration interactives, et de specification de narration interactives, avantage qu'il y a a pouvoir faire des preuves au second ordre grace a une approche proof-assistant, comparee a une approche prouveur automatique: Meme sans automatisation, un assistant de preuve permet d'exprimer des proprietes "arbitraires" au second ordre sur une specification de narrations interactives: de raisonner sur un ensemble d'histoires que peut generer la specification. Ceci permet ensuite de verifier ces proprietes (qui sont structurelles, et suivant notre analogie, mappee sur la structure de la preuve), ou d'exhiber une narration interactive particuliere verifiant une propriete structurelle donnee. C'est ce qu'on discute dans ce papier.
@@ -125,7 +133,87 @@ Preuve en Coq que: on peut toujours se ramener a une preuve ou toutes les implic
 \textbf{Cas d'utilisation 1: construction du sequent qui servira de fil d'Ariane dans la suite, pour illustrer la methode}
 \section{Using the Coq proof assistant for Story Properties Analysis}
 \subsection{ILL encoding into Coq}
-quelques details techniques. Comparer avec encodings existants si necessaire (y'en a peu, mais certains pour Isabelle sont plus aboutis avec tactiques). Le truc est simple, expliquer pourquoi.
+
+A lot of encodings of (different fragments and variants of) linear
+logic have been proposed in proof assistants. In~\cite{Power99} for
+instance, authors present a shallow embedding of ILL in Coq and
+performs some simple generic proofs about Hanoi towers for an
+arbitrary number of discs using induction.
+In~\cite{Sadrzadeh03modallinear} authors present a shallow embedding
+of the sequent calculus of classical modal linear logic and performs
+some \emph{epistemic} proofs. In~\cite{Kalvala95mechanizinglinear} an
+efficient and easy to use implementation of ILL rules in the Isabelle
+framework is presented.
+
+In many aspects our modeling of ILL in Coq is similar to these work.
+The main original feature of this development is the focus on
+properties of \emph{proofs} themselves, not only on provability of
+sequents. As in these previous works we provide some (limited)
+automation for proving \emph{closed sequent}\marginote{r\'ef. vers la
+  section idoine.}, but we also provide reasoning lemmas and tactics
+for reasoning on properties of proofs and even on \emph{all possible
+  proofs of a sequent}. \marginote{r\'ef. vers la section idoine.}
+
+Formulae, proofs and corresponding convenient notations are defined as
+follows (type \texttt{env} being an modeling of multisets):
+
+\marginote{no Cut}
+\begin{lstlisting}
+  Inductive formula : Type := 
+  | Proposition : Vars.t -> formula
+  | Implies : formula -> formula -> formula 
+  | Otimes : formula -> formula -> formula 
+  | Oplus : formula -> formula -> formula 
+  | One : formula 
+  | Zero : formula 
+  | Bang : formula -> formula
+  | And : formula -> formula  -> formula 
+  | Top : formula.
+
+  Notation "A -o B" := (Implies A B) : ILL_scope.
+  Notation  "A ++ B" := (Oplus A B) : ILL_scope.
+  Notation  "A ** B" := (Otimes A B) : ILL_scope.
+  Notation "1" := One : ILL_scope.
+  Notation "0" := Zero : ILL_scope.
+  Notation  "! A" := (Bang A) : ILL_scope.
+  Notation  "A & B" := (And A B) : ILL_scope.
+  Notation  "\Top" := Top : ILL_scope.
+  Notation  "x \in \G" := (mem x G = true) : ILL_scope.
+  Notation  "x \ \G" := (remove x G) : ILL_scope.
+ 
+  Inductive ILL_proof : env -> formula -> Prop :=
+    Id : forall \G p, \G == {p} -> \G |- p
+  | Impl_R : forall \G p q, p::\G |- q -> \G |- p -o q
+  | Impl_L : forall \G \D \D' p q r, (p -o q) \in \G -> (\G \ (p -o q)) == \D \U \D'
+(*@\hfill@*)->  \D |- p -> q::\D' |- r -> \G |- r
+  | Times_R : forall \G \D \D' p q , \G == \D \U \D' -> \D |- p -> \D' |- q -> \G |- p ** q
+  | Times_L : forall \G p q r , (p ** q) \in \G -> q :: p :: (\G \ (p ** q)) |- r -> \G |- r
+  | One_R : forall \G, \G == \O -> \G |- 1
+  | One_L : forall \G p , 1 \in \G -> (\G \ 1) |- p -> \G |- p
+  | And_R : forall \G p q , \G |- p -> \G |- q -> \G |- (p & q)
+  | And_L_1 : forall \G p q r , (p & q) \in \G ->  p::(\G \ (p&q)) |- r -> \G |- r
+  | And_L_2 : forall \G p q r , (p & q) \in \G ->  q::(\G \ (p&q)) |- r -> \G |- r
+  | Oplus_L : forall \G p q r ,  (p ++ q) \in \G
+(*@\hfill@*)->  p :: (\G \ (p ++ q)) |- r -> q :: (\G \ (p ++ q)) |- r -> \G |- r
+  | Oplus_R_1 : forall \G p q , \G |- p -> \G |- p ++ q
+  | Oplus_R_2 : forall \G p q , \G |- q -> \G |- p ++ q 
+  | T_ : forall \G, \G |- \Top
+  | Zero_ : forall \G p , 0 \in \G -> \G |- p
+  | Bang_D : forall \G p q , !p \in \G -> p :: (\G \ (!p)) |- q -> \G |- q
+  | Bang_C : forall \G p q , !p \in \G -> !p :: \G |- q ->  \G |- q
+  | Bang_W : forall \G p q , !p \in \G -> \G \ (!p) |- q ->  \G |- q
+    where " x |- y " := (ILL_proof x y) : ILL_scope.
+\end{lstlisting}
+
+Notice the use of the form ``$\phi\in\Gamma \to \Gamma\vdash\dots$''
+instead of ``$\phi,\Gamma\vdash\dots$''. This formulation avoids
+tedious manipulations on the environment to match rules. Simple
+tactics allow to apply rules and premisses of the form $\phi\in\Gamma$
+are discharged automatically (on closed environments).
+
+
+
+%quelques details techniques. Comparer avec encodings existants si necessaire (y'en a peu, mais certains pour Isabelle sont plus aboutis avec tactiques). Le truc est simple, expliquer pourquoi.
 %\subsection{Specifying Interactive Narratives}
 %methode/cuisine pour ecrire le sequent. Faut que ca paraisse facile, et suive naturellement la description de la theorie representationnelle.
 \subsection{Unfolding a Story}
@@ -160,4 +248,21 @@ On a montre que: un couplage ILL et Proof assistant fourni un outil puissant pou
 On a fourni: une methode d'encodage IS en sequent ILL, une methode pour derouler une narration interactive correspondante en utilisant Coq.//
 Insister:\\
 A partir d'un encodage/specification des conditions initiales, actions narratives, et open-world input, a faire a la main selon une methode que nous avons definie ici -> une methode reposant sur des tactiques de Coq pour derouler une histoire.
+
+%TPHOLs99) Working with Linear Logic in Coq
+%
+\bibliography{ITP2011_Coq_Emma}
+\bibliographystyle{plain}
+
 \end{document}
+
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-PDF-mode: t
+%%% ispell-local-dictionary: "british"
+%%% TeX-master: t
+%%% End: 
+
+% LocalWords:  sequent Coq multisets

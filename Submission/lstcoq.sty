@@ -1,0 +1,41 @@
+
+%%
+%% Coq definition (c) 2001 Guillaume Dufay 
+%%                           <Guillaume.Dufay@sophia.inria.fr>
+%%
+\lstdefinelanguage{Coq}%
+  {morekeywords={let,signature,polyinterpkind,termination,%
+      coq_certify_proof,termcrit,%
+      Variable,Inductive,CoInductive,Fixpoint,CoFixpoint,%
+      Definition,Lemma,Theorem,Axiom,Local,Save,Grammar,Syntax,intro,%
+      trivial,Qed,intros,symmetry,simpl,rewrite,apply,elim,assumption,%
+      left,cut,match,auto,unfold,exact,right,Hypothesis,pattern,destruct,%
+      constructor,Defined,Fix,Record,Proof,induction,Hints,exists,%
+      Parameter,split,red,reflexivity,transitivity,if,then,else,Opaque,%
+      Transparent,inversion,absurd,generalize,Mutual,of,end,with,
+      Module,Type,Declare,Section,End,Import,fun,Rewall,match,fail,%
+      eauto,repeat,replace,progress,forall,autorewrite,Functional,%
+      Scheme,params,refine,using,discriminate,try,solve,functional},%
+   sensitive,%
+   morecomment=[n]{(*}{*)},%
+   escapeinside={(*@}{@*)},%
+   morestring=[d]",%
+   literate={=>}{{$\Rightarrow$}}1{>->}{{$\rightarrowtail$}}2%
+{->}{{$\to$}}2{~}{{$\ $}}1%
+{/\\}{{$\land$}}2{\\/}{{$\lor$}}2%
+{forall}{{$\forall$}}1{exists}{{$\exists$}}1%
+{\\G}{{$\mathrm{\Gamma}$}}1{|-}{{$\vdash$}}1%
+{\\D}{{$\mathrm{\Delta}$}}1{-o}{{$\multimap$}}1%
+{**}{{$\otimes$}}1{++}{{$\oplus$}}1%
+{\\O}{{$\emptyset$}}1{\\in}{{$\in$}}1%
+{\\Top}{{$\top$}}1{\\U}{{$\cup$}}1%
+{\\!}{{$\!$}}1%
+% {_0}{{${}_{\tt 0}${}}}1%
+% {_1}{{${}_{\tt 1}${}}}1%
+% {_2}{{${}_{\tt 2}${}}}1%
+% {_3}{{${}_{\tt 3}${}}}1%
+% {_4}{{${}_{\tt 4}${}}}1%
+% {_n}{{${}_{\tt n}${}}}1%
+% {_k}{{${}_{\tt k}${}}}1%
+}[keywords,comments,strings]%
+\endinput
