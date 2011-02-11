@@ -74,12 +74,15 @@ More specifically, we describe a method for modelling narrative resources and ac
 
 
 \section{Introduction}
-Proofs as narratives.
+%
+Narrative representations have always played a prominent role in AI research and Cognitive Science (see~\cite{Richards09} for a recent review and current trends, and~\cite{AAAI10}). More recently, the emergence of new media has created an opportunity for real-world applications of computational models of narratives~\cite{Laurel93,Murray98}. Research in Interactive Storytelling, whose long-term goal is to create narratives which can respond and adapt in real-time to user's reaction, has thus recently become a sustained interest within the AI community~\cite{AAAI07,AAAI09}.
 
-Proposed method:
-- a formalisation, "by hand" of interactive narratives specifications in the form of an ILL sequent.
-- a method for unfolding a given narrative specified by such a sequent using Coq, thus allowing to assist the generation of well-formed stories.
-- methods for proving structural properties on the stories a sequent can generate.
+Recent research in Interactive Storytelling has converged on the use of AI techniques (mostly Planning~\cite{Young99}) to generate consistent plots (seen as a sequence of actions corresponding to the backbone of the narrative), but has paradoxically failed to capitalise on narrative representations. Initial hopes of developing computational narratology on the same bases as computational linguistics using narrative models developed in the field of humanities~\cite{Greimas66,Bremond73} have been dashed by the finding that they were closer to ontologies than to proper logical or computational formalisms~\cite{Cavazza06}.
+
+We have recently described in~\cite{bosser10} how Linear Logic(LL)~\cite{GirardTCS87}, and in particular Intuitionistic Linear Logic~\cite{GirardILL87} can provide a suitable conceptual model for Interactive Narratives. Interactive Narratives are modelled as proofs of a sequent written in Linear Logic which describes initial resources and possible narrative actions. This allows to express naturally key properties for Interactive Narratives while supporting a return to first principles of narrative action representation (causality and competition for resources).
+
+%a affiner/preciser. ce paragraphe doit etre accrocheur pour la communaute.
+Building on this work, we propose here a first step towards the automation of the structural analysis of interactive narratives using the Coq Proof-Assistant. We describe how to specify narratives on a structural basis only in the form of an ILL sequent, and a dedicated ILL encoding into Coq, with tactics allowing to obtain proofs of such a sequent. We describe how such proofs are interpreted as well-formed narratives. Our encoding of ILL into Coq supports, as have previous work, the assisted generation of ILL proofs, but also assists the reasoning on the properties of proofs and on all the possible proofs of an ILL sequent, through lemmas and tactics. This allows us to explore second order structural properties traversing all the interactive narratives which can be generated from a description of initial and atomic narrative actions and resources.
 
 %Further work: tactics based on patterns of use.
 \section{Related Works}
