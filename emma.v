@@ -23,6 +23,21 @@ Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
   apply Oplus_R_2...
 Defined.
 
+(* EXAMPLE OF IMPOSSIBLE INTERNAL CHOICE
+Lemma originelle :              
+  {P&1, R, G, B&1, !(V⊸A), (E⊸A)&1, (P⊸M)&1,(R⊸1)&(R⊸E), (G⊸1)⊕(G⊸V), 1⊕((B⊸V)&(B⊸1))  } ⊢ A ⊕ M .
+Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
+  and_l_2 (R⊸1) (R⊸E).
+  oplus_l (G ⊸ 1) (G ⊸ V).
+  Focus 2.
+  weak_impl_l G V...
+  weak_impl_l R E...
+  bang_c (V ⊸ A).
+  bang_d (V ⊸ A).
+  weak_impl_l V A...
+  and_l_1 (E ⊸ A) 1.
+  weak_impl_l E A... (* THERE IS TWO A *)
+*)
 
 Lemma originelle :              
   {P&1, R, G, B&1, !(V⊸A), (E⊸A)&1, (P⊸M)&1,(R⊸1)&(R⊸E), (G⊸1)⊕(G⊸V), 1⊕((B⊸V)&(B⊸1))  } ⊢ A ⊕ M .

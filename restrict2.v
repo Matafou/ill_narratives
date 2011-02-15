@@ -11,55 +11,57 @@ Open Scope ILL_scope.
    of h.
    *)
 
+Section Stability.
+  Set Implicit Arguments.
+  Variable pred: ∀ {e} {f} (h:e ⊢ f), Prop.
+  (** This property is true when pred holds for all nodes above the root
+     of h (it has not to hold for the root itself). *)
+  Inductive Istable: ∀ {e} {f} (h: e ⊢ f) , Prop := 
+  | IId: ∀ Γ p heq, Istable (Id Γ p heq)
+  | IImpl_R: ∀ Γ p q h, pred h → Istable h → Istable (Impl_R Γ p q h)
+  | IImpl_L: ∀ Γ Δ Δ' p q r hin heq h h',
+    pred h → pred h' →  Istable h → Istable h' → Istable (Impl_L Γ Δ Δ' p q r hin heq h h')
+  | ITimes_R: ∀ Γ Δ Δ' p q heq h h', pred h → pred h' → Istable h → Istable h' → Istable (Times_R Γ Δ Δ' p q heq h h')
+  | ITimes_L: ∀ Γ p q r hin h, pred h → Istable h → Istable (Times_L Γ p q r hin h)
+  | IOne_R: ∀ Γ heq, Istable (One_R Γ heq)
+  | IOne_L: ∀ Γ p hin h, pred h → Istable h → Istable (One_L Γ p hin h)
+  | IAnd_R: ∀ Γ p q h h', pred h → pred h' → Istable h → Istable h' → Istable (And_R  Γ p q h h')
+  | IAnd_L_2: ∀ Γ p q r hin h, pred h → Istable h → Istable (And_L_2 Γ p q r hin h)
+  | IAnd_L_1: ∀ Γ p q r hin h, pred h → Istable h → Istable (And_L_1 Γ p q r hin h)
+  | IOplus_L: ∀ Γ p q r hin h h', pred h → pred h' → Istable h → Istable h' → Istable (Oplus_L  Γ p q r hin h h')
+  | IOplus_R_2: ∀ Γ p q h, Istable h  → Istable (Oplus_R_2 Γ p q h)
+  | IOplus_R_1: ∀ Γ p q h, pred h → Istable h → Istable (Oplus_R_1 Γ p q h)
+  | IT_ : ∀ Γ,  (Istable (T_ Γ)) → (Istable (T_ Γ))
+  | IZero_: ∀ Γ p truein, (Istable (Zero_ Γ p truein)) → (Istable (Zero_ Γ p truein))
+  | IBang_D: ∀ Γ p q hin h, pred h → Istable h → (Istable (Bang_D Γ p q hin h))
+  | IBang_C: ∀ Γ p q hin h, pred h → Istable h → (Istable (Bang_C Γ p q hin h))
+  | IBang_W: ∀ Γ p q hin h, pred h → Istable h → (Istable (Bang_W Γ p q hin h)).
 
-
-(** This property is true when pred holds for all nodes above the root
-   of h (it has not to hold for the root itself). *)
-Inductive Istable (pred:∀ e f (h: e ⊢ f), Prop): ∀ e f (h: e ⊢ f) , Prop := 
-| IId: ∀ Γ (f:formula) (heq:Γ == {f}), Istable pred Γ f (Id _ _ heq)
-| IImpl_R: ∀ Γ p q (h:(p :: Γ ⊢ q)), pred _ _ h → Istable pred _ _ h → Istable pred _ _ (Impl_R Γ p q h)
-| IImpl_L: ∀ Γ Δ Δ' p q r (hin:(p⊸q)∈Γ) (heq:remove (p⊸ q) Γ== Δ ∪ Δ') (h:Δ ⊢ p) (h':q::Δ' ⊢ r), 
-  pred _ _ h → pred _ _ h' →  Istable pred _ _ h → Istable pred _ _ h' → Istable pred _ _ (Impl_L Γ Δ Δ' p q r hin heq h h')
-| ITimes_R: ∀ Γ Δ Δ' p q heq h h', pred _ _ h → pred _ _ h' → Istable pred _ _ h → Istable pred _ _ h' → Istable pred _ _ (Times_R Γ Δ Δ' p q heq h h')
-| ITimes_L: ∀ Γ p q r hin h, pred _ _ h → Istable pred _ _ h → Istable pred _ _ (Times_L Γ p q r hin h)
-| IOne_R: ∀ Γ heq, Istable pred _ _ (One_R Γ heq)
-| IOne_L: ∀ Γ p hin h, pred _ _ h → Istable pred _ _ h → Istable pred _ _ (One_L Γ p hin h)
-| IAnd_R: ∀ Γ p q h h', pred _ _ h → pred _ _ h' → Istable pred _ _ h → Istable pred _ _ h' → Istable pred _ _ (And_R  Γ p q h h')
-| IAnd_L_2: ∀ Γ p q r hin h, pred _ _ h → Istable pred _ _ h → Istable pred _ _ (And_L_2 Γ p q r hin h)
-| IAnd_L_1: ∀ Γ p q r hin h, pred _ _ h → Istable pred _ _ h → Istable pred _ _ (And_L_1 Γ p q r hin h)
-| IOplus_L: ∀ Γ p q r hin h h', pred _ _ h → pred _ _ h' → Istable pred _ _ h → Istable pred _ _ h' → Istable pred _ _ (Oplus_L  Γ p q r hin h h')
-| IOplus_R_2: ∀ Γ p q h, Istable pred _ _ h  → Istable pred _ _ (Oplus_R_2 Γ p q h)
-| IOplus_R_1: ∀ Γ p q h, pred _ _ h → Istable pred _ _ h → Istable pred _ _ (Oplus_R_1 Γ p q h)
-| IT_ : ∀ Γ,  (Istable pred Γ Top (T_ Γ)) → (Istable pred Γ Top (T_ Γ))
-| IZero_: ∀ Γ p truein, (Istable pred Γ p (Zero_ Γ p truein)) → (Istable pred _ _ (Zero_ Γ p truein))
-| IBang_D: ∀ Γ p q hin h, pred _ _ h → Istable pred _ _ h → (Istable pred _ _ (Bang_D Γ p q hin h))
-| IBang_C: ∀ Γ p q hin h, pred _ _ h → Istable pred _ _ h → (Istable pred _ _ (Bang_C Γ p q hin h))
-| IBang_W: ∀ Γ p q hin h, pred _ _ h → Istable pred _ _ h → (Istable pred _ _ (Bang_W Γ p q hin h)).
-
+End Stability.
 
 (** The predicate that we want to check on all
     nodes is that formula belong to the following
     grammar. *)
-Inductive A : formula -> Prop := (* Act *)
-| A1: A 1
-| A2:∀ φ₁ φ₂, Ac φ₁ → Ap φ₂ → A (φ₁ ⊸ φ₂)
-| A3: ∀ φ₁ φ₂, A φ₁ → A φ₂ → A (φ₁ ⊕ φ₂)
-| A4: ∀ φ₁ φ₂, A φ₁ → A φ₂ → A (φ₁ & φ₂)
-| A5: ∀ φ, A φ → A (! φ)
-with Ac: formula -> Prop:= (* CRes *)
-| Ac1: Ac 1
-| Ac2: ∀ n, Ac (Proposition n)
-| Ac3: ∀ φ₁ φ₂, Ac φ₁ → Ac φ₂ → Ac (φ₁ ⊗ φ₂)
-with Ap: formula -> Prop:= (* Context *)
-| Ap1:∀ φ, A φ → Ap φ
-| Ap2:∀ φ, R φ → Ap φ
-| Ap3: ∀ φ₁ φ₂, Ap φ₁ → Ap φ₂ → Ap (φ₁ ⊗ φ₂)
-with R: formula -> Prop:= (* Res *)
-  R1: R 1
-| R2: ∀ n, R (Proposition n)
-| R3: ∀ φ, R φ → R (!φ)
-| R4: ∀ φ₁ φ₂, R φ₁ → R φ₂ → R (φ₁ ⊗ φ₂)
-| R5: ∀ φ₁ φ₂, R φ₁ → R φ₂ → R (φ₁ & φ₂).
+Inductive Act : formula -> Prop := (* Act *)
+| A1: Act 1
+| A2:∀ φ₁ φ₂, Cres φ₁ → Context φ₂ → Act (φ₁ ⊸ φ₂)
+| A3: ∀ φ₁ φ₂, Act φ₁ → Act φ₂ → Act (φ₁ ⊕ φ₂)
+| A4: ∀ φ₁ φ₂, Act φ₁ → Act φ₂ → Act (φ₁ & φ₂)
+| A5: ∀ φ, Act φ → Act (! φ)
+with Cres: formula -> Prop:= (* CRes *)
+| Cres1: Cres 1
+| Cres2: ∀ n, Cres (Proposition n)
+| Cres3: ∀ φ₁ φ₂, Cres φ₁ → Cres φ₂ → Cres (φ₁ ⊗ φ₂)
+with Context: formula -> Prop:= (* Context *)
+| Context1:∀ φ, Act φ → Context φ
+| Context2:∀ φ, Res φ → Context φ
+| Context3: ∀ φ₁ φ₂, Context φ₁ → Context φ₂ → Context (φ₁ ⊗ φ₂)
+with Res: formula -> Prop:= (* Res *)
+  R1: Res 1
+| R2: ∀ n, Res (Proposition n)
+| R3: ∀ φ, Res φ → Res (!φ)
+| R4: ∀ φ₁ φ₂, Res φ₁ → Res φ₂ → Res (φ₁ ⊗ φ₂)
+| R5: ∀ φ₁ φ₂, Res φ₁ → Res φ₂ → Res (φ₁ & φ₂).
 
 
 Inductive Goal : formula → Prop :=
@@ -70,10 +72,10 @@ Inductive Goal : formula → Prop :=
 | G5: ∀ φ₁ φ₂, Goal φ₁ → Goal φ₂ → Goal (φ₁ & φ₂).
 
 
-(** Predicate [Apall Γ f _] is true if all
-    formulas of a [Γ] are in grammar [Ap] and [f]
+(** Predicate [Contextall Γ f _] is true if all
+    formulas of a [Γ] are in grammar [Context] and [f]
     is in Goal. *)
-Definition Apall Γ f (_:Γ⊢f):Prop := (∀g:formula, g ∈ Γ  → Ap g) /\ Goal f.
+Definition Contextall Γ f (_:Γ⊢f):Prop := Goal f /\ ∀g:formula, g ∈ Γ  → Context g.
 
 Lemma inEnv:∀ g p Γ,  g ∈ (p :: Γ) → g = p ∨ g ∈ Γ .
 Proof.
@@ -125,7 +127,7 @@ Proof.
   assumption.
 Qed.
 
-Lemma Ac_Ap: ∀x, Ac x → Ap x.
+Lemma Cres_Context: ∀x, Cres x → Context x.
 Proof.
   intros x H.
   induction H.
@@ -134,7 +136,7 @@ Proof.
   constructor 3;assumption.
 Qed.
 
-Lemma Ap_Goal: ∀x, Ac x → Goal x.
+Lemma Context_Goal: ∀x, Cres x → Goal x.
 Proof.
   intros x H.
   induction H.
@@ -150,27 +152,27 @@ Ltac zap :=
     | |- ?x == ?x => apply eq_refl
     | H: ILLVarInt.MILL.eq ?g ?q |- _ => apply eq_is_eq in H;subst
     | H:?g ∈ (?q :: ?D') |- _ => destruct (mem_destruct _ _ _ H);clear H
-    | H: ?p ∈ ?Γ ,  H':∀ g : formula, g ∈ ?Γ → Ap g |- _ => assert (Ap (p)) by auto;clear H
-    | H: Ac ?p |- Goal ?p => apply Ap_Goal;assumption
-    | H:Ap (?p ⊸ ?q) |- _ => inversion H;clear H
-    | H:A (?p ⊸ ?q) |- _ => inversion H;clear H
-    | H:R (?p ⊸ ?q) |- _ => inversion H;clear H
-    | H:Ac (?p ⊸ ?q) |- _ => inversion H;clear H
+    | H: ?p ∈ ?Γ ,  H':∀ g : formula, g ∈ ?Γ → Context g |- _ => assert (Context (p)) by auto;clear H
+    | H: Cres ?p |- Goal ?p => apply Context_Goal;assumption
+    | H:Context (?p ⊸ ?q) |- _ => inversion H;clear H
+    | H:Act (?p ⊸ ?q) |- _ => inversion H;clear H
+    | H:Res (?p ⊸ ?q) |- _ => inversion H;clear H
+    | H:Cres (?p ⊸ ?q) |- _ => inversion H;clear H
     | H:Goal (?p ⊸ ?q) |- _ => inversion H;clear H
-    | H:Ap (?p ⊕ ?q) |- _ => inversion H;clear H
-    | H:A (?p ⊕ ?q) |- _ => inversion H;clear H
-    | H:R (?p ⊕ ?q) |- _ => inversion H;clear H
-    | H:Ac (?p ⊕ ?q) |- _ => inversion H;clear H
+    | H:Context (?p ⊕ ?q) |- _ => inversion H;clear H
+    | H:Act (?p ⊕ ?q) |- _ => inversion H;clear H
+    | H:Res (?p ⊕ ?q) |- _ => inversion H;clear H
+    | H:Cres (?p ⊕ ?q) |- _ => inversion H;clear H
     | H:Goal (?p ⊕ ?q) |- _ => inversion H;clear H
-    | H:Ap (?p ⊗ ?q) |- _ => inversion H;clear H
-    | H:A (?p ⊗ ?q) |- _ => inversion H;clear H
-    | H:R (?p ⊗ ?q) |- _ => inversion H;clear H
-    | H:Ac (?p ⊗ ?q) |- _ => inversion H;clear H
+    | H:Context (?p ⊗ ?q) |- _ => inversion H;clear H
+    | H:Act (?p ⊗ ?q) |- _ => inversion H;clear H
+    | H:Res (?p ⊗ ?q) |- _ => inversion H;clear H
+    | H:Cres (?p ⊗ ?q) |- _ => inversion H;clear H
     | H:Goal (?p ⊗ ?q) |- _ => inversion H;clear H
-    | H:Ap (?p & ?q) |- _ => inversion H;clear H
-    | H:A (?p & ?q) |- _ => inversion H;clear H
-    | H:R (?p & ?q) |- _ => inversion H;clear H
-    | H:Ac (?p & ?q) |- _ => inversion H;clear H
+    | H:Context (?p & ?q) |- _ => inversion H;clear H
+    | H:Act (?p & ?q) |- _ => inversion H;clear H
+    | H:Res (?p & ?q) |- _ => inversion H;clear H
+    | H:Cres (?p & ?q) |- _ => inversion H;clear H
     | H:Goal (?p & ?q) |- _ => inversion H;clear H
     | H: ?g ∈ ?Δ |- ?g ∈ (?Δ ∪ ?Δ') => apply mem_union_l;assumption
     | H: ?g ∈ ?Δ |- ?g ∈ (?Δ' ∪ ?Δ) => apply mem_union_r;assumption
@@ -178,62 +180,62 @@ Ltac zap :=
     | H: (?Γ \ ?p) == ?D |- ?g ∈ ?Γ => apply mem_remove with (Δ:=D) (f:=p);[auto|]
     | H: ?g ∈ (?Γ \ ?p) |- ?g ∈ ?Γ => apply mem_remove with (Δ:=(Γ \ p)) (f:=p);[auto|]
     | H:?Γ == ?Δ ∪ ?Δ' |- ?g ∈ ?Γ => rewrite (mem_morph_eq _ _ (Δ ∪ Δ'));[|auto]
-    | H:R ?p |- Ap ?p => constructor 2;assumption
-    | H: A ?p |- Ap ?p => constructor 1;assumption
+    | H:Res ?p |- Context ?p => constructor 2;assumption
+    | H: Act ?p |- Context ?p => constructor 1;assumption
   end
   ;try assumption.
 
 
-Lemma essai : ∀ Γ φ (h:Γ ⊢ φ), Apall Γ φ h → Istable Apall _ _ h.
+Lemma Grammar_Stable : ∀ Γ φ (h:Γ ⊢ φ), Contextall h → Istable Contextall h.
 Proof.
   fix 3.
-  destruct h; intros; try constructor;try (unfold Apall in *;decompose [and] H;clear H); try split;intros; try solve [  repeat (zap;subst);apply H0;repeat zap
+  destruct h; intros; try constructor;try (unfold Contextall in *;decompose [and] H;clear H); try split;intros; try solve [  repeat (zap;subst);apply H1;repeat zap
 ].
   Guarded.
 
-  apply essai;split;intros; repeat (zap;subst);apply H0;repeat zap.
+  apply Grammar_Stable;split;intros; repeat (zap;subst);apply H1;repeat zap.
   Guarded.
 
-  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  apply Grammar_Stable;split;intros;repeat (zap;subst);apply H1;repeat zap.
   
-  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  apply Grammar_Stable;split;intros;repeat (zap;subst);apply H1;repeat zap.
   Guarded.
 
-  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  apply Grammar_Stable;split;intros;repeat (zap;subst);apply H1;repeat zap.
   Guarded.
 
-  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  apply Grammar_Stable;split;intros;repeat (zap;subst);apply H1;repeat zap.
   Guarded.
 
-  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  apply Grammar_Stable;split;intros;repeat (zap;subst);apply H1;repeat zap.
   Guarded.
 
-  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  apply Grammar_Stable;split;intros;repeat (zap;subst);apply H1;repeat zap.
   Guarded.
 
-  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  apply Grammar_Stable;split;intros;repeat (zap;subst);apply H1;repeat zap.
   Guarded.
 
-  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  apply Grammar_Stable;split;intros;repeat (zap;subst);apply H1;repeat zap.
   Guarded.
 
-  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  apply Grammar_Stable;split;intros;repeat (zap;subst);apply H1;repeat zap.
   Guarded.
 
-  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  apply Grammar_Stable;split;intros;repeat (zap;subst);apply H1;repeat zap.
   Guarded.
 
-  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  apply Grammar_Stable;split;intros;repeat (zap;subst);apply H1;repeat zap.
   Guarded.
-  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  apply Grammar_Stable;split;intros;repeat (zap;subst);apply H1;repeat zap.
   Guarded.
-  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
-  Guarded.
-
-  inversion H1.
+  apply Grammar_Stable;split;intros;repeat (zap;subst);apply H1;repeat zap.
   Guarded.
 
-  assert ( h : Ap 0) by auto.
+  inversion H0.
+  Guarded.
+
+  assert ( h : Context 0) by auto.
   inversion h.
   inversion H.
   inversion H.
@@ -246,23 +248,23 @@ Proof.
   inversion H2.
   constructor 2;assumption.
 
-  repeat (zap;subst);apply H0;repeat zap.
+  repeat (zap;subst);apply H1;repeat zap.
   Guarded.
 
-  apply essai;split;intros.
-  2:assumption.
+  apply Grammar_Stable;split;intros.
+  assumption.
   repeat zap.
   inversion H;subst.
   inversion H2.
   constructor 1;assumption.
   inversion H2.
   constructor 2;assumption.
-  repeat (zap;subst);apply H0;repeat zap.
+  repeat (zap;subst);apply H1;repeat zap.
   Guarded.
 
-  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  apply Grammar_Stable;split;intros;repeat (zap;subst);apply H1;repeat zap.
   Guarded.
 
-  apply essai;split;intros;repeat (zap;subst);apply H0;repeat zap.
+  apply Grammar_Stable;split;intros;repeat (zap;subst);apply H1;repeat zap.
   Guarded.
 Qed.
