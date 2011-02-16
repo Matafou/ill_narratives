@@ -10,8 +10,8 @@ Module Proof_eq.
 (* Implicit Types f φ p q : formula. *)
   Set Implicit Arguments.
 
-  Inductive eq: ∀ (Γ:env) (Γ':env), ∀ (f:formula), (Γ ⊢ f) → (Γ' ⊢ f) → Prop := 
-  | EQId: ∀ Γ1 Γ2, ∀ f, ∀ heq heq' , eq (Id Γ1 f heq) (Id Γ2 f heq')
+  Inductive eq: ∀ Γ Γ' f, (Γ ⊢ f) → (Γ' ⊢ f) → Prop := 
+  | EQId: ∀ Γ1 Γ2, ∀ f, ∀ heq heq', eq (Id Γ1 f heq) (Id Γ2 f heq')
   | EQImpl_R: ∀ Γ1 Γ2 p q h h',  eq h h' → eq (Impl_R Γ1 p q h) (Impl_R Γ2 p q h')
   | EQImpl_L: ∀ Γ1 Δ1 Δ1' Γ2 Δ2 Δ2', ∀ p q r, ∀ heq1 heq1' heq2 heq2' h1 h1' h2 h2',
     eq h1 h1' → eq h2 h2'
