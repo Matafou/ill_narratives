@@ -415,25 +415,23 @@ Ltac titi p :=
     (dependent simple inversion p||inversion p);clear p;subst;try discriminate;simpl.
 
 
+Ltac decompose_add := 
+    repeat (match goal with 
+            | H : _ ∈ (_ :: _) |- _  => 
+              destruct (mem_destruct _ _ _ H);clear H
+            | H : _ ∈ ∅ |- _ => 
+              rewrite empty_no_mem in H;discriminate
+            | H : ILLVarInt.MILL.eq _ _ |- _ => apply eq_is_eq in H;subst
+          end).
+
 Ltac var_not_in_env_tac_simple n' H := 
-elim var_not_in_env with (n:=n') (5:=H);
+elim unusable_var_in_env with (n:=n') (1:=H);
 [
   vm_compute;reflexivity |
   vm_compute;reflexivity |
-    vm_compute;tauto | 
-      let f := fresh "f" in 
-        let H := fresh "H" in 
-          intros f H;
-            repeat 
-              match goal with 
-                | H : _ ∈ (_::_) |- _ => 
-                  let h := fresh "H" in  
-                    destruct (mem_destruct _ _ _ H) as [h|h];clear H;
-                      [  
-                        apply eq_is_eq in h;subst;vm_compute;reflexivity |
-                      ]
-                | H : _ ∈ ∅ |- _ => rewrite empty_no_mem in H;discriminate
-              end
+  vm_compute;reflexivity |
+  vm_compute;reflexivity |
+    intros;decompose_add;simpl in *;repeat split;try discriminate;reflexivity
 ]
 .
 
@@ -588,1286 +586,1469 @@ Ltac finish :=
 
 Ltac one_step p :=   titi p; (repeat tutu);try finish.
 
-Lemma proof_aux_1 : all_proofs_of ({A}) (A ⊕ M).
-Proof.
-  intros p;one_step p.
-Qed.
-Hint Resolve proof_aux_1 : proof.
-Hint Rewrite proof_aux_1 : proof.
+Ltac unusable_implies_tac n' f H := 
+  apply unusable_implies with (1:=H) (n:=n') (φ:=f);
+    [
+      vm_compute;reflexivity |
+        vm_compute;reflexivity |
+          vm_compute;reflexivity |
+            intros;decompose_add;repeat split;simpl in *;try discriminate;reflexivity].
 
+Ltac unusable_var_strong_tac n1 n2 H :=
+  apply unusable_var_in_env_strong with (1:=H) (n:=n1);[
+  vm_compute;reflexivity|
+  vm_compute;reflexivity|
+  vm_compute;reflexivity|
+  vm_compute;reflexivity|
+  intros;decompose_add;simpl in *;  repeat split;try discriminate;try reflexivity;auto;
+  intros _;right;
+  exists n2;
+    split;[((left;reflexivity)||(right;reflexivity))|split;[
+      intros;decompose_add;simpl;reflexivity|vm_compute;reflexivity]]].
+
+Lemma aux_1 : all_proofs_of ({A}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_1 : proof.
+Hint Rewrite aux_1 : proof.
 
 Lemma proof_1 : all_proofs_of ({ (V⊸A),V}) (A⊕M).
 Proof.
-  intros p.
-  one_step p.
+  intros p; one_step p;eauto with proof.
 Qed.
 Hint Resolve proof_1 : proof.
 Hint Rewrite proof_1 : proof.
 
 Lemma proof_2 : all_proofs_of ({(V⊸A)&1, V}) (A⊕M).
 Proof.
-  intros p.
-  one_step p.
+  intros p;one_step p;eauto with proof.
 Qed.
 Hint Resolve proof_2 : proof.
 Hint Rewrite proof_2 : proof.
 
-
-Lemma proof_aux_2 : all_proofs_of ({A,1}) (A ⊕ M).
+Lemma aux_2 : all_proofs_of ({A, 1}) (A ⊕ M).
 Proof.
-  intros p.
-  one_step p.
+  intros p; one_step p;eauto with proof.
 Qed.
-Hint Resolve proof_aux_2 : proof.
-Hint Rewrite proof_aux_2 : proof.
+Hint Resolve aux_2 : proof.
+Hint Rewrite aux_2 : proof.
 
-Lemma proof_aux_3 : all_proofs_of ( { (V ⊸ A), 1,V}) (A ⊕ M).
+Lemma aux_3 : all_proofs_of ({V ⊸ A, 1, V})  (A ⊕ M).
 Proof.
-  intros p.
-  one_step p.
+  intros p; one_step p;eauto with proof.
 Qed.
-Hint Resolve proof_aux_3 : proof.
-Hint Rewrite proof_aux_3 : proof.
+Hint Resolve aux_3 : proof.
+Hint Rewrite aux_3 : proof.
 
-Lemma proof_aux_4 : all_proofs_of ({1, (V ⊸ A) & 1, V}) (A ⊕ M).
+Lemma aux_4 : all_proofs_of ({1, (V ⊸ A) & 1, V}) (A ⊕ M).
 Proof.
-  intros p.
-  one_step p.
+  intros p; one_step p;eauto with proof.
 Qed.
-Hint Resolve proof_aux_4 : proof.
-Hint Rewrite proof_aux_4 : proof.
+Hint Resolve aux_4 : proof.
+Hint Rewrite aux_4 : proof.
 
-
-Lemma proof_aux_5 : all_proofs_of ({A, 1, 1}) (A ⊕ M).
+Lemma aux_5 : all_proofs_of ({A, 1, 1}) (A ⊕ M).
 Proof.
-  intros p.
-  one_step p.
+  intros p; one_step p;eauto with proof.
 Qed.
-Hint Resolve proof_aux_5 : proof.
-Hint Rewrite proof_aux_5 : proof.
+Hint Resolve aux_5 : proof.
+Hint Rewrite aux_5 : proof.
 
-Lemma proof_aux_6 : all_proofs_of ({V ⊸ A, 1, 1, V}) (A ⊕ M).
+Lemma aux_6 : all_proofs_of ({V ⊸ A, 1, 1, V}) (A ⊕ M).
 Proof.
-  intros p.
-  one_step p.
+  intros p; one_step p;eauto with proof.
 Qed.
-Hint Resolve proof_aux_6 : proof.
-Hint Rewrite proof_aux_6: proof.
+Hint Resolve aux_6 : proof.
+Hint Rewrite aux_6 : proof.
 
-Lemma proof_aux_7 : all_proofs_of ({1, 1, (V ⊸ A) & 1, V}) (A ⊕ M).
+Lemma aux_7 : all_proofs_of ({1, 1, (V ⊸ A) & 1, V}) (A ⊕ M).
 Proof.
-  intros p.
-  one_step p.
+  intros p; one_step p;eauto with proof.
 Qed.
-Hint Resolve proof_aux_7 : proof.
-Hint Rewrite proof_aux_7: proof.
+Hint Resolve aux_7 : proof.
+Hint Rewrite aux_7 : proof.
 
-Lemma proof_aux_8 : all_proofs_of ({A,1, 1, 1}) (A ⊕ M).
+Lemma aux_8 : all_proofs_of ({A, 1, 1, 1}) (A ⊕ M).
 Proof.
-  intros p.
-  one_step p.
+  intros p; one_step p;eauto with proof.
 Qed.
-Hint Resolve proof_aux_8 : proof.
-Hint Rewrite proof_aux_8: proof.
+Hint Resolve aux_8 : proof.
+Hint Rewrite aux_8 : proof.
 
-Lemma proof_aux_9 : all_proofs_of ({V ⊸ A, 1, 1, 1, V}) (A ⊕ M).
+Lemma aux_9 : all_proofs_of ({V ⊸ A, 1, 1, 1, V}) (A ⊕ M).
 Proof.
-  intros p.
-  one_step p.
+  intros p; one_step p;eauto with proof.
 Qed.
-Hint Resolve proof_aux_9 : proof.
-Hint Rewrite proof_aux_9: proof.
+Hint Resolve aux_9 : proof.
+Hint Rewrite aux_9 : proof.
 
 Lemma proof_3 : all_proofs_of ({1,1,1,(V⊸A)&1, V}) (A⊕M).
 Proof.
-  intros p.
-  one_step p.
+  intros p; one_step p;eauto with proof.
 Qed.
 Hint Resolve proof_3 : proof.
 Hint Rewrite proof_3 : proof.
-
-Lemma proof_aux_10 : no_proof_for ({P⊸M,A}) A.
+(*
+Lemma aux_10 : no_proof_for ({E ⊸ A, P, (P ⊸ M) & 1, V}) V.
 Proof.
-  intros p;one_step p.
+  intro p;unusable_implies_tac 7%nat A p.
 Qed.
-Hint Resolve proof_aux_10 : proof.
+Hint Resolve aux_10 : proof.
 
-Lemma proof_aux_11 : no_proof_for  ({P ⊸ M, A}) (A ⊕ M).
-Proof.
-  intros p;one_step p.
-Qed.
-Hint Resolve proof_aux_11 : proof.
-
-
-Lemma proof_aux_12 : all_proofs_of ({A, (P ⊸ M) & 1}) (A ⊕ M).
-Proof.
-  intros p. 
-  one_step p.
-  eauto with proof.
-Qed.
-Hint Resolve proof_aux_12 : proof.
-Hint Rewrite proof_aux_12 : proof.
-
-Lemma proof_aux_13 : no_proof_for  ({P ⊸ M, P, V}) V.
-Proof.
-  intros p;one_step p.
-Qed.
-Hint Resolve proof_aux_13 : proof.
-
-Lemma proof_aux_14 : no_proof_for  ({P, (P ⊸ M) & 1, V}) V.
+Lemma aux_12 : no_proof_for ({P ⊸ M, P, V}) V.
 Proof.
   intro p.
-  one_step p.
+  unusable_var_strong_tac 1%nat 8%nat p.
+Qed.
+Hint Resolve aux_12 : proof.
+
+Lemma aux_13 : no_proof_for ({1, P ⊸ M, P, V}) V.
+Proof.
+  intro p.
+  unusable_var_strong_tac 1%nat 8%nat p.
+Qed.
+Hint Resolve aux_13 : proof.
+
+Lemma aux_14 : no_proof_for ({P ⊸ M, P, (E ⊸ A) & 1, V}) V.
+Proof.
+  intro p.
+  unusable_var_strong_tac 1%nat 8%nat p.
+Qed.
+Hint Resolve aux_14 : proof.
+
+Lemma aux_15 : no_proof_for ({P, (P ⊸ M) & 1, V}) V.
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_15 : proof.
+
+Lemma aux_16 : no_proof_for ({1, P, (P ⊸ M) & 1, V}) V.
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_16 : proof.
+
+Lemma aux_17 : no_proof_for ({P, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) V.
+Proof.
+  intros p; one_step p;eauto with proof.
+  ({E ⊸ A, P, (P ⊸ M) & 1, V} ⊢ V
+     {P ⊸ M, P, (E ⊸ A) & 1, V} ⊢ V  e
+     {1, P, (P ⊸ M) & 1, V} ⊢ V
+     *)
+Qed.
+Hint Resolve aux_17 : proof.
+
+Lemma aux_18 : no_proof_for ({E ⊸ A, A, P, (P ⊸ M) & 1}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_18 : proof.
+
+Lemma aux_19 : no_proof_for ({M, A}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_19 : proof.
+
+Lemma aux_20 : no_proof_for ({E ⊸ A, M, A}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_20 : proof.
+
+Lemma aux_21 : no_proof_for ({1, M, A})(A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_21 : proof.
+
+Lemma aux_22 : no_proof_for ({M, A, (E ⊸ A) & 1}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_22 : proof.
+
+Lemma aux_23 : no_proof_for ({E ⊸ A, P ⊸ M, A, P}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_23 : proof.
+
+Lemma aux_24 : no_proof_for ({P ⊸ M, A, P}) A.
+Proof.
+  intro p.
+  unusable_var_strong_tac 1%nat 8%nat p.
+Qed.
+Hint Resolve aux_24 : proof.
+
+Lemma aux_25 : no_proof_for ({P ⊸ M, A, P}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_25 : proof.
+
+Lemma aux_26 : no_proof_for ({1, P ⊸ M, A, P}) A.
+Proof.
+  intro p.
+  unusable_var_strong_tac 1%nat 8%nat p.
+Qed.
+Hint Resolve aux_26 : proof.
+
+Lemma aux_27 : no_proof_for ({1, P ⊸ M, A, P}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(* 
+   {P ⊸ M, A, P} ⊢ A ⊕ M
+   {1, P ⊸ M, A, P} ⊢ A 
+*)
+Qed.
+Hint Resolve aux_27 : proof.
+
+Lemma aux_29 : no_proof_for ({P ⊸ M, A, P, (E ⊸ A) & 1}) A.
+Proof.
+  intro p.
+  unusable_var_strong_tac 1%nat 8%nat p.
+Qed.
+Hint Resolve aux_29 : proof.
+
+Lemma aux_30 : no_proof_for ({P ⊸ M, A, P, (E ⊸ A) & 1}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{M, A} ⊢ A ⊕ M
+{M, A, (E ⊸ A) & 1} ⊢ A ⊕ M
+{E ⊸ A, P ⊸ M, A, P} ⊢ A ⊕ M
+{1, P ⊸ M, A, P} ⊢ A ⊕ M
+{P ⊸ M, A, P, (E ⊸ A) & 1} ⊢ A e
+*)
+Qed.
+Hint Resolve aux_30 : proof.
+
+
+Lemma aux_31 : no_proof_for ({A, P, (P ⊸ M) & 1}) A.
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_31 : proof.
+
+Lemma aux_32 : no_proof_for ({A, P, (P ⊸ M) & 1}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(* ({A, P, (P ⊸ M) & 1}) A *)
+Qed.
+Hint Resolve aux_32 : proof.
+
+Lemma aux_33 : no_proof_for ({1, A, P, (P ⊸ M) & 1}) A.
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_33 : proof.
+
+Lemma aux_34 : no_proof_for ({1, A, P, (P ⊸ M) & 1}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+ {A, P, (P ⊸ M) & 1} ⊢ A ⊕ M
+ {1, A, P, (P ⊸ M) & 1} ⊢ A
+*)
+Qed.
+Hint Resolve aux_34 : proof.
+
+
+Lemma aux_35 : no_proof_for ({E ⊸ A, A, P, (P ⊸ M) & 1}) A.
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_35 : proof.
+ 
+Lemma aux_36 : no_proof_for ({A, P, (E ⊸ A) & 1, (P ⊸ M) & 1}) A.
+Proof.
+  intros p; one_step p;eauto with proof.
+(* 
+{E ⊸ A, A, P, (P ⊸ M) & 1} ⊢ A
+*)
+Qed.
+Hint Resolve aux_36 : proof.
+
+Lemma aux_37 : no_proof_for ({A, P, (E ⊸ A) & 1, (P ⊸ M) & 1}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{E ⊸ A, A, P, (P ⊸ M) & 1} ⊢ A ⊕ M
+{P ⊸ M, A, P, (E ⊸ A) & 1} ⊢ A ⊕ M  
+{1, A, P, (P ⊸ M) & 1} ⊢ A ⊕ M
+{A, P, (E ⊸ A) & 1, (P ⊸ M) & 1} ⊢ A
+*)
+Qed.
+Hint Resolve aux_37 : proof.
+
+
+Lemma aux_38 : no_proof_for ({E ⊸ A, V ⊸ A, P, (P ⊸ M) & 1, V}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_38 : proof.
+
+Lemma aux_40 : no_proof_for ({V ⊸ A, P, V}) P.
+Proof.
+  intro p.
+  unusable_var_strong_tac 5%nat 6%nat p.
+Qed.
+Hint Resolve aux_40 : proof.
+
+Lemma aux_42 : no_proof_for ({V ⊸ A, P, (E ⊸ A) & 1, V}) P.
+Proof.
+  intro p.
+  unusable_var_strong_tac 5%nat 6%nat p.
+Qed.
+Hint Resolve aux_42 : proof.
+
+Lemma aux_43 : no_proof_for ({M, V ⊸ A, V}) M.
+Proof.
+  intro p.
+  unusable_var_strong_tac 5%nat 6%nat p.
+
+Qed.
+Hint Resolve aux_43 : proof.
+
+Lemma aux_44 : no_proof_for ({M, V ⊸ A, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(* 
+   {M, V ⊸ A, V} ⊢ M
+*)
+Qed.
+Hint Resolve aux_44 : proof.
+
+Lemma aux_45 : no_proof_for ({E ⊸ A, M, V ⊸ A, V}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_45 : proof.
+
+Lemma aux_46 : no_proof_for ({1, M, V ⊸ A, V}) (M).
+Proof.
+  intro p.
+  unusable_var_strong_tac 5%nat 6%nat p.
+Qed.
+Hint Resolve aux_46 : proof.
+
+Lemma aux_47 : no_proof_for ({1, M, V ⊸ A, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_47 : proof.
+
+Lemma aux_49 : no_proof_for ({M, V ⊸ A, (E ⊸ A) & 1, V}) M.
+Proof.
+  intro p.
+  unusable_var_strong_tac 5%nat 6%nat p.
+Qed.
+Hint Resolve aux_49 : proof.
+
+Lemma aux_50 : no_proof_for ({M, V ⊸ A, (E ⊸ A) & 1, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+ {E ⊸ A, M, V ⊸ A, V} ⊢ A ⊕ M
+ {1, M, V ⊸ A, V} ⊢ A ⊕ M
+ {M, V ⊸ A, (E ⊸ A) & 1, V} ⊢ M 
+*)
+Qed.
+Hint Resolve aux_50 : proof.
+
+Lemma aux_41 : no_proof_for ({1, V ⊸ A, P, V}) P.
+Proof.
+  intro p.
+  unusable_var_strong_tac 5%nat 6%nat p.
+Qed.
+Hint Resolve aux_41 : proof.
+
+Lemma aux_52 : no_proof_for ({P ⊸ M, V ⊸ A, P, V}) A.
+Proof.
+  intro p.
+  unusable_var_strong_tac 1%nat 8%nat p.
+Qed.
+Hint Resolve aux_52 : proof.
+
+Lemma aux_53 : no_proof_for ({P ⊸ M, V ⊸ A, P, V}) M.
+Proof.
+  intro p.
+  unusable_var_strong_tac 5%nat 6%nat p.
+Qed.
+Hint Resolve aux_53 : proof.
+
+Lemma aux_54 : no_proof_for ({P ⊸ M, V ⊸ A, P, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+   {P ⊸ M, V ⊸ A, P, V} ⊢ A
+   {P ⊸ M, V ⊸ A, P, V} ⊢ M
+*)
+Qed.
+Hint Resolve aux_54 : proof.
+
+
+Lemma aux_55 : no_proof_for ({1, P ⊸ M, V ⊸ A, P, V}) A.
+Proof.
+  intro p.
+  unusable_var_strong_tac 1%nat 8%nat p.
+Qed.
+Hint Resolve aux_55 : proof.
+
+Lemma aux_56 : no_proof_for ({1, P ⊸ M, V ⊸ A, P, V}) M.
+Proof.
+  intro p.
+  unusable_var_strong_tac 5%nat 6%nat p.
+Qed.
+Hint Resolve aux_56 : proof.
+
+Lemma aux_57 : no_proof_for  ({1, P ⊸ M, V ⊸ A, P, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{1, V ⊸ A, P, V} ⊢ P 
+{P ⊸ M, V ⊸ A, P, V} ⊢ A ⊕ M
+{1, P ⊸ M, V ⊸ A, P, V} ⊢ A 
+{1, P ⊸ M, V ⊸ A, P, V} ⊢ M
+*)
+Qed.
+Hint Resolve aux_57 : proof.
+
+Lemma aux_59 : no_proof_for ({P ⊸ M, V ⊸ A, P, (E ⊸ A) & 1, V}) A.
+Proof.
+  intro p.
+  unusable_var_strong_tac 1%nat 8%nat p.
+Qed.
+Hint Resolve aux_59 : proof.
+
+Lemma aux_60 : no_proof_for ({E ⊸ A, P ⊸ M, V ⊸ A, P, V}) M.
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_60 : proof.
+
+Lemma aux_61 : no_proof_for ({P ⊸ M, V ⊸ A, P, (E ⊸ A) & 1, V}) M.
+Proof.
+  intro p.
+  unusable_var_strong_tac 5%nat 6%nat p.
+Qed.
+Hint Resolve aux_61 : proof.
+
+Lemma aux_51 : no_proof_for ({E ⊸ A, P ⊸ M, V ⊸ A, P, V}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_51 : proof.
+
+Lemma aux_62 : no_proof_for ({P ⊸ M, V ⊸ A, P, (E ⊸ A) & 1, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+ {V ⊸ A, P, (E ⊸ A) & 1, V} ⊢ P e
+ {V ⊸ A, P, V} ⊢ P e
+ {M, V ⊸ A, V} ⊢ A ⊕ M
+ {M, V ⊸ A, (E ⊸ A) & 1, V} ⊢ A ⊕ M
+ {E ⊸ A, P ⊸ M, V ⊸ A, P, V} ⊢ A ⊕ M
+ {1, P ⊸ M, V ⊸ A, P, V} ⊢ A ⊕ M
+ {P ⊸ M, V ⊸ A, P, (E ⊸ A) & 1, V} ⊢ A e
+ {P ⊸ M, V ⊸ A, P, (E ⊸ A) & 1, V} ⊢ M e
+ *)
+Qed.
+Hint Resolve aux_62 : proof.
+
+
+Lemma aux_63 : no_proof_for ({V ⊸ A, P, (P ⊸ M) & 1, V}) A.
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_63 : proof.
+
+Lemma aux_64 : no_proof_for ({V ⊸ A, P, (P ⊸ M) & 1, V}) M.
+Proof.
+  intro p.
+  unusable_var_strong_tac 5%nat 6%nat p.
+Qed.
+Hint Resolve aux_64 : proof.
+
+Lemma aux_65 : no_proof_for ({V ⊸ A, P, (P ⊸ M) & 1, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+ {V ⊸ A, P, (P ⊸ M) & 1, V} ⊢ A
+ {V ⊸ A, P, (P ⊸ M) & 1, V} ⊢ M e
+*)
+Qed.
+Hint Resolve aux_65 : proof.
+
+Lemma aux_66 : no_proof_for ({1, V ⊸ A, P, (P ⊸ M) & 1, V}) A.
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_66 : proof.
+
+Lemma aux_67 : no_proof_for ({1, V ⊸ A, P, (P ⊸ M) & 1, V}) M.
+Proof.
+  intro p.
+  unusable_var_strong_tac 5%nat 6%nat p.
+Qed.
+Hint Resolve aux_67 : proof.
+
+Lemma aux_68 : no_proof_for ({1, V ⊸ A, P, (P ⊸ M) & 1, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+ {V ⊸ A, P, (P ⊸ M) & 1, V} ⊢ A ⊕ M
+ {1, V ⊸ A, P, (P ⊸ M) & 1, V} ⊢ A
+ {1, V ⊸ A, P, (P ⊸ M) & 1, V} ⊢ M e
+*)
+Qed.
+Hint Resolve aux_68 : proof.
+
+Lemma aux_69 : no_proof_for ({E ⊸ A, V ⊸ A, P, (P ⊸ M) & 1, V}) A.
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_69 : proof.
+
+Lemma aux_70 : no_proof_for ({V ⊸ A, P, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) A.
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+   {E ⊸ A, V ⊸ A, P, (P ⊸ M) & 1, V} ⊢ A     
+*)
+Qed.
+Hint Resolve aux_70 : proof.
+
+Lemma aux_72 : no_proof_for ({V ⊸ A, P, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) M.
+Proof.
+  intro p.
+  unusable_var_strong_tac 5%nat 6%nat p.
+Qed.
+Hint Resolve aux_72 : proof.
+
+Lemma aux_73 : no_proof_for ({V ⊸ A, P, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{P, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ V           
+{P, (P ⊸ M) & 1, V} ⊢ V                       
+{A, P, (E ⊸ A) & 1, (P ⊸ M) & 1} ⊢ A ⊕ M
+{A, P, (P ⊸ M) & 1} ⊢ A ⊕ M
+{E ⊸ A, V ⊸ A, P, (P ⊸ M) & 1, V} ⊢ A ⊕ M
+{P ⊸ M, V ⊸ A, P, (E ⊸ A) & 1, V} ⊢ A ⊕ M
+{1, V ⊸ A, P, (P ⊸ M) & 1, V} ⊢ A ⊕ M
+{V ⊸ A, P, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A
+{V ⊸ A, P, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ M    e 
+*)
+Qed.
+Hint Resolve aux_73 : proof.
+
+Lemma aux_74 : no_proof_for ({E ⊸ A, P, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_74 : proof.
+
+Lemma aux_75 : no_proof_for ({E ⊸ A, P, (V ⊸ A) & 1, V}) P.
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_75 : proof.
+
+Lemma aux_76 : no_proof_for ({P, (V ⊸ A) & 1, V}) P.
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_76 : proof.
+
+Lemma aux_77 : no_proof_for ({1, P, (V ⊸ A) & 1, V}) P.
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+ {P, (V ⊸ A) & 1, V} ⊢ P
+*)
+Qed.
+Hint Resolve aux_77 : proof.
+
+Lemma aux_78 : no_proof_for ({P, (V ⊸ A) & 1, (E ⊸ A) & 1, V}) P.
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+ {E ⊸ A, P, (V ⊸ A) & 1, V} ⊢ P
+ {1, P, (V ⊸ A) & 1, V} ⊢ P
+*)
+Qed.
+Hint Resolve aux_78 : proof.
+
+Lemma aux_79 : no_proof_for ({E ⊸ A, M, (V ⊸ A) & 1, V}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_79 : proof.
+
+Lemma aux_80 : no_proof_for ({M, (V ⊸ A) & 1, V}) (M).
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_80 : proof.
+
+Lemma aux_88 : no_proof_for ({M, (V ⊸ A) & 1, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+   {M, (V ⊸ A) & 1, V} ⊢ M
+*)
+Qed.
+Hint Resolve aux_88 : proof.
+
+Lemma aux_82 : no_proof_for ({1, M, (V ⊸ A) & 1, V}) M.
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_82 : proof.
+
+Lemma aux_83 : no_proof_for ({1, M, (V ⊸ A) & 1, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+ {M, (V ⊸ A) & 1, V} ⊢ A ⊕ M
+ {1, M, (V ⊸ A) & 1, V} ⊢ M
+*)
+Qed.
+Hint Resolve aux_83 : proof.
+
+Lemma aux_87 : no_proof_for ({E ⊸ A, M, (V ⊸ A) & 1, V}) M.
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_87 : proof.
+
+Lemma aux_85 : no_proof_for ({M, (V ⊸ A) & 1, (E ⊸ A) & 1, V}) M.
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{E ⊸ A, M, (V ⊸ A) & 1, V} ⊢ M
+*)
+Qed.
+Hint Resolve aux_85 : proof.
+
+Lemma aux_86 : no_proof_for ({M, (V ⊸ A) & 1, (E ⊸ A) & 1, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{E ⊸ A, M, (V ⊸ A) & 1, V} ⊢ A ⊕M 
+{1, M, (V ⊸ A) & 1, V} ⊢ A ⊕ M
+{M, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ M
+*)
+Qed.
+Hint Resolve aux_86 : proof.
+
+Lemma aux_89 : no_proof_for ({E ⊸ A, P ⊸ M, P, (V ⊸ A) & 1, V}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_89 : proof.
+
+Lemma aux_90 : no_proof_for ({P ⊸ M, P, (V ⊸ A) & 1, V}) A.
+Proof.
+  intro p.
+  unusable_var_strong_tac 1%nat 8%nat p.
+Qed.
+Hint Resolve aux_90 : proof.
+
+Lemma aux_91 : no_proof_for ({P ⊸ M, P, (V ⊸ A) & 1, V}) M.
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_91 : proof.
+
+Lemma aux_92 : no_proof_for ({P ⊸ M, P, (V ⊸ A) & 1, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{P ⊸ M, P, (V ⊸ A) & 1, V} ⊢ A e
+{P ⊸ M, P, (V ⊸ A) & 1, V} ⊢ M
+*)
+Qed.
+Hint Resolve aux_92 : proof.
+
+Lemma aux_93 : no_proof_for ({1, P ⊸ M, P, (V ⊸ A) & 1, V}) A.
+Proof.
+  intro p.
+  unusable_var_strong_tac 1%nat 8%nat p.
+Qed.
+Hint Resolve aux_93 : proof.
+
+Lemma aux_94 : no_proof_for ({1, P ⊸ M, P, (V ⊸ A) & 1, V}) M.
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_94 : proof.
+
+Lemma aux_95 : no_proof_for ({1, P ⊸ M, P, (V ⊸ A) & 1, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{P ⊸ M, P, (V ⊸ A) & 1, V} ⊢ A ⊕ M
+{1, P ⊸ M, P, (V ⊸ A) & 1, V} ⊢ A e
+{1, P ⊸ M, P, (V ⊸ A) & 1, V} ⊢ M
+*)
+Qed.
+Hint Resolve aux_95 : proof.
+
+Lemma aux_97 : no_proof_for ({P ⊸ M, P, (V ⊸ A) & 1, (E ⊸ A) & 1, V}) A.
+Proof.
+  intro p.
+  unusable_var_strong_tac 1%nat 8%nat p.
+Qed.
+Hint Resolve aux_97 : proof.
+
+Lemma aux_98 : no_proof_for ({E ⊸ A, P ⊸ M, P, (V ⊸ A) & 1, V}) M.
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_98 : proof.
+
+Lemma aux_99 : no_proof_for ({P ⊸ M, P, (V ⊸ A) & 1, (E ⊸ A) & 1, V}) M.
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{E ⊸ A, P ⊸ M, P, (V ⊸ A) & 1, V} ⊢ M
+*)
+Qed.
+Hint Resolve aux_99 : proof.
+
+Lemma aux_100 : no_proof_for ({P ⊸ M, P, (V ⊸ A) & 1, (E ⊸ A) & 1, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{P, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ P
+{P, (V ⊸ A) & 1, V} ⊢ P
+{M, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M
+{M, (V ⊸ A) & 1, V} ⊢ A ⊕ M
+{E ⊸ A, P ⊸ M, P, (V ⊸ A) & 1, V} ⊢ A ⊕ M
+{1, P ⊸ M, P, (V ⊸ A) & 1, V} ⊢ A ⊕ M
+{P ⊸ M, P, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ A e
+ {P ⊸ M, P, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ M
+*)
+Qed.
+Hint Resolve aux_100 : proof.
+
+Lemma aux_101 : no_proof_for ({P, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) A.
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_101 : proof.
+
+Lemma aux_102 : no_proof_for ({P, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) M.
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_102 : proof.
+
+Lemma aux_103 : no_proof_for ({P, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{P, (V ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A
+{P, (V ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ M
+*)
+Qed.
+Hint Resolve aux_103 : proof.
+
+Lemma aux_104 : no_proof_for ({1, P, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) A.
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_104 : proof.
+
+Lemma aux_105 : no_proof_for ({1, P, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) M.
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_105 : proof.
+
+Lemma aux_106 : no_proof_for ({1, P, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{P, (V ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M
+{1, P, (V ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A
+{1, P, (V ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ M
+*)
+Qed.
+Hint Resolve aux_106 : proof.
+
+Lemma aux_107 : no_proof_for ({E ⊸ A, P, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) A.
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_107 : proof.
+
+Lemma aux_108 : no_proof_for ({P, (V ⊸ A) & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) A.
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{E ⊸ A, P, (V ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A
+*)
+Qed.
+Hint Resolve aux_108 : proof.
+
+Lemma aux_109 : no_proof_for ({E ⊸ A, P, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) M.
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_109 : proof.
+
+Lemma aux_110 : no_proof_for ({P, (V ⊸ A) & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) M.
+Proof.
+  intros p; one_step p;eauto with proof.
+Qed.
+Hint Resolve aux_110 : proof.
+
+Lemma aux_111 : no_proof_for ({P, (V ⊸ A) & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{V ⊸ A, P, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M
+{E ⊸ A, P, (V ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M
+{P ⊸ M, P, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M
+{1, P, (V ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M
+{P, (V ⊸ A) & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A
+{P, (V ⊸ A) & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ M
+*)
+Qed.
+Hint Resolve aux_111 : proof.
+
+Lemma aux_200 : no_proof_for ({P ⊸ M, A}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 1%nat M p.
+Qed.
+Hint Resolve aux_200 : proof.
+
+Lemma aux_201 : all_proofs_of ({A, (P ⊸ M) & 1}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{P ⊸ M, A} ⊢ A ⊕ M -
+*)
+Qed.
+Hint Resolve aux_201 : proof.
+
+Lemma aux_202 : no_proof_for ({E ⊸ A, A, (P ⊸ M) & 1}) (A ⊕ M). 
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_202 : proof.
+
+Lemma aux_203 : no_proof_for ({P ⊸ M, A, (E ⊸ A) & 1}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 1%nat M p.
+Qed.
+Hint Resolve aux_203 : proof.
+
+Lemma aux_204 : no_proof_for ({P ⊸ M, 1, A}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 1%nat M p.
+Qed.
+Hint Resolve aux_204 : proof.
+
+Lemma aux_205 : all_proofs_of ({1, A, (P ⊸ M) & 1}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+({P ⊸ M, 1, A} ⊢ A ⊕ M *)
+Qed.
+Hint Resolve aux_205 : proof.
+Hint Rewrite aux_205 : proof.
+
+Lemma aux_206 : no_proof_for ({E ⊸ A, A}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_206 : proof.
+
+Lemma aux_207 : all_proofs_of ({A, (E ⊸ A) & 1}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(* 
+   {E ⊸ A, A} ⊢ A ⊕ M
+*)
+Qed.
+Hint Resolve aux_207 : proof.
+Hint Rewrite aux_207 : proof.
+
+Lemma aux_208 : no_proof_for ({E ⊸ A, 1, A}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_208 : proof.
+
+Lemma aux_209 : all_proofs_of ({1, A, (E ⊸ A) & 1}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(* 
+   {A, (E ⊸ A) & 1} ⊢ A ⊕ M + 
+   {E ⊸ A, 1, A} ⊢ A ⊕ M - e
+
+*)
+Qed.
+Hint Resolve aux_209 : proof.
+Hint Rewrite aux_209 : proof.
+
+Lemma aux_210 : all_proofs_of ({A, (E ⊸ A) & 1, (P ⊸ M) & 1}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{E ⊸ A, A, (P ⊸ M) & 1} ⊢ A ⊕ M - e
+{P ⊸ M, A, (E ⊸ A) & 1} ⊢ A ⊕ M - e
+{1, A, (P ⊸ M) & 1} ⊢ A ⊕ M  + 
+{1, A, (E ⊸ A) & 1} ⊢ A ⊕ M  +
+*)
+Qed.
+Hint Resolve aux_210 : proof.
+Hint Rewrite aux_210 : proof.
+
+Lemma aux_211 : no_proof_for ({E ⊸ A, A, P & 1, (P ⊸ M) & 1}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_211 : proof.
+
+Lemma aux_212 : no_proof_for ({E ⊸ A, P ⊸ M, A, P & 1}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_212 : proof.
+
+Lemma aux_213 : no_proof_for ({1, P ⊸ M, A, (E ⊸ A) & 1}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 1%nat M p.
+Qed.
+Hint Resolve aux_213 : proof.
+
+Lemma aux_214 : no_proof_for ({1, P ⊸ M, A}) A.
+Proof.
+  intro p;unusable_implies_tac 1%nat M p.
+Qed.
+Hint Resolve aux_214 : proof.
+
+Lemma aux_215 : no_proof_for ({P ⊸ M, A, P & 1}) (A).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{1, P ⊸ M, A} ⊢ A
+*)
 Qed. 
-Hint Resolve proof_aux_14 : proof.
+Hint Resolve aux_215 : proof.
 
-Lemma proof_aux_15 : no_proof_for ({P ⊸ M, E ⊸ A, A, P}) A.
+Lemma aux_216 : no_proof_for ({P ⊸ M, A, P & 1}) (A ⊕ M).
 Proof.
-  intros p;one_step p.
+  intros p; one_step p;eauto with proof.
+(*
+{P ⊸ M, A, P & 1} ⊢ A
+*)
 Qed.
-Hint Resolve proof_aux_15 : proof.
+Hint Resolve aux_216 : proof.
 
-Lemma proof_aux_16 : no_proof_for ({M, E ⊸ A}) M.
+Lemma aux_217 : no_proof_for ({1, 1, P ⊸ M, A}) (A ⊕ M).
 Proof.
-  intros p;one_step p.
+  intro p;unusable_implies_tac 1%nat M p.
 Qed.
-Hint Resolve proof_aux_16 : proof.
+Hint Resolve aux_217 : proof.
 
-Lemma proof_aux_17 : no_proof_for ({M, E ⊸ A}) (A ⊕ M).
-  intros p;one_step p.
-Qed.
-Hint Resolve proof_aux_17 : proof.
-
-Lemma proof_aux_18 : no_proof_for ({M, E ⊸ A, A}) (A ⊕ M).
-Proof.
-  intros p;one_step p.
-Qed.
-Hint Resolve proof_aux_18 : proof.
-
-Lemma proof_aux_21 : no_proof_for ({M, A}) (A ⊕ M).
-Proof.
-  intros p;one_step p.
-Qed.
-Hint Resolve proof_aux_21 : proof.
-
-Lemma proof_aux_19 : no_proof_for ({P ⊸ M, E ⊸ A, A, P}) (A ⊕ M).
-Proof.
-  intros p;one_step p.
-Qed.
-Hint Resolve proof_aux_19 : proof.
-
-Lemma proof_aux_20 : no_proof_for ({E ⊸ A, A, P, (P ⊸ M) & 1}) A.
-Proof.
-  intros p;one_step p.
-Qed.
-Hint Resolve proof_aux_20 : proof.
-
-Lemma proof_aux_22 : no_proof_for ({E ⊸ A, P ⊸ M, A, P}) A.
-Proof.
-  intros p;one_step p.
-Qed.
-Hint Resolve proof_aux_22 : proof.
-
-Lemma proof_aux_23 : no_proof_for ({E ⊸ A, P ⊸ M, A, P}) (A ⊕ M).
-Proof.
-  intros p;one_step p.
-Qed.
-Hint Resolve proof_aux_23 : proof.
-
-Lemma proof_aux_24 : no_proof_for ({P ⊸ M, A, P}) A.
-Proof.
-  intros p;one_step p.
-Qed.
-Hint Resolve proof_aux_24 : proof.
-
-Lemma proof_aux_25 : no_proof_for ({1, P ⊸ M, A, P}) A.
-Proof.
-  intros p;one_step p.
-Qed.
-Hint Resolve proof_aux_25 : proof.
-
-Lemma proof_aux_26 : no_proof_for ({P ⊸ M, A, P, (E ⊸ A) & 1}) A.
-Proof.
-  intros p;one_step p.
-Qed.
-Hint Resolve proof_aux_26 : proof.
-
-Lemma proof_aux_27 : no_proof_for ({M, 1, A})  (A ⊕ M).
-Proof.
-  intros p;one_step p.
-Qed.
-Hint Resolve proof_aux_27 : proof.
-
-Lemma proof_aux_28 : no_proof_for ({P ⊸ M, A, P}) (A ⊕ M).
-Proof.
-  intros p;one_step p.
-Qed.
-Hint Resolve proof_aux_28 : proof.
-
-Lemma proof_aux_29 : no_proof_for ({1, P ⊸ M, A, P}) M.
-Proof.
-  intros p;one_step p.
-Qed.
-Hint Resolve proof_aux_29 : proof.
-
-Lemma proof_aux_30 : no_proof_for ({1, P ⊸ M, A, P}) (A ⊕ M).
-Proof.
-  intros p;one_step p.
-Qed.
-Hint Resolve proof_aux_30 : proof.
-
-Lemma proof_aux_31 : no_proof_for ({M, A, (E ⊸ A) & 1}) (A ⊕ M).
-Proof.
-  intros p;one_step p; eauto with proof.
-Qed.
-Hint Resolve proof_aux_31 : proof.
-
-Lemma proof_aux_32 : no_proof_for  ({P ⊸ M, A, P, (E ⊸ A) & 1})(A ⊕ M).
-Proof.
-  intros p;one_step p.
-Qed.
-Hint Resolve proof_aux_32 : proof.
-
-Lemma proof_aux_33 : no_proof_for ({A, P, (P ⊸ M) & 1}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_33 : proof.
-
-Lemma proof_aux_34 : no_proof_for ({A, P, (P ⊸ M) & 1}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_34 : proof.
-
-Lemma proof_aux_35 : no_proof_for ({1, A, P, (P ⊸ M) & 1}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_35 : proof.
-
-Lemma proof_aux_36 : no_proof_for ({1, A, P, (P ⊸ M) & 1}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_36 : proof.
-
-Lemma proof_aux_37 : no_proof_for ({A, P, (E ⊸ A) & 1, (P ⊸ M) & 1}) A.
-Proof.
-  intros p;one_step p.
-Qed.
-Hint Resolve proof_aux_37 : proof.
-
-Lemma proof_aux_38 : no_proof_for ({E ⊸ A, A, P, (P ⊸ M) & 1}) (A ⊕ M).
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_38 : proof.
-
-Lemma proof_aux_39 : no_proof_for ({A, P, (E ⊸ A) & 1, (P ⊸ M) & 1}) (A ⊕ M).
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_39 : proof.
-
-Lemma proof_aux_40 : no_proof_for ({P ⊸ M, E ⊸ A, P, V}) V.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_40 : proof.
-
-Lemma proof_aux_41 : no_proof_for ({E ⊸ A, P, (P ⊸ M) & 1, V}) V.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_41 : proof.
-
-Lemma proof_aux_42 : no_proof_for ({1, P ⊸ M, P, V}) V.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_42 : proof.
-
-Lemma proof_aux_43 : no_proof_for ({P ⊸ M, P, (E ⊸ A) & 1, V}) V.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_43 : proof.
-
-
-Lemma proof_aux_44 : no_proof_for ({1, P, (P ⊸ M) & 1, V}) V.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_44 : proof.
-
-Lemma proof_aux_45 : no_proof_for ({P, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) V.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_45 : proof.
-
-Lemma proof_aux_46 : no_proof_for ({E ⊸ A, V ⊸ A, P, V}) P.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_46 : proof.
-
-Lemma proof_aux_47 : no_proof_for  ({E ⊸ A, P}) P.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_47 : proof.
-
-Lemma proof_aux_48 : no_proof_for ({M, E ⊸ A, V ⊸ A, V}) M.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_48 : proof.
-
-Lemma proof_aux_49 : no_proof_for ({M, E ⊸ A, V ⊸ A, V}) (A ⊕ M).
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_49 : proof.
-
-Lemma proof_aux_50 : no_proof_for ({P ⊸ M, E ⊸ A, V ⊸ A, P, V}) A.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_50 : proof.
-
-Lemma proof_aux_51 : no_proof_for ({P ⊸ M, E ⊸ A, V ⊸ A, P, V}) M.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_51 : proof.
-
-Lemma proof_aux_52 : no_proof_for ({P ⊸ M, E ⊸ A, V ⊸ A, P, V}) (A ⊕ M).
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_52 : proof.
-
-Lemma proof_aux_53 : no_proof_for ({E ⊸ A, V ⊸ A, P, (P ⊸ M) & 1, V}) A.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_53 : proof.
-
-Lemma proof_aux_54 : no_proof_for ({E ⊸ A, V ⊸ A, P, (P ⊸ M) & 1, V}) M.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_54 : proof.
-
-Lemma proof_aux_55 : no_proof_for ({E ⊸ A, V ⊸ A, P, (P ⊸ M) & 1, V}) (A ⊕ M).
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_55 : proof.
-
-Lemma proof_aux_56 : no_proof_for ({V ⊸ A, P, V})  P.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_56 : proof.
-
-Lemma proof_aux_57 : no_proof_for ({1, V ⊸ A, P, V}) P.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_57 : proof.
-
-Lemma proof_aux_58 : no_proof_for ({V ⊸ A, P, (E ⊸ A) & 1, V}) P.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_58 : proof.
-
-Lemma proof_aux_59 : no_proof_for ({M, V ⊸ A, V}) M.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_59 : proof.
-
-Lemma proof_aux_60 : no_proof_for ({M, V ⊸ A, V}) (A ⊕ M).
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_60 : proof.
-
-Lemma proof_aux_61 : no_proof_for ({1, M, V ⊸ A, V}) M.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_61 : proof.
-
-Lemma proof_aux_62 : no_proof_for ({1, M, V ⊸ A, V}) (A ⊕ M).
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_62 : proof.
-
-Lemma proof_aux_63 : no_proof_for ({M, V ⊸ A, (E ⊸ A) & 1, V}) M.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_63 : proof.
-
-Lemma proof_aux_64 : no_proof_for ({M, V ⊸ A, (E ⊸ A) & 1, V}) (A ⊕ M).
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_64 : proof.
-
-Lemma proof_aux_65 : no_proof_for ({P ⊸ M, V ⊸ A, P, V}) A.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_65 : proof.
-
-Lemma proof_aux_66 : no_proof_for ({P ⊸ M, V ⊸ A, P, V}) M.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_66 : proof.
-
-Lemma proof_aux_67 : no_proof_for ({P ⊸ M, V ⊸ A, P, V}) (A ⊕ M).
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_67 : proof.
-
-Lemma proof_aux_68 : no_proof_for ({1, P ⊸ M, V ⊸ A, P, V}) A.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_68 : proof.
-
-Lemma proof_aux_69 : no_proof_for ({1, P ⊸ M, V ⊸ A, P, V}) M.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_69 : proof.
-
-Lemma proof_aux_70 : no_proof_for ({1, P ⊸ M, V ⊸ A, P, V}) (A ⊕ M).
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_70 : proof.
-
-Lemma proof_aux_71 : no_proof_for ({P ⊸ M, V ⊸ A, P, (E ⊸ A) & 1, V}) A.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_71 : proof.
-
-Lemma proof_aux_72 : no_proof_for ({P ⊸ M, V ⊸ A, P, (E ⊸ A) & 1, V}) M.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_72 : proof.
-
-Lemma proof_aux_73 : no_proof_for ({P ⊸ M, V ⊸ A, P, (E ⊸ A) & 1, V}) (A ⊕ M).
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_73 : proof.
-
-Lemma proof_aux_74 : no_proof_for ({V ⊸ A, P, (P ⊸ M) & 1, V}) A.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_74 : proof.
-
-Lemma proof_aux_75 : no_proof_for ({V ⊸ A, P, (P ⊸ M) & 1, V}) M.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_75 : proof.
-
-
-Lemma proof_aux_76 : no_proof_for ({V ⊸ A, P, (P ⊸ M) & 1, V}) (A ⊕ M).
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_76 : proof.
-
-Lemma proof_aux_77 : no_proof_for ({1, V ⊸ A, P, (P ⊸ M) & 1, V}) A.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_77 : proof.
-
-Lemma proof_aux_78 : no_proof_for ({1, V ⊸ A, P, (P ⊸ M) & 1, V}) M.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_78 : proof.
-
-Lemma proof_aux_79 : no_proof_for ({1, V ⊸ A, P, (P ⊸ M) & 1, V}) (A ⊕ M).
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_79 : proof.
-
-Lemma proof_aux_80 : no_proof_for ({V ⊸ A, P, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) A.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_80 : proof.
-
-Lemma proof_aux_81 : no_proof_for ({V ⊸ A, P, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) M.
-Proof.
-  intro p.
-  one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_81 : proof.
-
-Lemma proof_aux_82 : no_proof_for ({V ⊸ A, P, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_82 : proof.
-
-Lemma proof_aux_83 : no_proof_for ({E ⊸ A, P, (V ⊸ A) & 1, V}) P.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_83 : proof.
-
-Lemma proof_aux_84 : no_proof_for ({M, E ⊸ A, (V ⊸ A) & 1, V})M.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_84 : proof.
-
-Lemma proof_aux_85 : no_proof_for ({M, E ⊸ A, (V ⊸ A) & 1, V}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_85 : proof.
-
-Lemma proof_aux_86 : no_proof_for ({P ⊸ M, E ⊸ A, P, V}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_86 : proof.
-
-Lemma proof_aux_87 : no_proof_for ({P ⊸ M, E ⊸ A, P, V}) M.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_87 : proof.
-
-Lemma proof_aux_88 : no_proof_for ({P ⊸ M, E ⊸ A, P, V})(A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_88 : proof.
-
-Lemma proof_aux_89 : no_proof_for ({1, P ⊸ M, E ⊸ A, P, V}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_89 : proof.
-
-Lemma proof_aux_90 : no_proof_for ({1, P ⊸ M, E ⊸ A, P, V}) M.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_90 : proof.
-
-Lemma proof_aux_91 : no_proof_for ({1, P ⊸ M, E ⊸ A, P, V}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_91 : proof.
-
-Lemma proof_aux_92 : no_proof_for ({P ⊸ M, E ⊸ A, P, (V ⊸ A) & 1, V}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_92 : proof.
-
-Lemma proof_aux_93 : no_proof_for ({P ⊸ M, E ⊸ A, P, (V ⊸ A) & 1, V}) M.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_93 : proof.
-
-Lemma proof_aux_94 : no_proof_for ({P ⊸ M, E ⊸ A, P, (V ⊸ A) & 1, V}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_94 : proof.
-
-Lemma proof_aux_95 : no_proof_for ({E ⊸ A, P, (P ⊸ M) & 1, V}) A.
+Lemma aux_218 : no_proof_for ({1, 1, P ⊸ M, A}) A.
 Proof.
-  intros p;one_step p;eauto with proof.
+  intro p;unusable_implies_tac 1%nat M p.
 Qed.
-Hint Resolve proof_aux_95 : proof.
+Hint Resolve aux_218 : proof.
 
-Lemma proof_aux_96 : no_proof_for ({E ⊸ A, P, (P ⊸ M) & 1, V}) M.
+Lemma aux_219 : no_proof_for ({1, P ⊸ M, A, P & 1}) A.
 Proof.
-  intros p;one_step p;eauto with proof.
+  intros p; one_step p;eauto with proof.
+(*
+{1, 1, P ⊸ M, A} ⊢ A
+*)
 Qed.
-Hint Resolve proof_aux_96 : proof.
+Hint Resolve aux_219 : proof.
 
-Lemma proof_aux_97 : no_proof_for ({E ⊸ A, P, (P ⊸ M) & 1, V}) (A ⊕ M).
+Lemma aux_220 : no_proof_for ({1, P ⊸ M, A, P & 1}) (A ⊕ M).
 Proof.
-  intros p;one_step p;eauto with proof.
+  intros p; one_step p;eauto with proof.
+(*
+{P ⊸ M, A, P & 1} ⊢ A ⊕ M
+{1, 1, P ⊸ M, A} ⊢ A ⊕ M e
+{1, P ⊸ M, A, P & 1} ⊢ A
+*)
 Qed.
-Hint Resolve proof_aux_97 : proof.
+Hint Resolve aux_220 : proof.
 
-Lemma proof_aux_98 : no_proof_for ({1, E ⊸ A, P, (P ⊸ M) & 1, V}) A.
+Lemma aux_221 : all_proofs_of ({P ⊸ M, A, P & 1, (E ⊸ A) & 1}) (A ⊕ M).
 Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_98 : proof.
-
-Lemma proof_aux_99 : no_proof_for ({1, E ⊸ A, P, (P ⊸ M) & 1, V}) M.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_99 : proof.
-
-Lemma proof_aux_100 : no_proof_for ({1, E ⊸ A, P, (P ⊸ M) & 1, V}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_100 : proof.
-
-Lemma proof_aux_101 : no_proof_for ({E ⊸ A, P, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_101 : proof.
-
-Lemma proof_aux_102 : no_proof_for ({E ⊸ A, P, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) M.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_102 : proof.
-
-Lemma proof_aux_103 : no_proof_for ({E ⊸ A, P, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_103 : proof.
-
-Lemma proof_aux_104 : no_proof_for ({P, (V ⊸ A) & 1, V}) P.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_104 : proof.
-
-Lemma proof_aux_105 : no_proof_for ({1, P, (V ⊸ A) & 1, V}) P.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_105 : proof.
-
-Lemma proof_aux_106 : no_proof_for ({P, (V ⊸ A) & 1, (E ⊸ A) & 1, V}) P.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_106 : proof.
-
-Lemma proof_aux_107 : no_proof_for ({P, (V ⊸ A) & 1, V}) P.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_107 : proof.
-
-Lemma proof_aux_108 : no_proof_for ({M, (V ⊸ A) & 1, V}) M.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_108 : proof.
-
-Lemma proof_aux_109 : no_proof_for ({M, (V ⊸ A) & 1, V})(A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_109 : proof.
-
-Lemma proof_aux_110 : no_proof_for ({1, M, (V ⊸ A) & 1, V}) M.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_110 : proof.
-
-Lemma proof_aux_111 : no_proof_for ({1, M, (V ⊸ A) & 1, V}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_111 : proof.
-
-Lemma proof_aux_112 : no_proof_for ({M, (V ⊸ A) & 1, (E ⊸ A) & 1, V}) M.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_112 : proof.
-
-Lemma proof_aux_113 : no_proof_for ({M, (V ⊸ A) & 1, (E ⊸ A) & 1, V}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_113 : proof.
-
-Lemma proof_aux_114 : no_proof_for ({M, (V ⊸ A) & 1, V}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_114 : proof.
-
-Lemma proof_aux_115 : no_proof_for ({P ⊸ M, P, V}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_115 : proof.
-
-Lemma proof_aux_116 : no_proof_for ({1, P ⊸ M, P, V}) M.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_116 : proof.
-
-Lemma proof_aux_117 : no_proof_for ({1, P ⊸ M, P, V}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_117 : proof.
-
-Lemma proof_aux_118 : no_proof_for ({P ⊸ M, P, (E ⊸ A) & 1, V}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_118 : proof.
-
-Lemma proof_aux_119 : no_proof_for ({P ⊸ M, P, (E ⊸ A) & 1, V}) M.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_119 : proof.
-
-Lemma proof_aux_120 : no_proof_for ({P ⊸ M, P, (E ⊸ A) & 1, V}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_120 : proof.
-
-Lemma proof_aux_121 : no_proof_for ({1, 1, P ⊸ M, P, V}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_121 : proof.
-
-Lemma proof_aux_122 : no_proof_for ({1, P ⊸ M, P, (E ⊸ A) & 1, V}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_122 : proof.
-
-Lemma proof_aux_123 : no_proof_for ({1, P ⊸ M, P, (E ⊸ A) & 1, V}) M.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_123 : proof.
-
-Lemma proof_aux_124 : no_proof_for ({1, P ⊸ M, P, (E ⊸ A) & 1, V}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_124 : proof.
-
-Lemma proof_aux_125 : no_proof_for ({P ⊸ M, P, (V ⊸ A) & 1, V}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_125 : proof.
-
-Lemma proof_aux_126 : no_proof_for ({P ⊸ M, P, (V ⊸ A) & 1, V}) M.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_126 : proof.
-
-Lemma proof_aux_127 : no_proof_for ({P ⊸ M, P, (V ⊸ A) & 1, V}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_127 : proof.
-
-Lemma proof_aux_128 : no_proof_for ({1, P ⊸ M, P, (V ⊸ A) & 1, V}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_128 : proof.
-
-Lemma proof_aux_129 : no_proof_for ({1, P ⊸ M, P, (V ⊸ A) & 1, V}) M.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_129 : proof.
-
-
-Lemma proof_aux_130 : no_proof_for ({1, P ⊸ M, P, (V ⊸ A) & 1, V}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_130 : proof.
-
-Lemma proof_aux_131 : no_proof_for ({P ⊸ M, P, (V ⊸ A) & 1, (E ⊸ A) & 1, V}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_131 : proof.
-
-Lemma proof_aux_132 : no_proof_for ({P ⊸ M, P, (V ⊸ A) & 1, (E ⊸ A) & 1, V}) M.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_132 : proof.
-
-
-Lemma proof_aux_133 : no_proof_for ({P ⊸ M, P, (V ⊸ A) & 1, (E ⊸ A) & 1, V}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_133 : proof.
-
-Lemma proof_aux_134 : no_proof_for ({1, P, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_134 : proof.
-
-Lemma proof_aux_135 : no_proof_for ({P, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_135 : proof.
-
-Lemma proof_aux_136 : no_proof_for ({P, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) M.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_136 : proof.
-
-Lemma proof_aux_137 : no_proof_for ({P, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_137 : proof.
-
-Lemma proof_aux_138 : no_proof_for ({1, P, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_138 : proof.
-
-Lemma proof_aux_139 : no_proof_for ({1, P, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) M.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_139 : proof.
-
-Lemma proof_aux_140 : no_proof_for ({1, P, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_140 : proof.
-
-Lemma proof_aux_141 : no_proof_for ({P, (V ⊸ A) & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_141 : proof.
-
-Lemma proof_aux_142 : no_proof_for ({P, (V ⊸ A) & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) M.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_142 : proof.
-
-Lemma proof_aux_143 : no_proof_for ({P, (V ⊸ A) & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) (A ⊕ M).
-Proof.
-  intros p;one_step p.
-Qed.
-Hint Resolve proof_aux_143 : proof.
-
-Lemma proof_aux_144 : no_proof_for ({P ⊸ M, E ⊸ A, A}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_144 : proof.
-
-Lemma proof_aux_145 : no_proof_for ({P ⊸ M, E ⊸ A, A}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_145 : proof.
-
-Lemma proof_aux_146 : no_proof_for ({E ⊸ A, A}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_146 : proof.
-
-Lemma proof_aux_147 : no_proof_for ({E ⊸ A, A}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_147 : proof.
-
-Lemma proof_aux_148 : no_proof_for ({1, E ⊸ A, A}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_148 : proof.
-
-Lemma proof_aux_149 : no_proof_for ({1, E ⊸ A, A}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_149 : proof.
-
-Lemma proof_aux_150 : no_proof_for ({E ⊸ A, A, (P ⊸ M) & 1}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_150 : proof.
-
-Lemma proof_aux_151 : no_proof_for ({E ⊸ A, A, (P ⊸ M) & 1}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_151 : proof.
-
-Lemma proof_aux_152 : no_proof_for ({1, P ⊸ M, A}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_152 : proof.
-
-Lemma proof_aux_153 : no_proof_for ({1, P ⊸ M, A}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_153 : proof.
-
-Lemma proof_aux_154 : no_proof_for ({P ⊸ M, A, (E ⊸ A) & 1}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_154 : proof.
- 
-Lemma proof_aux_155 : no_proof_for ({P ⊸ M, A, (E ⊸ A) & 1}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_155 : proof.
- 
-Lemma proof_aux_156 : all_proofs_of ({1, A, (P ⊸ M) & 1}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_156 : proof.
-Hint Rewrite proof_aux_156 : proof.
-
-Lemma proof_aux_157 : all_proofs_of ({A, (E ⊸ A) & 1}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_157 : proof.
-Hint Rewrite proof_aux_157 : proof.
-
-Lemma proof_aux_158 : all_proofs_of ({1, A, (E ⊸ A) & 1}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_158 : proof.
-Hint Rewrite proof_aux_158 : proof.
-
-Lemma proof_aux_159 : all_proofs_of ({A, (E ⊸ A) & 1, (P ⊸ M) & 1}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_159 : proof.
-Hint Rewrite proof_aux_159 : proof.
-
-Lemma proof_aux_160 : no_proof_for ({1, P ⊸ M, E ⊸ A, A}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_160 : proof.
-
-Lemma proof_aux_161 : no_proof_for ({1, P ⊸ M, E ⊸ A, A}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_161 : proof.
-
-Lemma proof_aux_162 : no_proof_for ({P ⊸ M, E ⊸ A, A, P & 1}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_162 : proof.
-
-Lemma proof_aux_163 : no_proof_for ({P ⊸ M, E ⊸ A, A, P & 1}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_163 : proof.
-
-Lemma proof_aux_164 : no_proof_for ({1, 1, E ⊸ A, A}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_164 : proof.
-
-Lemma proof_aux_165 : no_proof_for ({1, 1, E ⊸ A, A}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_165 : proof.
-
-Lemma proof_aux_166 : no_proof_for ({1, E ⊸ A, A, (P ⊸ M) & 1}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_166 : proof.
-
-Lemma proof_aux_167 : no_proof_for ({1, E ⊸ A, A, (P ⊸ M) & 1})(A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_167 : proof.
-
-Lemma proof_aux_169 : no_proof_for ({E ⊸ A, A, P & 1}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_169 : proof.
-
-Lemma proof_aux_170 : no_proof_for ({E ⊸ A, A, P & 1}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_170 : proof.
-
-Lemma proof_aux_171 : no_proof_for ({1, E ⊸ A, A, P & 1}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_171 : proof.
-
-Lemma proof_aux_172 : no_proof_for ({1, E ⊸ A, A, P & 1}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_172 : proof.
-
-Lemma proof_aux_173 : no_proof_for ({E ⊸ A, A, P & 1, (P ⊸ M) & 1}) A.
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_173 : proof.
-
-Lemma proof_aux_174 : no_proof_for ({E ⊸ A, A, P & 1, (P ⊸ M) & 1})(A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_174 : proof.
-
-Lemma proof_aux_175 : no_proof_for ({1, P ⊸ M, A, (E ⊸ A) & 1}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_175 : proof.
-
-Lemma  : no_proof_for ({1, P ⊸ M, A, P & 1}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-Qed.
-Hint Resolve proof_aux_175 : proof.
-
-
-Lemma proof_aux_175 : all_proofs_of ({P ⊸ M, A, P & 1, (E ⊸ A) & 1}) (A ⊕ M).
-Proof.
-  intros p;one_step p;eauto with proof.
-
-{1, P ⊸ M, A, (E ⊸ A) & 1} ⊢ A ⊕ M -
+  intros p; one_step p;eauto with proof.
+(*
+{E ⊸ A, P ⊸ M, A, P & 1} ⊢ A ⊕ M  - e 
+{1, P ⊸ M, A, (E ⊸ A) & 1} ⊢ A ⊕ M - e
 {1, P ⊸ M, A, P & 1} ⊢ A ⊕ M - 
+*)
 Qed.
-Hint Resolve proof_aux_175 : proof.
-Hint Rewrite proof_aux_175 : proof.
+Hint Resolve aux_221 : proof.
+Hint Rewrite aux_221 : proof.
 
-Lemma : all_proofs_of ({1, A, (E ⊸ A) & 1, (P ⊸ M) & 1}) (A ⊕ M).
+Lemma aux_222 : no_proof_for ({E ⊸ A, 1, A, (P ⊸ M) & 1}) (A ⊕ M).
 Proof.
-  intros p;one_step p;eauto with proof.
+  intro p;unusable_implies_tac 7%nat A p.
 Qed.
-Hint Resolve proof_aux_159 : proof.
-Hint Rewrite proof_aux_159 : proof.
+Hint Resolve aux_222 : proof.
 
-Lemma : all_proofs_of ({1, A, P & 1, (P ⊸ M) & 1}) (A ⊕ M).
+Lemma aux_223 : all_proofs_of ({1, 1, A, (P ⊸ M) & 1}) (A ⊕ M).
 Proof.
-  intros p;one_step p;eauto with proof.
+  intros p; one_step p;eauto with proof.
 Qed.
-Hint Resolve proof_aux_159 : proof.
-Hint Rewrite proof_aux_159 : proof.
+Hint Resolve aux_223 : proof.
+Hint Rewrite aux_223 : proof.
 
-Lemma : all_proofs_of ({1, A, P & 1, (E ⊸ A) & 1}) (A ⊕ M).
+Lemma aux_224 : no_proof_for ({E ⊸ A, 1, 1, A}) (A ⊕ M).
 Proof.
-  intros p;one_step p;eauto with proof.
+  intro p;unusable_implies_tac 7%nat A p.
 Qed.
-Hint Resolve proof_aux_159 : proof.
-Hint Rewrite proof_aux_159 : proof.
+Hint Resolve aux_224 : proof.
 
-Lemma proof_aux_160 : all_proofs_of ({A, P & 1, (E ⊸ A) & 1, (P ⊸ M) & 1}) (A ⊕ M).
+Lemma aux_225 : all_proofs_of ({1, 1, A, (E ⊸ A) & 1}) (A ⊕ M).
 Proof.
-  intros p;one_step p;eauto with proof.
-
-{E ⊸ A, A, P & 1, (P ⊸ M) & 1} ⊢ A ⊕ M - 
-{P ⊸ M, A, P & 1, (E ⊸ A) & 1} ⊢ A ⊕ M
-{1, A, (E ⊸ A) & 1, (P ⊸ M) & 1} ⊢ A ⊕ M
-{1, A, P & 1, (P ⊸ M) & 1} ⊢ A ⊕ M
-{1, A, P & 1, (E ⊸ A) & 1} ⊢ A ⊕ M
-
+  intros p; one_step p;eauto with proof.
+(*
+{E ⊸ A, 1, 1, A} ⊢ A ⊕ M
+*)
 Qed.
-Hint Resolve proof_aux_160 : proof.
-Hint Rewrite proof_aux_160 : proof.
+Hint Resolve aux_225 : proof.
+Hint Rewrite aux_225 : proof.
 
-Lemma : all_proofs_of ({A, P & 1, (E ⊸ A) & 1}) (A ⊕ M).
+Lemma aux_226 : all_proofs_of ({1, A, (E ⊸ A) & 1, (P ⊸ M) & 1}) (A ⊕ M).
 Proof.
-  intros p;one_step p;eauto with proof.
+  intros p; one_step p;eauto with proof.
+(*
+{E ⊸ A, 1, A, (P ⊸ M) & 1} ⊢ A ⊕ M - e
+{1, 1, A, (P ⊸ M) & 1} ⊢ A ⊕ M     +
+{1, 1, A, (E ⊸ A) & 1} ⊢ A ⊕ M     +
+*)
 Qed.
-Hint Resolve proof_aux_143 : proof.
+Hint Resolve aux_226 : proof.
+Hint Rewrite aux_226 : proof.
 
-Lemma : all_proofs_of ({A, P & 1}) (A ⊕ M).
+Lemma aux_227 : all_proofs_of ({A, P & 1}) (A ⊕ M).
 Proof.
-  intros p;one_step p;eauto with proof.
+  intros p; one_step p;eauto with proof.
 Qed.
-Hint Resolve proof_aux_143 : proof.
+Hint Resolve aux_227 : proof.
+Hint Rewrite aux_227 : proof.
 
-Lemma : all_proofs_of ({A, P & 1, (P ⊸ M) & 1}) (A ⊕ M);
-{E ⊸ A, V ⊸ A, P & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M -
-{P ⊸ M, V ⊸ A, P & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M - 
-{1, V ⊸ A, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M
-{1, V ⊸ A, P & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M
-{1, V ⊸ A, P & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M
-{V ⊸ A, P & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ M -
-
-
-Lemma proof_aux_144 : all_proofs_of ({V ⊸ A, P & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) (A ⊕ M).
+Lemma aux_228 : all_proofs_of ({1, A, P & 1}) (A ⊕ M).
 Proof.
-  intros p;one_step p;eauto with proof.
-
-{A, (E ⊸ A) & 1, (P ⊸ M) & 1} ⊢ A ⊕ M
-{A, (E ⊸ A) & 1} ⊢ A ⊕ M
-{A, P & 1, (E ⊸ A) & 1, (P ⊸ M) & 1} ⊢ A ⊕ M
-{A, P & 1, (E ⊸ A) & 1} ⊢ A ⊕ M
-{A, P & 1} ⊢ A ⊕ M
-{A, P & 1, (P ⊸ M) & 1} ⊢ A ⊕ M
-{E ⊸ A, V ⊸ A, P & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M -
-{P ⊸ M, V ⊸ A, P & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M - 
-{1, V ⊸ A, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M
-{1, V ⊸ A, P & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M
-{1, V ⊸ A, P & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M
-{V ⊸ A, P & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ M -
+  intros p; one_step p;eauto with proof.
+(*
+{A, P & 1}) (A ⊕ M)
+*)
 Qed.
-Hint Resolve proof_aux_144 : proof.
+Hint Resolve aux_228 : proof.
+Hint Rewrite aux_228 : proof.
 
-Lemma : no_proof_for ({E ⊸ A, P & 1, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) (A ⊕ M).
+Lemma aux_229 : all_proofs_of ({A, P & 1, (P ⊸ M) & 1}) (A ⊕ M).
 Proof.
-  intros p;one_step p;eauto with proof.
+  intros p; one_step p;eauto with proof.
+(*
+   {1, A, P & 1} ⊢ A ⊕ M +
+*)
 Qed.
-Hint Resolve proof_aux_143 : proof.
+Hint Resolve aux_229 : proof.
+Hint Rewrite aux_229 : proof.
 
-Lemma : no_proof_for ({P ⊸ M, P & 1, (V ⊸ A) & 1, (E ⊸ A) & 1, V}) (A ⊕ M).
+Lemma aux_230 : all_proofs_of ({1, 1, A, P & 1}) (A ⊕ M).
 Proof.
-  intros p;one_step p;eauto with proof.
+  intros p; one_step p;eauto with proof.
 Qed.
-Hint Resolve proof_aux_143 : proof.
+Hint Resolve aux_230 : proof.
+Hint Rewrite aux_230 : proof.
 
-Lemma : all_proofs_of ({1, (V ⊸ A) & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) (A ⊕ M).
+Lemma aux_231 : all_proofs_of ({1, A, P & 1, (P ⊸ M) & 1}) (A ⊕ M).
 Proof.
-  intros p;one_step p;eauto with proof.
+  intros p; one_step p;eauto with proof.
+(*
+{A, P & 1, (P ⊸ M) & 1} ⊢ A ⊕ M + 
+{1, 1, A, P & 1} ⊢ A ⊕ M +
+*)
 Qed.
-Hint Resolve proof_aux_143 : proof.
+Hint Resolve aux_231 : proof.
+Hint Rewrite aux_231 : proof.
 
-Lemma : all_proofs_of ({1, P & 1, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) (A ⊕ M).
+Lemma aux_232 : no_proof_for ({E ⊸ A, A, P & 1}) (A ⊕ M).
 Proof.
-  intros p;one_step p;eauto with proof.
+  intro p;unusable_implies_tac 7%nat A p.
 Qed.
-Hint Resolve proof_aux_143 : proof.
+Hint Resolve aux_232 : proof.
 
-Lemma : all_proofs_of ({1, P & 1, (V ⊸ A) & 1, (E ⊸ A) & 1, V}) (A ⊕ M).
-
-Lemma : no_proof_for ({P & 1, (V ⊸ A) & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) M.
+Lemma aux_233 : all_proofs_of ({A, P & 1, (E ⊸ A) & 1}) (A ⊕ M).
 Proof.
-  intros p;one_step p;eauto with proof.
+  intros p; one_step p;eauto with proof.
+(*
+{E ⊸ A, A, P & 1} ⊢ A ⊕ M - e
+*)
 Qed.
-Hint Resolve proof_aux_143 : proof.
+Hint Resolve aux_233 : proof.
+Hint Rewrite aux_233 : proof.
 
+Lemma aux_234 : no_proof_for ({E ⊸ A, 1, A, P & 1}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_234 : proof.
+
+Lemma aux_235 : all_proofs_of ({1, A, P & 1, (E ⊸ A) & 1}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+ {A, P & 1, (E ⊸ A) & 1} ⊢ A ⊕ M + 
+ {E ⊸ A, 1, A, P & 1} ⊢ A ⊕ M - e
+*)
+Qed.
+Hint Resolve aux_235 : proof.
+Hint Rewrite aux_235 : proof.
+
+Lemma aux_236 : all_proofs_of ({A, P & 1, (E ⊸ A) & 1, (P ⊸ M) & 1}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(* 
+{E ⊸ A, A, P & 1, (P ⊸ M) & 1} ⊢ A ⊕ M       - e
+{P ⊸ M, A, P & 1, (E ⊸ A) & 1} ⊢ A ⊕ M       + 
+{1, A, (E ⊸ A) & 1, (P ⊸ M) & 1} ⊢ A ⊕ M     +
+{1, A, P & 1, (P ⊸ M) & 1} ⊢ A ⊕ M           +
+{1, A, P & 1, (E ⊸ A) & 1} ⊢ A ⊕ M           + 
+*)
+Qed.
+Hint Resolve aux_236 : proof.
+Hint Rewrite aux_236 : proof.
+
+Lemma aux_237 : no_proof_for ({E ⊸ A, V ⊸ A, P & 1, (P ⊸ M) & 1, V}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_237 : proof.
+
+Lemma aux_238 : no_proof_for ({V ⊸ A, P & 1, (E ⊸ A) & 1, V}) P.
+Proof.
+  intro p; unusable_var_strong_tac 5%nat 6%nat p.
+Qed.
+Hint Resolve aux_238 : proof.
+
+Lemma aux_239 : no_proof_for ({V ⊸ A, P & 1, V}) P.
+Proof.
+  intro p; unusable_var_strong_tac 5%nat 6%nat p.
+Qed.
+Hint Resolve aux_239 : proof.
+
+Lemma aux_240 : no_proof_for ({E ⊸ A, P ⊸ M, P & 1, V}) V.
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_240 : proof.
+
+Lemma aux_241 : no_proof_for ({1, P ⊸ M, (E ⊸ A) & 1, V}) V.
+Proof.
+  intro p;unusable_implies_tac 1%nat M p.
+Qed.
+Hint Resolve aux_241 : proof.
+
+Lemma aux_242 : no_proof_for ({1, P ⊸ M, V}) V.
+Proof.
+  intro p;unusable_implies_tac 1%nat M p.
+Qed.
+Hint Resolve aux_242 : proof.
+
+Lemma aux_243 : no_proof_for ({P ⊸ M, P & 1, V}) V.
+Proof.
+  intro p;one_step p;eauto with proof.
+(*
+   {1, P ⊸ M, V} ⊢ V e
+*)
+Qed.
+Hint Resolve aux_243 : proof.
+
+Lemma aux_244 : no_proof_for ({1, 1, P ⊸ M, V}) V.
+Proof.
+  intro p;unusable_implies_tac 1%nat M p.
+Qed.
+Hint Resolve aux_244 : proof.
+
+Lemma aux_245 : no_proof_for ({1, P ⊸ M, P & 1, V}) V.
+Proof.
+  intro p;one_step p;eauto with proof.
+(*
+{P ⊸ M, P & 1, V} ⊢ V        
+{1, 1, P ⊸ M, V} ⊢ V         e 
+*)
+Qed.
+Hint Resolve aux_245 : proof.
+
+Lemma aux_246 : no_proof_for ({P ⊸ M, P & 1, (E ⊸ A) & 1, V}) V.
+Proof.
+  intros p; one_step p;eauto with proof.
+(* 
+{E ⊸ A, P ⊸ M, P & 1, V} ⊢ V     e
+{1, P ⊸ M, (E ⊸ A) & 1, V} ⊢ V   e
+{1, P ⊸ M, P & 1, V} ⊢ V          e
+*)
+Qed.
+Hint Resolve aux_246 : proof.
+Hint Rewrite aux_246 : proof.
+
+Lemma aux_247 : no_proof_for ({P ⊸ M, V}) V.
+Proof.
+  intro p;unusable_implies_tac 1%nat M p.
+Qed.
+Hint Resolve aux_247 : proof.
+
+Lemma aux_248 : no_proof_for ({P ⊸ M, (E ⊸ A) & 1, V}) V.
+Proof.
+  intro p;unusable_implies_tac 1%nat M p.
+Qed.
+Hint Resolve aux_248 : proof.
+
+Lemma aux_249 : no_proof_for ({E ⊸ A, A, P ⊸ M, P & 1}) A.
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_249 : proof.
+
+Lemma aux_250 : no_proof_for ({1, A, P ⊸ M, (E ⊸ A) & 1}) A.
+Proof.
+  intro p;unusable_implies_tac 1%nat M p.
+Qed.
+Hint Resolve aux_250 : proof.
+
+Lemma aux_251 : no_proof_for ({A, P ⊸ M, P & 1, (E ⊸ A) & 1}) A.
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+ {E ⊸ A, A, P ⊸ M, P & 1} ⊢ A   e
+{1, A, P ⊸ M, (E ⊸ A) & 1} ⊢ A   e
+*)
+Qed.
+Hint Resolve aux_251 : proof.
+
+Lemma aux_252 : no_proof_for ({A, P ⊸ M, P & 1, (E ⊸ A) & 1}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+ {A, P ⊸ M, P & 1, (E ⊸ A) & 1} ⊢ A
+*)
+Qed.
+Hint Resolve aux_252 : proof.
+
+Lemma aux_253 : no_proof_for ({E ⊸ A, P ⊸ M, V ⊸ A, P & 1, V}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_253 : proof.
+
+Lemma aux_254 : no_proof_for ({E ⊸ A, P ⊸ M, V ⊸ A, V}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_254 : proof.
+
+Lemma aux_255 : no_proof_for ({P ⊸ M, V ⊸ A, V}) A.
+Proof.
+  intro p;unusable_implies_tac 1%nat M p.
+Qed.
+Hint Resolve aux_255 : proof.
+
+Lemma aux_256 : no_proof_for ({P ⊸ M, V ⊸ A, V}) M.
+Proof.
+  intro p;unusable_var_strong_tac 5%nat 6%nat p.
+Qed.
+Hint Resolve aux_256 : proof.
+
+Lemma aux_257 : no_proof_for ({P ⊸ M, V ⊸ A, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{P ⊸ M, V ⊸ A, V} ⊢ A e
+{P ⊸ M, V ⊸ A, V} ⊢ M e
+*)
+Qed.
+Hint Resolve aux_257 : proof.
+
+Lemma aux_258 : no_proof_for ({1, P ⊸ M, V ⊸ A, V}) A.
+Proof.
+  intro p;unusable_implies_tac 1%nat M p.
+Qed.
+Hint Resolve aux_258 : proof.
+
+Lemma aux_259 : no_proof_for ({1, P ⊸ M, V ⊸ A, V}) M.
+Proof.
+  intro p;unusable_var_strong_tac 5%nat 6%nat p.
+Qed.
+Hint Resolve aux_259 : proof.
+
+
+Lemma aux_260 : no_proof_for ({1, P ⊸ M, V ⊸ A, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{P ⊸ M, V ⊸ A, V} ⊢ A ⊕ M
+{1, P ⊸ M, V ⊸ A, V} ⊢ A      e
+{1, P ⊸ M, V ⊸ A, V} ⊢ M      e
+*)
+Qed.
+Hint Resolve aux_260 : proof.
+
+Lemma aux_261 : no_proof_for ({P ⊸ M, V ⊸ A, (E ⊸ A) & 1, V}) A.
+Proof.
+  intro p;unusable_implies_tac 1%nat M p.
+Qed.
+Hint Resolve aux_261 : proof.
+
+Lemma aux_262 : no_proof_for ({P ⊸ M, V ⊸ A, (E ⊸ A) & 1, V}) M.
+Proof.
+  intro p;unusable_var_strong_tac 5%nat 6%nat p.
+Qed.
+Hint Resolve aux_262 : proof.
+
+Lemma aux_263 : no_proof_for ({P ⊸ M, V ⊸ A, (E ⊸ A) & 1, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{E ⊸ A, P ⊸ M, V ⊸ A, V} ⊢ A ⊕ M  e
+{1, P ⊸ M, V ⊸ A, V} ⊢ A ⊕ M 
+{P ⊸ M, V ⊸ A, (E ⊸ A) & 1, V} ⊢ A  e
+{P ⊸ M, V ⊸ A, (E ⊸ A) & 1, V} ⊢ M  e
+*)
+Qed.
+Hint Resolve aux_263 : proof.
+
+Lemma aux_264 : no_proof_for ({E ⊸ A, 1, P ⊸ M, V ⊸ A, V}) (A ⊕ M).
+Proof.
+  intro p;unusable_implies_tac 7%nat A p.
+Qed.
+Hint Resolve aux_264 : proof.
+
+Lemma aux_265 : no_proof_for ({1, 1, P ⊸ M, V ⊸ A, V}) A.
+Proof.
+  intro p;unusable_implies_tac 1%nat M p.
+Qed.
+Hint Resolve aux_265 : proof.
+
+Lemma aux_266 : no_proof_for ({1, 1, P ⊸ M, V ⊸ A, V}) M.
+Proof.
+  intro p;unusable_var_strong_tac 5%nat 6%nat p.
+Qed.
+Hint Resolve aux_266 : proof.
+
+Lemma aux_267 : no_proof_for ({1, 1, P ⊸ M, V ⊸ A, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{1, 1, P ⊸ M, V ⊸ A, V} ⊢ A  e
+{1, 1, P ⊸ M, V ⊸ A, V} ⊢ M  e
+*)
+Qed.
+Hint Resolve aux_267 : proof.
+
+Lemma aux_268 : no_proof_for ({1, P ⊸ M, V ⊸ A, (E ⊸ A) & 1, V}) A.
+Proof.
+  intro p;unusable_implies_tac 1%nat M p.
+Qed.
+Hint Resolve aux_268 : proof.
+
+Lemma aux_269 : no_proof_for ({1, P ⊸ M, V ⊸ A, (E ⊸ A) & 1, V}) M.
+Proof.
+  intro p;unusable_var_strong_tac 5%nat 6%nat p.
+Qed.
+Hint Resolve aux_269 : proof.
+
+Lemma aux_270 : no_proof_for ({1, P ⊸ M, V ⊸ A, (E ⊸ A) & 1, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{P ⊸ M, V ⊸ A, (E ⊸ A) & 1, V} ⊢ A ⊕ M
+{E ⊸ A, 1, P ⊸ M, V ⊸ A, V} ⊢ A ⊕ M        e
+{1, 1, P ⊸ M, V ⊸ A, V} ⊢ A ⊕ M
+{1, P ⊸ M, V ⊸ A, (E ⊸ A) & 1, V} ⊢ A      e
+{1, P ⊸ M, V ⊸ A, (E ⊸ A) & 1, V} ⊢ M      e
+*)
+Qed.
+Hint Resolve aux_270 : proof.
+
+Lemma aux_271 : no_proof_for ({1, P ⊸ M, V ⊸ A, P & 1, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+*****
+(*
+*{1, V ⊸ A, P & 1, V} ⊢ P   e
+{P ⊸ M, V ⊸ A, P & 1, V} ⊢ A ⊕ M
+{1, P ⊸ M, V ⊸ A, P & 1, V} ⊢ A 
+{1, P ⊸ M, V ⊸ A, P & 1, V} ⊢ M  e
+*)
+Qed.
+Hint Resolve aux_270 : proof.
+
+Lemma aux_238 : no_proof_for ({P ⊸ M, V ⊸ A, P & 1, (E ⊸ A) & 1, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{V ⊸ A, P & 1, (E ⊸ A) & 1, V} ⊢ P              e
+{V ⊸ A, P & 1, V} ⊢ P                           e 
+{P ⊸ M, P & 1, (E ⊸ A) & 1, V} ⊢ V
+{P ⊸ M, P & 1, V} ⊢ V
+{P ⊸ M, V} ⊢ V                                  e
+{P ⊸ M, (E ⊸ A) & 1, V} ⊢ V                     e
+{A, P ⊸ M, P & 1, (E ⊸ A) & 1} ⊢ A ⊕ M
+{E ⊸ A, P ⊸ M, V ⊸ A, P & 1, V} ⊢ A ⊕ M        e
+{1, P ⊸ M, V ⊸ A, (E ⊸ A) & 1, V} ⊢ A ⊕ M
+*{1, P ⊸ M, V ⊸ A, P & 1, V} ⊢ A ⊕ M
+{P ⊸ M, V ⊸ A, P & 1, (E ⊸ A) & 1, V} ⊢ A      e
+{P ⊸ M, V ⊸ A, P & 1, (E ⊸ A) & 1, V} ⊢ M      e
+*)
+Qed.
+Hint Resolve aux_235 : proof.
+Hint Rewrite aux_235 : proof.
+
+Lemma aux_112 : all_proofs_of ({V ⊸ A, P & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) (A ⊕ M).
+Proof.
+  intros p; one_step p;eauto with proof.
+(*
+{A, (P ⊸ M) & 1} ⊢ A ⊕ M                      +
+{A, (E ⊸ A) & 1, (P ⊸ M) & 1} ⊢ A ⊕ M           +
+{A, (E ⊸ A) & 1} ⊢ A ⊕ M                        + 
+{A, P & 1, (E ⊸ A) & 1, (P ⊸ M) & 1} ⊢ A ⊕ M    +
+{A, P & 1, (E ⊸ A) & 1} ⊢ A ⊕ M                  +
+{A, P & 1} ⊢ A ⊕ M                               +
+{A, P & 1, (P ⊸ M) & 1} ⊢ A ⊕ M                  +
+{E ⊸ A, V ⊸ A, P & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M   - e
+*{P ⊸ M, V ⊸ A, P & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M   - 
+{1, V ⊸ A, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M +
+{1, V ⊸ A, P & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M       +
+{1, V ⊸ A, P & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M       +
+{V ⊸ A, P & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ M - e
+*)
+Qed.
+Hint Resolve aux_112 : proof.
+Hint Rewrite aux_112 : proof. 
+*)
 Lemma proof_4 : all_proofs_of ({P&1,(V⊸A)&1,(E⊸A)&1,(P⊸M)&1,V}) (A⊕M).
 Proof.
   intros p;one_step p;eauto with proof.
-
-{V ⊸ A, P & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M
-{E ⊸ A, P & 1, (V ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M
-{P ⊸ M, P & 1, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M
-{1, (V ⊸ A) & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M
-{1, P & 1, (V ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M
-{1, P & 1, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M
-{P & 1, (V ⊸ A) & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ M
-
+(*
+{P, (V ⊸ A) & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M    -
+{V ⊸ A, P & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M      + 
+{E ⊸ A, P & 1, (V ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M      e 
+{P ⊸ M, P & 1, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M      - 
+{1, (V ⊸ A) & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M    +
+{1, P & 1, (V ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M           +
+{1, P & 1, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M          +
+{P & 1, (V ⊸ A) & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ M   +
+*)
 Qed.
 Hint Resolve proof_4 : proof.
 Hint Rewrite proof_4 : proof.
