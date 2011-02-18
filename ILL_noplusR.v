@@ -417,261 +417,9 @@ with
 end Logic.eq_refl Logic.eq_refl JMeq.JMeq_refl
 .
 
-Next Obligation of fA.
-  assumption.
-Defined.
-Preterm of fM. 
-Obligations of fM.
-Next Obligation of fM.
-  assumption.
-Defined.
-Qed.
-Defined.
 
-  eapply Times_L.
-Show Proof.
-   (Impl_L Γ Δ Δ' p q r hin heq  (fid Γ p x) (f Γ x0))
-  exact (Impl_L Γ Δ Δ' p q r hin heq  (f Γ x) (f Γ x0)).
-  exact Impl_R Γ p q (f Γ x concl)
-  destruct 
-  apply Oplus_R_2
-
-
-  .
-
-
-Lemma essai : (∀ Γ p (h:Γ▷p), IReach atheseA' h) -> (∀ Γ p (h:Γ⊢p), titi.IReach atheseA h).
-Proof.
-  intros H Γ p h.
-
-Qed.
-
-
-End restrict_proof.
-
-
-f :
-Tactics.fix_proto (∀ Γ : env, Γ ⊢ A ⊕ M → Γ ▷ A ⊕ M)
-→ Tactics.fix_proto (∀ Γ : env, Γ ⊢ A → Γ ▷ A ⊕ M)
-  → Tactics.fix_proto (∀ Γ : env, Γ ⊢ M → Γ ▷ A ⊕ M)
-    → (∀ Γ : env, Γ ⊢ A ⊕ M → Γ ▷ A ⊕ M)
-:=
-λ (f : Tactics.fix_proto (∀ Γ : env, Γ ⊢ A ⊕ M → Γ ▷ A ⊕ M))
-(fA : Tactics.fix_proto (∀ Γ : env, Γ ⊢ A → Γ ▷ A ⊕ M))
-(fM : Tactics.fix_proto (∀ Γ : env, Γ ⊢ M → Γ ▷ A ⊕ M)) 
-(Γ : env) (h : Γ ⊢ A ⊕ M) in
-let branch_0:=
- λ (Γ0 : t) (p : formula) (heq : Γ0 == {p}) (Heq_Γ : Γ0 = Γ)
- (Heq_anonymous : p = A ⊕ M)
- (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Id Γ0 p heq) h),
- Id Γ0 (A ⊕ M)
-   (λ x : Maps'.key,
-    Logic.eq_rect (Maps'.find (elt:=nat) x ({p}))
-      (λ H : option nat, Maps'.find (elt:=nat) H Γ0 = H) 
-      (heq x) (Maps'.find (elt:=nat) x ({A ⊕ M}))
-      (f_obligation_1 Γ h Γ0 p heq Heq_Γ Heq_anonymous Heq_h x)) in
-let branch_1:=
- λ (Γ0 : t) (p q : formula) (x : p :: Γ0 ⊢ q) (Heq_Γ : Γ0 = Γ)
- (Heq_anonymous : p ⊸ q = A ⊕ M)
- (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Impl_R Γ0 p q x) h),
- f_obligation_2 Γ h Γ0 p q x Heq_Γ Heq_anonymous Heq_h in
-let branch_2:=
- λ (Γ0 Δ Δ' : t) (p q r : formula) (hin : p ⊸ q ∈ Γ0)
- (heq : Γ0 \ p ⊸ q == Δ ∪ Δ') (x : Δ ⊢ p) (x0 : q :: Δ' ⊢ r) 
- (Heq_Γ : Γ0 = Γ) (Heq_anonymous : r = A ⊕ M)
- (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Impl_L Γ0 Δ Δ' p q r hin heq x x0) h),
- Logic.eq_rect r (λ H : formula, Γ0 ▷ H)
-   (Impl_L Γ0 Δ Δ' p q r hin heq x
-      (Logic.eq_rect (A ⊕ M) (λ H : formula, q :: Δ' ▷ H)
-         (f (q :: Δ')
-            (Logic.eq_rect r (λ H : formula, q :: Δ' ⊢ H) x0 
-               (A ⊕ M)
-               (f_obligation_3 Γ h Γ0 Δ Δ' p q r hin heq x x0 Heq_Γ
-                  Heq_anonymous Heq_h))) r
-         (f_obligation_4 Γ h Γ0 Δ Δ' p q r hin heq x x0 Heq_Γ Heq_anonymous
-            Heq_h))) (A ⊕ M)
-   (f_obligation_5 Γ h Γ0 Δ Δ' p q r hin heq x x0 Heq_Γ Heq_anonymous Heq_h) in
-let branch_3:=
- λ (Γ0 Δ Δ' : t) (p q : formula) (heq : Γ0 == Δ ∪ Δ') 
- (x : Δ ⊢ p) (x0 : Δ' ⊢ q) (Heq_Γ : Γ0 = Γ) (Heq_anonymous : p ⊗ q = A ⊕ M)
- (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Times_R Γ0 Δ Δ' p q heq x x0) h),
- f_obligation_6 Γ h Γ0 Δ Δ' p q heq x x0 Heq_Γ Heq_anonymous Heq_h in
-let branch_4:=
- λ (Γ0 : t) (p q r : formula) (hin : p ⊗ q ∈ Γ0)
- (x : q :: p :: (Γ0 \ p ⊗ q) ⊢ r) (Heq_Γ : Γ0 = Γ)
- (Heq_anonymous : r = A ⊕ M)
- (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Times_L Γ0 p q r hin x) h),
- Logic.eq_rect r (λ H : formula, Γ0 ▷ H)
-   (Times_L Γ0 p q r hin
-      (Logic.eq_rect (A ⊕ M) (λ H : formula, q :: p :: (Γ0 \ p ⊗ q) ▷ H)
-         (f (q :: p :: (Γ0 \ p ⊗ q))
-            (Logic.eq_rect r (λ H : formula, q :: p :: (Γ0 \ p ⊗ q) ⊢ H) x
-               (A ⊕ M)
-               (f_obligation_7 Γ h Γ0 p q r hin x Heq_Γ Heq_anonymous Heq_h)))
-         r (f_obligation_8 Γ h Γ0 p q r hin x Heq_Γ Heq_anonymous Heq_h)))
-   (A ⊕ M) (f_obligation_9 Γ h Γ0 p q r hin x Heq_Γ Heq_anonymous Heq_h) in
-let branch_5:=
- λ (Γ0 : t) (heq : Γ0 == ∅) (Heq_Γ : Γ0 = Γ) (Heq_anonymous : 1 = A ⊕ M)
- (Heq_h : JMeq.JMeq (ILLVarInt.MILL.One_R Γ0 heq) h),
- f_obligation_10 Γ h Γ0 heq Heq_Γ Heq_anonymous Heq_h in
-let branch_6:=
- λ (Γ0 : t) (p : formula) (hin : 1 ∈ Γ0) (x : Γ0 \ 1 ⊢ p) 
- (Heq_Γ : Γ0 = Γ) (Heq_anonymous : p = A ⊕ M)
- (Heq_h : JMeq.JMeq (ILLVarInt.MILL.One_L Γ0 p hin x) h),
- Logic.eq_rect p (λ H : formula, Γ0 ▷ H)
-   (One_L Γ0 p hin
-      (Logic.eq_rect (A ⊕ M) (λ H : formula, Γ0 \ 1 ▷ H)
-         (f (Γ0 \ 1)
-            (Logic.eq_rect p (λ H : formula, Γ0 \ 1 ⊢ H) x 
-               (A ⊕ M)
-               (f_obligation_11 Γ h Γ0 p hin x Heq_Γ Heq_anonymous Heq_h))) p
-         (f_obligation_12 Γ h Γ0 p hin x Heq_Γ Heq_anonymous Heq_h))) 
-   (A ⊕ M) (f_obligation_13 Γ h Γ0 p hin x Heq_Γ Heq_anonymous Heq_h) in
-let branch_7:=
- λ (Γ0 : env) (p q : formula) (x : Γ0 ⊢ p) (x0 : Γ0 ⊢ q) 
- (Heq_Γ : Γ0 = Γ) (Heq_anonymous : p & q = A ⊕ M)
- (Heq_h : JMeq.JMeq (ILLVarInt.MILL.And_R Γ0 p q x x0) h),
- f_obligation_14 Γ h Γ0 p q x x0 Heq_Γ Heq_anonymous Heq_h in
-let branch_8:=
- λ (Γ0 : t) (p q r : formula) (hin : p & q ∈ Γ0) (x : p :: (Γ0 \ p & q) ⊢ r)
- (Heq_Γ : Γ0 = Γ) (Heq_anonymous : r = A ⊕ M)
- (Heq_h : JMeq.JMeq (ILLVarInt.MILL.And_L_1 Γ0 p q r hin x) h),
- Logic.eq_rect r (λ H : formula, Γ0 ▷ H)
-   (And_L_1 Γ0 p q r hin
-      (Logic.eq_rect (A ⊕ M) (λ H : formula, p :: (Γ0 \ p & q) ▷ H)
-         (f (p :: (Γ0 \ p & q))
-            (Logic.eq_rect r (λ H : formula, p :: (Γ0 \ p & q) ⊢ H) x 
-               (A ⊕ M)
-               (f_obligation_15 Γ h Γ0 p q r hin x Heq_Γ Heq_anonymous Heq_h)))
-         r (f_obligation_16 Γ h Γ0 p q r hin x Heq_Γ Heq_anonymous Heq_h)))
-   (A ⊕ M) (f_obligation_17 Γ h Γ0 p q r hin x Heq_Γ Heq_anonymous Heq_h) in
-let branch_9:=
- λ (Γ0 : t) (p q r : formula) (hin : p & q ∈ Γ0) (x : q :: (Γ0 \ p & q) ⊢ r)
- (Heq_Γ : Γ0 = Γ) (Heq_anonymous : r = A ⊕ M)
- (Heq_h : JMeq.JMeq (ILLVarInt.MILL.And_L_2 Γ0 p q r hin x) h),
- Logic.eq_rect r (λ H : formula, Γ0 ▷ H)
-   (And_L_2 Γ0 p q r hin
-      (Logic.eq_rect (A ⊕ M) (λ H : formula, q :: (Γ0 \ p & q) ▷ H)
-         (f (q :: (Γ0 \ p & q))
-            (Logic.eq_rect r (λ H : formula, q :: (Γ0 \ p & q) ⊢ H) x 
-               (A ⊕ M)
-               (f_obligation_18 Γ h Γ0 p q r hin x Heq_Γ Heq_anonymous Heq_h)))
-         r (f_obligation_19 Γ h Γ0 p q r hin x Heq_Γ Heq_anonymous Heq_h)))
-   (A ⊕ M) (f_obligation_20 Γ h Γ0 p q r hin x Heq_Γ Heq_anonymous Heq_h) in
-let branch_10:=
- λ (Γ0 : t) (p q r : formula) (hin : p ⊕ q ∈ Γ0) (x : p :: (Γ0 \ p ⊕ q) ⊢ r)
- (x0 : q :: (Γ0 \ p ⊕ q) ⊢ r) (Heq_Γ : Γ0 = Γ) (Heq_anonymous : r = A ⊕ M)
- (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Oplus_L Γ0 p q r hin x x0) h),
- Logic.eq_rect r (λ H : formula, Γ0 ▷ H)
-   (Oplus_L Γ0 p q r hin
-      (Logic.eq_rect (A ⊕ M) (λ H : formula, p :: (Γ0 \ p ⊕ q) ▷ H)
-         (f (p :: (Γ0 \ p ⊕ q))
-            (Logic.eq_rect r (λ H : formula, p :: (Γ0 \ p ⊕ q) ⊢ H) x 
-               (A ⊕ M)
-               (f_obligation_21 Γ h Γ0 p q r hin x x0 Heq_Γ Heq_anonymous
-                  Heq_h))) r
-         (f_obligation_22 Γ h Γ0 p q r hin x x0 Heq_Γ Heq_anonymous Heq_h))
-      (Logic.eq_rect (A ⊕ M) (λ H : formula, q :: (Γ0 \ p ⊕ q) ▷ H)
-         (f (q :: (Γ0 \ p ⊕ q))
-            (Logic.eq_rect r (λ H : formula, q :: (Γ0 \ p ⊕ q) ⊢ H) x0
-               (A ⊕ M)
-               (f_obligation_23 Γ h Γ0 p q r hin x x0 Heq_Γ Heq_anonymous
-                  Heq_h))) r
-         (f_obligation_24 Γ h Γ0 p q r hin x x0 Heq_Γ Heq_anonymous Heq_h)))
-   (A ⊕ M) (f_obligation_25 Γ h Γ0 p q r hin x x0 Heq_Γ Heq_anonymous Heq_h) in
-let branch_11:=
- λ (Γ0 : env) (p q : formula) (x : Γ0 ⊢ p) (Heq_Γ : Γ0 = Γ)
- (Heq_anonymous : p ⊕ q = A ⊕ M)
- (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Oplus_R_1 Γ0 p q x) h),
- fA Γ0
-   (Logic.eq_rect p (λ H : formula, Γ0 ⊢ H) x A
-      (f_obligation_26 Γ h Γ0 p q x Heq_Γ Heq_anonymous Heq_h)) in
-let branch_12:=
- λ (Γ0 : env) (p q : formula) (x : Γ0 ⊢ q) (Heq_Γ : Γ0 = Γ)
- (Heq_anonymous : p ⊕ q = A ⊕ M)
- (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Oplus_R_2 Γ0 p q x) h),
- fM Γ0
-   (Logic.eq_rect q (λ H : formula, Γ0 ⊢ H) x M
-      (f_obligation_27 Γ h Γ0 p q x Heq_Γ Heq_anonymous Heq_h)) in
-let branch_13:=
- λ (Γ0 : env) (Heq_Γ : Γ0 = Γ) (Heq_anonymous : ⊤ = A ⊕ M)
- (Heq_h : JMeq.JMeq (ILLVarInt.MILL.T_ Γ0) h),
- Logic.eq_rect (⊤) (λ H : formula, Γ0 ▷ H) (T_ Γ0) 
-   (A ⊕ M) (f_obligation_28 Γ h Γ0 Heq_Γ Heq_anonymous Heq_h) in
-let branch_14:=
- λ (Γ0 : t) (p : formula) (hin : 0 ∈ Γ0) (Heq_Γ : Γ0 = Γ)
- (Heq_anonymous : p = A ⊕ M)
- (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Zero_ Γ0 p hin) h),
- Logic.eq_rect p (λ H : formula, Γ0 ▷ H) (Zero_ Γ0 p hin) 
-   (A ⊕ M) (f_obligation_29 Γ h Γ0 p hin Heq_Γ Heq_anonymous Heq_h) in
-let branch_15:=
- λ (Γ0 : t) (p q : formula) (hin : !p ∈ Γ0) (x : p :: (Γ0 \ !p) ⊢ q)
- (Heq_Γ : Γ0 = Γ) (Heq_anonymous : q = A ⊕ M)
- (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Bang_D Γ0 p q hin x) h),
- Logic.eq_rect q (λ H : formula, Γ0 ▷ H)
-   (Bang_D Γ0 p q hin
-      (Logic.eq_rect (A ⊕ M) (λ H : formula, p :: (Γ0 \ !p) ▷ H)
-         (f (p :: (Γ0 \ !p))
-            (Logic.eq_rect q (λ H : formula, p :: (Γ0 \ !p) ⊢ H) x 
-               (A ⊕ M)
-               (f_obligation_30 Γ h Γ0 p q hin x Heq_Γ Heq_anonymous Heq_h)))
-         q (f_obligation_31 Γ h Γ0 p q hin x Heq_Γ Heq_anonymous Heq_h)))
-   (A ⊕ M) (f_obligation_32 Γ h Γ0 p q hin x Heq_Γ Heq_anonymous Heq_h) in
-let branch_16:=
- λ (Γ0 : t) (p q : formula) (hin : !p ∈ Γ0) (x : !p :: Γ0 ⊢ q)
- (Heq_Γ : Γ0 = Γ) (Heq_anonymous : q = A ⊕ M)
- (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Bang_C Γ0 p q hin x) h),
- Logic.eq_rect q (λ H : formula, Γ0 ▷ H)
-   (Bang_C Γ0 p q hin
-      (Logic.eq_rect (A ⊕ M) (λ H : formula, !p :: Γ0 ▷ H)
-         (f (!p :: Γ0)
-            (Logic.eq_rect q (λ H : formula, !p :: Γ0 ⊢ H) x 
-               (A ⊕ M)
-               (f_obligation_33 Γ h Γ0 p q hin x Heq_Γ Heq_anonymous Heq_h)))
-         q (f_obligation_34 Γ h Γ0 p q hin x Heq_Γ Heq_anonymous Heq_h)))
-   (A ⊕ M) (f_obligation_35 Γ h Γ0 p q hin x Heq_Γ Heq_anonymous Heq_h) in
-let branch_17:=
- λ (Γ0 : t) (p q : formula) (hin : !p ∈ Γ0) (x : Γ0 \ !p ⊢ q)
- (Heq_Γ : Γ0 = Γ) (Heq_anonymous : q = A ⊕ M)
- (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Bang_W Γ0 p q hin x) h),
- Logic.eq_rect q (λ H : formula, Γ0 ▷ H)
-   (Bang_W Γ0 p q hin
-      (Logic.eq_rect (A ⊕ M) (λ H : formula, Γ0 \ !p ▷ H)
-         (f (Γ0 \ !p)
-            (Logic.eq_rect q (λ H : formula, Γ0 \ !p ⊢ H) x 
-               (A ⊕ M)
-               (f_obligation_36 Γ h Γ0 p q hin x Heq_Γ Heq_anonymous Heq_h)))
-         q (f_obligation_37 Γ h Γ0 p q hin x Heq_Γ Heq_anonymous Heq_h)))
-   (A ⊕ M) (f_obligation_38 Γ h Γ0 p q hin x Heq_Γ Heq_anonymous Heq_h),
-match
-  h as h0 in (e ⊢ f0)
-  return (e = Γ → f0 = A ⊕ M → JMeq.JMeq h0 h → e ▷ A ⊕ M)
-with
-| ILLVarInt.MILL.Id Γ0 p heq => branch_0 Γ0 p heq
-| ILLVarInt.MILL.Impl_R Γ0 p q x => branch_1 Γ0 p q x
-| ILLVarInt.MILL.Impl_L Γ0 Δ Δ' p q r hin heq x x0 =>
-    branch_2 Γ0 Δ Δ' p q r hin heq x x0
-| ILLVarInt.MILL.Times_R Γ0 Δ Δ' p q heq x x0 =>
-    branch_3 Γ0 Δ Δ' p q heq x x0
-| ILLVarInt.MILL.Times_L Γ0 p q r hin x => branch_4 Γ0 p q r hin x
-| ILLVarInt.MILL.One_R Γ0 heq => branch_5 Γ0 heq
-| ILLVarInt.MILL.One_L Γ0 p hin x => branch_6 Γ0 p hin x
-| ILLVarInt.MILL.And_R Γ0 p q x x0 => branch_7 Γ0 p q x x0
-| ILLVarInt.MILL.And_L_1 Γ0 p q r hin x => branch_8 Γ0 p q r hin x
-| ILLVarInt.MILL.And_L_2 Γ0 p q r hin x => branch_9 Γ0 p q r hin x
-| ILLVarInt.MILL.Oplus_L Γ0 p q r hin x x0 => branch_10 Γ0 p q r hin x x0
-| ILLVarInt.MILL.Oplus_R_1 Γ0 p q x => branch_11 Γ0 p q x
-| ILLVarInt.MILL.Oplus_R_2 Γ0 p q x => branch_12 Γ0 p q x
-| ILLVarInt.MILL.T_ Γ0 => branch_13 Γ0
-| ILLVarInt.MILL.Zero_ Γ0 p hin => branch_14 Γ0 p hin
-| ILLVarInt.MILL.Bang_D Γ0 p q hin x => branch_15 Γ0 p q hin x
-| ILLVarInt.MILL.Bang_C Γ0 p q hin x => branch_16 Γ0 p q hin x
-| ILLVarInt.MILL.Bang_W Γ0 p q hin x => branch_17 Γ0 p q hin x
-end Logic.eq_refl Logic.eq_refl JMeq.JMeq_refl
-
-with 
-
-fA :
+Preterm of fA.
+Definition fA :
 Tactics.fix_proto (∀ Γ : env, Γ ⊢ A ⊕ M → Γ ▷ A ⊕ M)
 → Tactics.fix_proto (∀ Γ : env, Γ ⊢ A → Γ ▷ A ⊕ M)
   → Tactics.fix_proto (∀ Γ : env, Γ ⊢ M → Γ ▷ A ⊕ M)
@@ -680,19 +428,18 @@ Tactics.fix_proto (∀ Γ : env, Γ ⊢ A ⊕ M → Γ ▷ A ⊕ M)
 λ (_ : Tactics.fix_proto (∀ Γ : env, Γ ⊢ A ⊕ M → Γ ▷ A ⊕ M))
 (fA : Tactics.fix_proto (∀ Γ : env, Γ ⊢ A → Γ ▷ A ⊕ M))
 (fM : Tactics.fix_proto (∀ Γ : env, Γ ⊢ M → Γ ▷ A ⊕ M)) 
-(Γ : env) (h : Γ ⊢ A) in
+(Γ : env) (h : Γ ⊢ A),
 let branch_0:=
  λ (Γ0 : t) (p : formula) (heq : Γ0 == {p}) (Heq_Γ : Γ0 = Γ)
  (Heq_anonymous : p = A) (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Id Γ0 p heq) h),
  Logic.eq_rect (p ⊕ M) (λ H : formula, Γ0 ▷ H)
-   (Oplus_R_1 Γ0 p M (fA_obligation_1 Γ h Γ0 p heq Heq_Γ Heq_anonymous Heq_h)
-      (Id Γ0 p heq)) (A ⊕ M)
-   (fA_obligation_2 Γ h Γ0 p heq Heq_Γ Heq_anonymous Heq_h) in
+   (Oplus_R_1 Γ0 p M heq (Id Γ0 p heq)) (A ⊕ M)
+   (fA_obligation_1 Γ h Γ0 p heq Heq_Γ Heq_anonymous Heq_h) in
 let branch_1:=
  λ (Γ0 : t) (p q : formula) (x : p :: Γ0 ⊢ q) (Heq_Γ : Γ0 = Γ)
  (Heq_anonymous : p ⊸ q = A)
  (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Impl_R Γ0 p q x) h),
- fA_obligation_3 Γ h Γ0 p q x Heq_Γ Heq_anonymous Heq_h in
+ fA_obligation_2 Γ h Γ0 p q x Heq_Γ Heq_anonymous Heq_h in
 let branch_2:=
  λ (Γ0 Δ Δ' : t) (p q r : formula) (hin : p ⊸ q ∈ Γ0)
  (heq : Γ0 \ p ⊸ q == Δ ∪ Δ') (x : Δ ⊢ p) (x0 : q :: Δ' ⊢ r) 
@@ -702,13 +449,13 @@ let branch_2:=
    (fA (q :: Δ')
       (Logic.eq_rect r (λ H : formula, q :: Δ' ⊢ H) x0 
          A
-         (fA_obligation_4 Γ h Γ0 Δ Δ' p q r hin heq x x0 Heq_Γ Heq_anonymous
+         (fA_obligation_3 Γ h Γ0 Δ Δ' p q r hin heq x x0 Heq_Γ Heq_anonymous
             Heq_h))) in
 let branch_3:=
  λ (Γ0 Δ Δ' : t) (p q : formula) (heq : Γ0 == Δ ∪ Δ') 
  (x : Δ ⊢ p) (x0 : Δ' ⊢ q) (Heq_Γ : Γ0 = Γ) (Heq_anonymous : p ⊗ q = A)
  (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Times_R Γ0 Δ Δ' p q heq x x0) h),
- fA_obligation_5 Γ h Γ0 Δ Δ' p q heq x x0 Heq_Γ Heq_anonymous Heq_h in
+ fA_obligation_4 Γ h Γ0 Δ Δ' p q heq x x0 Heq_Γ Heq_anonymous Heq_h in
 let branch_4:=
  λ (Γ0 : t) (p q r : formula) (hin : p ⊗ q ∈ Γ0)
  (x : q :: p :: (Γ0 \ p ⊗ q) ⊢ r) (Heq_Γ : Γ0 = Γ) 
@@ -717,11 +464,11 @@ let branch_4:=
  Times_L Γ0 p q (A ⊕ M) hin
    (fA (q :: p :: (Γ0 \ p ⊗ q))
       (Logic.eq_rect r (λ H : formula, q :: p :: (Γ0 \ p ⊗ q) ⊢ H) x 
-         A (fA_obligation_6 Γ h Γ0 p q r hin x Heq_Γ Heq_anonymous Heq_h))) in
+         A (fA_obligation_5 Γ h Γ0 p q r hin x Heq_Γ Heq_anonymous Heq_h))) in
 let branch_5:=
  λ (Γ0 : t) (heq : Γ0 == ∅) (Heq_Γ : Γ0 = Γ) (Heq_anonymous : 1 = A)
  (Heq_h : JMeq.JMeq (ILLVarInt.MILL.One_R Γ0 heq) h),
- fA_obligation_7 Γ h Γ0 heq Heq_Γ Heq_anonymous Heq_h in
+ fA_obligation_6 Γ h Γ0 heq Heq_Γ Heq_anonymous Heq_h in
 let branch_6:=
  λ (Γ0 : t) (p : formula) (hin : 1 ∈ Γ0) (x : Γ0 \ 1 ⊢ p) 
  (Heq_Γ : Γ0 = Γ) (Heq_anonymous : p = A)
@@ -729,12 +476,12 @@ let branch_6:=
  One_L Γ0 (A ⊕ M) hin
    (fA (Γ0 \ 1)
       (Logic.eq_rect p (λ H : formula, Γ0 \ 1 ⊢ H) x 
-         A (fA_obligation_8 Γ h Γ0 p hin x Heq_Γ Heq_anonymous Heq_h))) in
+         A (fA_obligation_7 Γ h Γ0 p hin x Heq_Γ Heq_anonymous Heq_h))) in
 let branch_7:=
  λ (Γ0 : env) (p q : formula) (x : Γ0 ⊢ p) (x0 : Γ0 ⊢ q) 
  (Heq_Γ : Γ0 = Γ) (Heq_anonymous : p & q = A)
  (Heq_h : JMeq.JMeq (ILLVarInt.MILL.And_R Γ0 p q x x0) h),
- fA_obligation_9 Γ h Γ0 p q x x0 Heq_Γ Heq_anonymous Heq_h in
+ fA_obligation_8 Γ h Γ0 p q x x0 Heq_Γ Heq_anonymous Heq_h in
 let branch_8:=
  λ (Γ0 : t) (p q r : formula) (hin : p & q ∈ Γ0) (x : p :: (Γ0 \ p & q) ⊢ r)
  (Heq_Γ : Γ0 = Γ) (Heq_anonymous : r = A)
@@ -742,7 +489,7 @@ let branch_8:=
  And_L_1 Γ0 p q (A ⊕ M) hin
    (fA (p :: (Γ0 \ p & q))
       (Logic.eq_rect r (λ H : formula, p :: (Γ0 \ p & q) ⊢ H) x 
-         A (fA_obligation_10 Γ h Γ0 p q r hin x Heq_Γ Heq_anonymous Heq_h))) in
+         A (fA_obligation_9 Γ h Γ0 p q r hin x Heq_Γ Heq_anonymous Heq_h))) in
 let branch_9:=
  λ (Γ0 : t) (p q r : formula) (hin : p & q ∈ Γ0) (x : q :: (Γ0 \ p & q) ⊢ r)
  (Heq_Γ : Γ0 = Γ) (Heq_anonymous : r = A)
@@ -750,7 +497,7 @@ let branch_9:=
  And_L_2 Γ0 p q (A ⊕ M) hin
    (fA (q :: (Γ0 \ p & q))
       (Logic.eq_rect r (λ H : formula, q :: (Γ0 \ p & q) ⊢ H) x 
-         A (fA_obligation_11 Γ h Γ0 p q r hin x Heq_Γ Heq_anonymous Heq_h))) in
+         A (fA_obligation_10 Γ h Γ0 p q r hin x Heq_Γ Heq_anonymous Heq_h))) in
 let branch_10:=
  λ (Γ0 : t) (p q r : formula) (hin : p ⊕ q ∈ Γ0) (x : p :: (Γ0 \ p ⊕ q) ⊢ r)
  (x0 : q :: (Γ0 \ p ⊕ q) ⊢ r) (Heq_Γ : Γ0 = Γ) (Heq_anonymous : r = A)
@@ -758,29 +505,29 @@ let branch_10:=
  Oplus_L Γ0 p q (A ⊕ M) hin
    (fA (p :: (Γ0 \ p ⊕ q))
       (Logic.eq_rect r (λ H : formula, p :: (Γ0 \ p ⊕ q) ⊢ H) x 
-         A (fA_obligation_12 Γ h Γ0 p q r hin x x0 Heq_Γ Heq_anonymous Heq_h)))
+         A (fA_obligation_11 Γ h Γ0 p q r hin x x0 Heq_Γ Heq_anonymous Heq_h)))
    (fA (q :: (Γ0 \ p ⊕ q))
       (Logic.eq_rect r (λ H : formula, q :: (Γ0 \ p ⊕ q) ⊢ H) x0 
-         A (fA_obligation_13 Γ h Γ0 p q r hin x x0 Heq_Γ Heq_anonymous Heq_h))) in
+         A (fA_obligation_12 Γ h Γ0 p q r hin x x0 Heq_Γ Heq_anonymous Heq_h))) in
 let branch_11:=
  λ (Γ0 : env) (p q : formula) (x : Γ0 ⊢ p) (Heq_Γ : Γ0 = Γ)
  (Heq_anonymous : p ⊕ q = A)
  (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Oplus_R_1 Γ0 p q x) h),
  fA Γ0
    (Logic.eq_rect p (λ H : formula, Γ0 ⊢ H) x A
-      (fA_obligation_14 Γ h Γ0 p q x Heq_Γ Heq_anonymous Heq_h)) in
+      (fA_obligation_13 Γ h Γ0 p q x Heq_Γ Heq_anonymous Heq_h)) in
 let branch_12:=
  λ (Γ0 : env) (p q : formula) (x : Γ0 ⊢ q) (Heq_Γ : Γ0 = Γ)
  (Heq_anonymous : p ⊕ q = A)
  (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Oplus_R_2 Γ0 p q x) h),
  fM Γ0
    (Logic.eq_rect q (λ H : formula, Γ0 ⊢ H) x M
-      (fA_obligation_15 Γ h Γ0 p q x Heq_Γ Heq_anonymous Heq_h)) in
+      (fA_obligation_14 Γ h Γ0 p q x Heq_Γ Heq_anonymous Heq_h)) in
 let branch_13:=
  λ (Γ0 : env) (Heq_Γ : Γ0 = Γ) (Heq_anonymous : ⊤ = A)
  (Heq_h : JMeq.JMeq (ILLVarInt.MILL.T_ Γ0) h),
  Logic.eq_rect (⊤) (λ H : formula, Γ0 ▷ H) (T_ Γ0) 
-   (A ⊕ M) (fA_obligation_16 Γ h Γ0 Heq_Γ Heq_anonymous Heq_h) in
+   (A ⊕ M) (fA_obligation_15 Γ h Γ0 Heq_Γ Heq_anonymous Heq_h) in
 let branch_14:=
  λ (Γ0 : t) (p : formula) (hin : 0 ∈ Γ0) (_ : Γ0 = Γ) 
  (_ : p = A) (_ : JMeq.JMeq (ILLVarInt.MILL.Zero_ Γ0 p hin) h),
@@ -792,7 +539,7 @@ let branch_15:=
  Bang_D Γ0 p (A ⊕ M) hin
    (fA (p :: (Γ0 \ !p))
       (Logic.eq_rect q (λ H : formula, p :: (Γ0 \ !p) ⊢ H) x 
-         A (fA_obligation_17 Γ h Γ0 p q hin x Heq_Γ Heq_anonymous Heq_h))) in
+         A (fA_obligation_16 Γ h Γ0 p q hin x Heq_Γ Heq_anonymous Heq_h))) in
 let branch_16:=
  λ (Γ0 : t) (p q : formula) (hin : !p ∈ Γ0) (x : !p :: Γ0 ⊢ q)
  (Heq_Γ : Γ0 = Γ) (Heq_anonymous : q = A)
@@ -800,7 +547,7 @@ let branch_16:=
  Bang_C Γ0 p (A ⊕ M) hin
    (fA (!p :: Γ0)
       (Logic.eq_rect q (λ H : formula, !p :: Γ0 ⊢ H) x 
-         A (fA_obligation_18 Γ h Γ0 p q hin x Heq_Γ Heq_anonymous Heq_h))) in
+         A (fA_obligation_17 Γ h Γ0 p q hin x Heq_Γ Heq_anonymous Heq_h))) in
 let branch_17:=
  λ (Γ0 : t) (p q : formula) (hin : !p ∈ Γ0) (x : Γ0 \ !p ⊢ q)
  (Heq_Γ : Γ0 = Γ) (Heq_anonymous : q = A)
@@ -808,7 +555,7 @@ let branch_17:=
  Bang_W Γ0 p (A ⊕ M) hin
    (fA (Γ0 \ !p)
       (Logic.eq_rect q (λ H : formula, Γ0 \ !p ⊢ H) x 
-         A (fA_obligation_19 Γ h Γ0 p q hin x Heq_Γ Heq_anonymous Heq_h))),
+         A (fA_obligation_18 Γ h Γ0 p q hin x Heq_Γ Heq_anonymous Heq_h))) in
 match
   h as h0 in (e ⊢ f0) return (e = Γ → f0 = A → JMeq.JMeq h0 h → e ▷ A ⊕ M)
 with
@@ -832,6 +579,411 @@ with
 | ILLVarInt.MILL.Bang_D Γ0 p q hin x => branch_15 Γ0 p q hin x
 | ILLVarInt.MILL.Bang_C Γ0 p q hin x => branch_16 Γ0 p q hin x
 | ILLVarInt.MILL.Bang_W Γ0 p q hin x => branch_17 Γ0 p q hin x
-end Logic.eq_refl Logic.eq_refl JMeq.JMeq_refl
+end Logic.eq_refl Logic.eq_refl JMeq.JMeq_refl.
+
+
+Preterm of fM.
+Definition fM :
+Tactics.fix_proto (∀ Γ : env, Γ ⊢ A ⊕ M → Γ ▷ A ⊕ M)
+→ Tactics.fix_proto (∀ Γ : env, Γ ⊢ A → Γ ▷ A ⊕ M)
+  → Tactics.fix_proto (∀ Γ : env, Γ ⊢ M → Γ ▷ A ⊕ M)
+    → (∀ Γ : env, Γ ⊢ M → Γ ▷ A ⊕ M)
+:=
+λ (_ : Tactics.fix_proto (∀ Γ : env, Γ ⊢ A ⊕ M → Γ ▷ A ⊕ M))
+(fA : Tactics.fix_proto (∀ Γ : env, Γ ⊢ A → Γ ▷ A ⊕ M))
+(fM : Tactics.fix_proto (∀ Γ : env, Γ ⊢ M → Γ ▷ A ⊕ M)) 
+(Γ : env) (h : Γ ⊢ M),
+let branch_0:=
+ λ (Γ0 : t) (p : formula) (heq : Γ0 == {p}) (Heq_Γ : Γ0 = Γ)
+ (Heq_anonymous : p = M) (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Id Γ0 p heq) h),
+ Logic.eq_rect (A ⊕ p) (λ H : formula, Γ0 ▷ H)
+   (Oplus_R_2 Γ0 A p heq
+      (Id Γ0 p heq)) (A ⊕ M)
+   (fM_obligation_2 Γ h Γ0 p heq Heq_Γ Heq_anonymous Heq_h) in
+let branch_1:=
+ λ (Γ0 : t) (p q : formula) (x : p :: Γ0 ⊢ q) (Heq_Γ : Γ0 = Γ)
+ (Heq_anonymous : p ⊸ q = M)
+ (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Impl_R Γ0 p q x) h),
+ fM_obligation_3 Γ h Γ0 p q x Heq_Γ Heq_anonymous Heq_h in
+let branch_2:=
+ λ (Γ0 Δ Δ' : t) (p q r : formula) (hin : p ⊸ q ∈ Γ0)
+ (heq : Γ0 \ p ⊸ q == Δ ∪ Δ') (x : Δ ⊢ p) (x0 : q :: Δ' ⊢ r) 
+ (Heq_Γ : Γ0 = Γ) (Heq_anonymous : r = M)
+ (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Impl_L Γ0 Δ Δ' p q r hin heq x x0) h),
+ Impl_L Γ0 Δ Δ' p q (A ⊕ M) hin heq x
+   (fM (q :: Δ')
+      (Logic.eq_rect r (λ H : formula, q :: Δ' ⊢ H) x0 
+         M
+         (fM_obligation_4 Γ h Γ0 Δ Δ' p q r hin heq x x0 Heq_Γ Heq_anonymous
+            Heq_h))) in
+let branch_3:=
+ λ (Γ0 Δ Δ' : t) (p q : formula) (heq : Γ0 == Δ ∪ Δ') 
+ (x : Δ ⊢ p) (x0 : Δ' ⊢ q) (Heq_Γ : Γ0 = Γ) (Heq_anonymous : p ⊗ q = M)
+ (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Times_R Γ0 Δ Δ' p q heq x x0) h),
+ fM_obligation_5 Γ h Γ0 Δ Δ' p q heq x x0 Heq_Γ Heq_anonymous Heq_h in
+let branch_4:=
+ λ (Γ0 : t) (p q r : formula) (hin : p ⊗ q ∈ Γ0)
+ (x : q :: p :: (Γ0 \ p ⊗ q) ⊢ r) (Heq_Γ : Γ0 = Γ) 
+ (Heq_anonymous : r = M)
+ (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Times_L Γ0 p q r hin x) h),
+ Times_L Γ0 p q (A ⊕ M) hin
+   (fM (q :: p :: (Γ0 \ p ⊗ q))
+      (Logic.eq_rect r (λ H : formula, q :: p :: (Γ0 \ p ⊗ q) ⊢ H) x 
+         M (fM_obligation_6 Γ h Γ0 p q r hin x Heq_Γ Heq_anonymous Heq_h))) in
+let branch_5:=
+ λ (Γ0 : t) (heq : Γ0 == ∅) (Heq_Γ : Γ0 = Γ) (Heq_anonymous : 1 = M)
+ (Heq_h : JMeq.JMeq (ILLVarInt.MILL.One_R Γ0 heq) h),
+ fM_obligation_7 Γ h Γ0 heq Heq_Γ Heq_anonymous Heq_h in
+let branch_6:=
+ λ (Γ0 : t) (p : formula) (hin : 1 ∈ Γ0) (x : Γ0 \ 1 ⊢ p) 
+ (Heq_Γ : Γ0 = Γ) (Heq_anonymous : p = M)
+ (Heq_h : JMeq.JMeq (ILLVarInt.MILL.One_L Γ0 p hin x) h),
+ One_L Γ0 (A ⊕ M) hin
+   (fM (Γ0 \ 1)
+      (Logic.eq_rect p (λ H : formula, Γ0 \ 1 ⊢ H) x 
+         M (fM_obligation_8 Γ h Γ0 p hin x Heq_Γ Heq_anonymous Heq_h))) in
+let branch_7:=
+ λ (Γ0 : env) (p q : formula) (x : Γ0 ⊢ p) (x0 : Γ0 ⊢ q) 
+ (Heq_Γ : Γ0 = Γ) (Heq_anonymous : p & q = M)
+ (Heq_h : JMeq.JMeq (ILLVarInt.MILL.And_R Γ0 p q x x0) h),
+ fM_obligation_9 Γ h Γ0 p q x x0 Heq_Γ Heq_anonymous Heq_h in
+let branch_8:=
+ λ (Γ0 : t) (p q r : formula) (hin : p & q ∈ Γ0) (x : p :: (Γ0 \ p & q) ⊢ r)
+ (Heq_Γ : Γ0 = Γ) (Heq_anonymous : r = M)
+ (Heq_h : JMeq.JMeq (ILLVarInt.MILL.And_L_1 Γ0 p q r hin x) h),
+ And_L_1 Γ0 p q (A ⊕ M) hin
+   (fM (p :: (Γ0 \ p & q))
+      (Logic.eq_rect r (λ H : formula, p :: (Γ0 \ p & q) ⊢ H) x 
+         M (fM_obligation_10 Γ h Γ0 p q r hin x Heq_Γ Heq_anonymous Heq_h))) in
+let branch_9:=
+ λ (Γ0 : t) (p q r : formula) (hin : p & q ∈ Γ0) (x : q :: (Γ0 \ p & q) ⊢ r)
+ (Heq_Γ : Γ0 = Γ) (Heq_anonymous : r = M)
+ (Heq_h : JMeq.JMeq (ILLVarInt.MILL.And_L_2 Γ0 p q r hin x) h),
+ And_L_2 Γ0 p q (A ⊕ M) hin
+   (fM (q :: (Γ0 \ p & q))
+      (Logic.eq_rect r (λ H : formula, q :: (Γ0 \ p & q) ⊢ H) x 
+         M (fM_obligation_11 Γ h Γ0 p q r hin x Heq_Γ Heq_anonymous Heq_h))) in
+let branch_10:=
+ λ (Γ0 : t) (p q r : formula) (hin : p ⊕ q ∈ Γ0) (x : p :: (Γ0 \ p ⊕ q) ⊢ r)
+ (x0 : q :: (Γ0 \ p ⊕ q) ⊢ r) (Heq_Γ : Γ0 = Γ) (Heq_anonymous : r = M)
+ (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Oplus_L Γ0 p q r hin x x0) h),
+ Oplus_L Γ0 p q (A ⊕ M) hin
+   (fM (p :: (Γ0 \ p ⊕ q))
+      (Logic.eq_rect r (λ H : formula, p :: (Γ0 \ p ⊕ q) ⊢ H) x 
+         M (fM_obligation_12 Γ h Γ0 p q r hin x x0 Heq_Γ Heq_anonymous Heq_h)))
+   (fM (q :: (Γ0 \ p ⊕ q))
+      (Logic.eq_rect r (λ H : formula, q :: (Γ0 \ p ⊕ q) ⊢ H) x0 
+         M (fM_obligation_13 Γ h Γ0 p q r hin x x0 Heq_Γ Heq_anonymous Heq_h))) in
+let branch_11:=
+ λ (Γ0 : env) (p q : formula) (x : Γ0 ⊢ p) (Heq_Γ : Γ0 = Γ)
+ (Heq_anonymous : p ⊕ q = M)
+ (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Oplus_R_1 Γ0 p q x) h),
+ fA Γ0
+   (Logic.eq_rect p (λ H : formula, Γ0 ⊢ H) x A
+      (fM_obligation_14 Γ h Γ0 p q x Heq_Γ Heq_anonymous Heq_h)) in
+let branch_12:=
+ λ (Γ0 : env) (p q : formula) (x : Γ0 ⊢ q) (Heq_Γ : Γ0 = Γ)
+ (Heq_anonymous : p ⊕ q = M)
+ (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Oplus_R_2 Γ0 p q x) h),
+ fM Γ0
+   (Logic.eq_rect q (λ H : formula, Γ0 ⊢ H) x M
+      (fM_obligation_15 Γ h Γ0 p q x Heq_Γ Heq_anonymous Heq_h)) in
+let branch_13:=
+ λ (Γ0 : env) (Heq_Γ : Γ0 = Γ) (Heq_anonymous : ⊤ = M)
+ (Heq_h : JMeq.JMeq (ILLVarInt.MILL.T_ Γ0) h),
+ Logic.eq_rect (⊤) (λ H : formula, Γ0 ▷ H) (T_ Γ0) 
+   (A ⊕ M) (fM_obligation_16 Γ h Γ0 Heq_Γ Heq_anonymous Heq_h) in
+let branch_14:=
+ λ (Γ0 : t) (p : formula) (hin : 0 ∈ Γ0) (_ : Γ0 = Γ) 
+ (_ : p = M) (_ : JMeq.JMeq (ILLVarInt.MILL.Zero_ Γ0 p hin) h),
+ Zero_ Γ0 (A ⊕ M) hin in
+let branch_15:=
+ λ (Γ0 : t) (p q : formula) (hin : !p ∈ Γ0) (x : p :: (Γ0 \ !p) ⊢ q)
+ (Heq_Γ : Γ0 = Γ) (Heq_anonymous : q = M)
+ (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Bang_D Γ0 p q hin x) h),
+ Bang_D Γ0 p (A ⊕ M) hin
+   (fM (p :: (Γ0 \ !p))
+      (Logic.eq_rect q (λ H : formula, p :: (Γ0 \ !p) ⊢ H) x 
+         M (fM_obligation_17 Γ h Γ0 p q hin x Heq_Γ Heq_anonymous Heq_h))) in
+let branch_16:=
+ λ (Γ0 : t) (p q : formula) (hin : !p ∈ Γ0) (x : !p :: Γ0 ⊢ q)
+ (Heq_Γ : Γ0 = Γ) (Heq_anonymous : q = M)
+ (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Bang_C Γ0 p q hin x) h),
+ Bang_C Γ0 p (A ⊕ M) hin
+   (fM (!p :: Γ0)
+      (Logic.eq_rect q (λ H : formula, !p :: Γ0 ⊢ H) x 
+         M (fM_obligation_18 Γ h Γ0 p q hin x Heq_Γ Heq_anonymous Heq_h))) in
+let branch_17:=
+ λ (Γ0 : t) (p q : formula) (hin : !p ∈ Γ0) (x : Γ0 \ !p ⊢ q)
+ (Heq_Γ : Γ0 = Γ) (Heq_anonymous : q = M)
+ (Heq_h : JMeq.JMeq (ILLVarInt.MILL.Bang_W Γ0 p q hin x) h),
+ Bang_W Γ0 p (A ⊕ M) hin
+   (fM (Γ0 \ !p)
+      (Logic.eq_rect q (λ H : formula, Γ0 \ !p ⊢ H) x 
+         M (fM_obligation_19 Γ h Γ0 p q hin x Heq_Γ Heq_anonymous Heq_h))) in
+match
+  h as h0 in (e ⊢ f0) return (e = Γ → f0 = M → JMeq.JMeq h0 h → e ▷ A ⊕ M)
+with
+| ILLVarInt.MILL.Id Γ0 p heq => branch_0 Γ0 p heq
+| ILLVarInt.MILL.Impl_R Γ0 p q x => branch_1 Γ0 p q x
+| ILLVarInt.MILL.Impl_L Γ0 Δ Δ' p q r hin heq x x0 =>
+    branch_2 Γ0 Δ Δ' p q r hin heq x x0
+| ILLVarInt.MILL.Times_R Γ0 Δ Δ' p q heq x x0 =>
+    branch_3 Γ0 Δ Δ' p q heq x x0
+| ILLVarInt.MILL.Times_L Γ0 p q r hin x => branch_4 Γ0 p q r hin x
+| ILLVarInt.MILL.One_R Γ0 heq => branch_5 Γ0 heq
+| ILLVarInt.MILL.One_L Γ0 p hin x => branch_6 Γ0 p hin x
+| ILLVarInt.MILL.And_R Γ0 p q x x0 => branch_7 Γ0 p q x x0
+| ILLVarInt.MILL.And_L_1 Γ0 p q r hin x => branch_8 Γ0 p q r hin x
+| ILLVarInt.MILL.And_L_2 Γ0 p q r hin x => branch_9 Γ0 p q r hin x
+| ILLVarInt.MILL.Oplus_L Γ0 p q r hin x x0 => branch_10 Γ0 p q r hin x x0
+| ILLVarInt.MILL.Oplus_R_1 Γ0 p q x => branch_11 Γ0 p q x
+| ILLVarInt.MILL.Oplus_R_2 Γ0 p q x => branch_12 Γ0 p q x
+| ILLVarInt.MILL.T_ Γ0 => branch_13 Γ0
+| ILLVarInt.MILL.Zero_ Γ0 p hin => branch_14 Γ0 p hin
+| ILLVarInt.MILL.Bang_D Γ0 p q hin x => branch_15 Γ0 p q hin x
+| ILLVarInt.MILL.Bang_C Γ0 p q hin x => branch_16 Γ0 p q hin x
+| ILLVarInt.MILL.Bang_W Γ0 p q hin x => branch_17 Γ0 p q hin x
+end Logic.eq_refl Logic.eq_refl JMeq.JMeq_refl.
+
+Print Assumptions f.
+Print Assumptions fA.
+Print Assumptions fM.
+
+Lemma f':∀ Γ X (h':X=A⊕M)(h:Γ⊢X) ,  Γ▷A⊕M 
+with fA':∀ Γ X  (h':X=A) (h:Γ⊢A),Γ▷A⊕M
+with fM':∀ Γ X  (h':X=M) (h:Γ⊢M),Γ▷A⊕M.
+Show Proof.
+  intros Γ X h' h.
+  apply f.
+  unfold Tactics.fix_proto.
+  intros Γ0 H.
+  eapply f' with X.
+  assumption.
+  rewrite h'.
+  assumption.
+  unfold Tactics.fix_proto.
+  intros Γ0 H.
+  eapply fA' with A;trivial.
+  unfold Tactics.fix_proto.
+  intros Γ0 H.
+  eapply fM' with M;trivial.
+  rewrite <- h'.
+  assumption.
+
+  intros Γ X h' h.
+  apply fA.
+  unfold Tactics.fix_proto.
+  intros Γ0 H.
+  eapply f' with (A⊕M);trivial.
+  unfold Tactics.fix_proto.
+  intros Γ0 H.
+  eapply fA' with X;trivial.
+  unfold Tactics.fix_proto.
+  intros Γ0 H.
+  eapply fM' with M;trivial.
+  assumption.
+
+  intros Γ X h' h.
+  apply fM.
+  unfold Tactics.fix_proto.
+  intros Γ0 H.
+  eapply f' with (A⊕M);trivial.
+  unfold Tactics.fix_proto.
+  intros Γ0 H.
+  eapply fA' with A;trivial.
+  unfold Tactics.fix_proto.
+  intros Γ0 H.
+  eapply fM' with X;trivial.
+  assumption.
+Defined.
+Print f'.
+
+
+(*
+Program Fixpoint toto Γ (h:Γ⊢A⊕M) (hI:IReach atheseA' (f' _ _ _ h)): titi.IReach atheseA h :=
+    match h with
+      | ILLVarInt.MILL.Id Γ p x => _
+      | ILLVarInt.MILL.Impl_R Γ p q x => _
+      | ILLVarInt.MILL.Impl_L Γ Δ Δ' p q r x x0 x1 x2 => _
+      | ILLVarInt.MILL.Times_R Γ Δ Δ' p q x x0 x1 => _
+      | ILLVarInt.MILL.Times_L Γ p q r x x0 => _
+      | ILLVarInt.MILL.One_R Γ x => _
+      | ILLVarInt.MILL.One_L Γ p x x0 => _
+      | ILLVarInt.MILL.And_R Γ p q x x0 => _
+      | ILLVarInt.MILL.And_L_1 Γ p q r x x0 => _
+      | ILLVarInt.MILL.And_L_2 Γ p q r x x0 => _
+      | ILLVarInt.MILL.Oplus_L Γ p q r x x0 x1 => _
+      | ILLVarInt.MILL.Oplus_R_1 Γ p q x0 => _
+      | ILLVarInt.MILL.Oplus_R_2 Γ p q x0 => _
+      | ILLVarInt.MILL.T_ Γ => _
+      | ILLVarInt.MILL.Zero_ Γ p x => _
+      | ILLVarInt.MILL.Bang_D Γ p q x x0 => _
+      | ILLVarInt.MILL.Bang_C Γ p q x x0 => _
+      | ILLVarInt.MILL.Bang_W Γ p q x x0 => _
+    end
+.
+Preterm of toto.
+Next Obligation of toto.
+*)
+
+
+Lemma essai : (∀ Γ X (heq:X=A⊕M)(h:Γ⊢X), IReach atheseA' (f' _ _ heq h) → titi.IReach atheseA h).
+Proof.
+  fix 4.
+  intros Γ X heq h H.
+  subst X.
+  refine (match
+           h as h0 in (e ⊢ f)
+             return (e = Γ → f = A ⊕ M → JMeq.JMeq h0 h → titi.IReach atheseA h)
+           with
+           | ILLVarInt.MILL.Id Γ0 p x => _
+           | ILLVarInt.MILL.Impl_R Γ0 p q x => _
+           | ILLVarInt.MILL.Impl_L Γ0 Δ Δ' p q r x x0 x1 x2 => _
+           | ILLVarInt.MILL.Times_R Γ0 Δ Δ' p q x x0 x1 => _
+           | ILLVarInt.MILL.Times_L Γ0 p q r x x0 => _
+           | ILLVarInt.MILL.One_R Γ0 x => _
+           | ILLVarInt.MILL.One_L Γ0 p x x0 => _
+           | ILLVarInt.MILL.And_R Γ0 p q x x0 => _
+           | ILLVarInt.MILL.And_L_1 Γ0 p q r x x0 => _
+           | ILLVarInt.MILL.And_L_2 Γ0 p q r x x0 => _
+           | ILLVarInt.MILL.Oplus_L Γ0 p q r x x0 x1 => _
+           | ILLVarInt.MILL.Oplus_R_1 Γ0 p q x0 => _
+           | ILLVarInt.MILL.Oplus_R_2 Γ0 p q x0 => _
+           | ILLVarInt.MILL.T_ Γ0 => _
+           | ILLVarInt.MILL.Zero_ Γ0 p x => _
+           | ILLVarInt.MILL.Bang_D Γ0 p q x x0 => _
+           | ILLVarInt.MILL.Bang_C Γ0 p q x x0 => _
+           | ILLVarInt.MILL.Bang_W Γ0 p q x x0 => _
+         end Logic.eq_refl Logic.eq_refl JMeq.JMeq_refl).
+
+  intros H0 H1 H2.
+  subst.
+  assert (JMeq.JMeq H (Id Γ (A⊕M) x)).
+  Focus 2.
+  constructor 1.
+  subst h.
+  unfold atheseA.
+  simpl in H.
+  set  (Y:=(Id Γ (A ⊕ M) (λ x0 : Maps'.key, x x0))) in *.
+  assert (Y=(Id Γ (A ⊕ M) (λ x0 : Maps'.key, x x0))) by auto.
+  clearbody Y.
+  revert H0 H.
+  destruct Y.
+  dependent inversion Y.
+  
+  refine (match H with
+            | # => #
+          end)
+
+  intros Γ X heq h.
+  revert heq.
+  case h;clear -essai;intros.
+
+  revert H.
+  simpl.
+  simpl in H.
+  unfold f in H.
+subst.
+
+
+Check (λ (Γ : env) (X : formula) (h : Γ ⊢ X),
+ IReach atheseA' (f' Γ X heq h) → titi.IReach atheseA h).
+
+case h.
+  revert heq.
+  revert h.
+  pattern Γ, X.
+  apply ILLVarInt.MILL.ILL_proof_ind;clear;intros.
+subst.
+dependent inversion h.
+Show 2.
+simpl in H0.
+  Check (λ (Γ : env) (X : formula),
+    ∀ heq : X = A ⊕ M, IReach atheseA' (f' Γ X heq h) → titi.IReach atheseA h).²
+  induction h.
+  intros Γ h.
+  set (X:=A ⊕ M) in *.
+  assert (heq:=refl_equal X).
+  unfold X at 2 in heq.
+  clearbody X.
+
+  pattern Γ, h.
+  simple apply ILLVarInt.MILL.ILL_proof_ind.
+  fix 2.
+  intros Γ h H.
+  refine (match
+            h as h0 in (e ⊢ f)
+              return (e = Γ → f = A ⊕ M → JMeq.JMeq h0 h → titi.IReach atheseA h)
+            with
+            | ILLVarInt.MILL.Id Γ0 p x => _
+            | ILLVarInt.MILL.Impl_R Γ0 p q x => _
+            | ILLVarInt.MILL.Impl_L Γ0 Δ Δ' p q r x x0 x1 x2 => _
+            | ILLVarInt.MILL.Times_R Γ0 Δ Δ' p q x x0 x1 => _
+            | ILLVarInt.MILL.Times_L Γ0 p q r x x0 => _
+            | ILLVarInt.MILL.One_R Γ0 x => _
+            | ILLVarInt.MILL.One_L Γ0 p x x0 => _
+            | ILLVarInt.MILL.And_R Γ0 p q x x0 => _
+            | ILLVarInt.MILL.And_L_1 Γ0 p q r x x0 => _
+            | ILLVarInt.MILL.And_L_2 Γ0 p q r x x0 => _
+            | ILLVarInt.MILL.Oplus_L Γ0 p q r x x0 x1 => _
+            | ILLVarInt.MILL.Oplus_R_1 Γ0 p q x0 => _
+            | ILLVarInt.MILL.Oplus_R_2 Γ0 p q x0 => _
+            | ILLVarInt.MILL.T_ Γ0 => _
+            | ILLVarInt.MILL.Zero_ Γ0 p x => _
+            | ILLVarInt.MILL.Bang_D Γ0 p q x x0 => _
+            | ILLVarInt.MILL.Bang_C Γ0 p q x x0 => _
+            | ILLVarInt.MILL.Bang_W Γ0 p q x x0 => _
+          end Logic.eq_refl Logic.eq_refl JMeq.JMeq_refl);intros; subst; subst.
+  induction H.
+  constructor;subst.
+  simpl in H.
+  info inversion H.
+  Focus 2.
+  destruct H.
+  setoid_rewrite <- H2.
+case h.
+Guarded.
+  apply essai.
+
+
+
+Lemma essai : (∀ Γ p (h:Γ⊢p) h', h' = (f' _ h) → (p=A⊕M) → IReach atheseA' h' → titi.IReach atheseA h).
+Proof.
+  fix 2.
+  intros Γ h h'.
+  case h.
+  dependent inversion h.
+  set (X:=A ⊕ M).
+  assert(X=A ⊕ M) by auto.
+  clearbody X.
+  rewrite <- H in *.
+
+  refine (
+    match h with
+      | ILLVarInt.MILL.Id Γ p x => _
+      | ILLVarInt.MILL.Impl_R Γ p q x => _
+      | ILLVarInt.MILL.Impl_L Γ Δ Δ' p q r x x0 x1 x2 => _
+      | ILLVarInt.MILL.Times_R Γ Δ Δ' p q x x0 x1 => _
+      | ILLVarInt.MILL.Times_L Γ p q r x x0 => _
+      | ILLVarInt.MILL.One_R Γ x => _
+      | ILLVarInt.MILL.One_L Γ p x x0 => _
+      | ILLVarInt.MILL.And_R Γ p q x x0 => _
+      | ILLVarInt.MILL.And_L_1 Γ p q r x x0 => _
+      | ILLVarInt.MILL.And_L_2 Γ p q r x x0 => _
+      | ILLVarInt.MILL.Oplus_L Γ p q r x x0 x1 => _
+      | ILLVarInt.MILL.Oplus_R_1 Γ p q x0 => _
+      | ILLVarInt.MILL.Oplus_R_2 Γ p q x0 => _
+      | ILLVarInt.MILL.T_ Γ => _
+      | ILLVarInt.MILL.Zero_ Γ p x => _
+      | ILLVarInt.MILL.Bang_D Γ p q x x0 => _
+      | ILLVarInt.MILL.Bang_C Γ p q x x0 => _
+      | ILLVarInt.MILL.Bang_W Γ p q x x0 => _
+    end
+  ).
+  dependent destruct h.
+  intros Γ h.
+  induction h.
+Qed.
 
 
