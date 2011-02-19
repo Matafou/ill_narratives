@@ -112,7 +112,8 @@ VFILES:=basic.v\
   restrict2.v\
   restrict.v\
   vars.v\
-  ILL_noplusR.v
+  ILL_noplusR.v\
+  subemma.v
 VOFILES:=$(VFILES:.v=.vo)
 VOFILES0:=$(filter-out ,$(VOFILES))
 GLOBFILES:=$(VFILES:.v=.glob)
