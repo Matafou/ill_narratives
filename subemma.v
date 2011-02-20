@@ -4,7 +4,7 @@ Import Utf8_core.
 Import ILLVarInt.MILL. (* only this *)
 Import ILLVarInt.M. (* this *)
 Import FormulaMultiSet. (* and this *)
-Import ILL_equiv.
+Require Import ILL_equiv.
 
 
 Local Open Scope ILL_scope.
@@ -596,6 +596,10 @@ Ltac unusable_var_strong_tac n1 n2 H :=
 
 
 
+
+
+
+
 Lemma aux3 : all_proofs_of ({S}) (S ⊕ R).
 Proof.
   intros p; one_step p.
@@ -637,6 +641,7 @@ Proof.
   unusable_implies_tac 4 R p.
 Qed.
 
+
 Lemma aux9' : no_proof_for ({B ⊸ R,S}) (S ⊕ R).
 Proof.
   intros p.
@@ -648,7 +653,6 @@ Proof.
   intros p.
   unusable_implies_tac 4 R p.
 Qed.
-
 Lemma aux10 : ∀ x,no_proof_for ({G ⊸ S, B ⊸ R, G}) (Proposition x).
 Proof.
   intros H p.
@@ -671,7 +675,7 @@ Lemma aux7 : no_proof_for ({G ⊸ S, B ⊸ R, G}) (S ⊕ R).
 Proof.
   intro p. one_step p.
   eapply aux8;eassumption.
-  apply aux9;assumption.
+  eapply aux9. eassumption.
   eapply aux10. eassumption.
   eapply aux10. eassumption.
 Qed.
@@ -894,3 +898,6 @@ Proof.
          (S ⊕ R) i0
     ); reflexivity.
 Qed.
+
+
+(* {G,G -o S,R, R -o E, !(S -o A), (E -o A) & 1, ...} |- A ++ M *)

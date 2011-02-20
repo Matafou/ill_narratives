@@ -3,6 +3,7 @@ Require ILLVarInt. (* Don't want import it. *)
 Import ILLVarInt.MILL. (* only this *)
 Import ILLVarInt.M. (* this *)
 Import FormulaMultiSet. (* and this *)
+Require Import narrative.
 
 Module Proof_eq.
 
@@ -59,4 +60,36 @@ Module Proof_eq.
 End Proof_eq.
 
 
+
+Module nu_eq.
+
+  Set Implicit Arguments.
+
+  Definition eq Γ Γ' f f' (h:Γ⊢f) (h':Γ'⊢f') : Prop  := 
+    (ν _ _ h) = (ν _ _ h').
+
+  Lemma refl : ∀ φ Γ (h:Γ ⊢ φ), eq h h.
+  Proof.
+    reflexivity.
+  Qed.
+
+  Lemma sym : ∀ φ Γ Γ' (h1:Γ⊢φ) (h2:Γ'⊢φ), eq h1 h2 -> eq h2 h1.
+  Proof.    
+    intros φ Γ Γ' h1 h2.
+    unfold eq.
+    intros H.
+    symmetry.
+    assumption.
+  Qed.
+
+  Lemma eq_pre_morph : ∀ φ Γ (h:Γ ⊢ φ) Γ' (heqΓ: Γ == Γ') , eq (ILL_proof_pre_morph φ Γ Γ' heqΓ h) h.
+  Proof.
+    fix 3.
+    intros φ Γ h.
+    case h;intros;simpl;unfold eq in *;simpl;
+      try solve [reflexivity | setoid_rewrite eq_pre_morph; reflexivity].
+  Qed.
+
+End nu_eq.
+  
 

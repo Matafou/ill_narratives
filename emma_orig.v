@@ -3,7 +3,6 @@ Require ILLVarInt. (* Don't want import it. *)
 Import ILLVarInt.MILL. (* only this *)
 Import ILLVarInt.M. (* this *)
 Import FormulaMultiSet. (* and this *)
-Require Import ILL_equiv.
 
 (* Declaration of basic propositions. *)
 Notation "'P'" := (Proposition 1%nat):Emma.
@@ -110,3 +109,11 @@ Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
   weak_impl_l S A...
   apply Oplus_R_1...
 Defined.
+
+
+(*
+Lemma originelle2 :              
+  {P&1, R, G, B&1, !(S⊸A), (E⊸A)&1, (P⊸M)&1,(R⊸1)&(R⊸E), (G⊸1)⊕(G⊸S), 1⊕((B⊸S)&(B⊸1))  } ⊢ A ⊕ M .
+
+  and_l_2 (R⊸1) (R⊸E).
+*)  

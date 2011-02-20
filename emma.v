@@ -4,6 +4,7 @@ Import ILLVarInt.MILL. (* only this *)
 Import ILLVarInt.M. (* this *)
 Import FormulaMultiSet. (* and this *)
 Require Import ILL_equiv.
+Require emma_orig.
 (* Declaration of basic propositions. *)
 Local Notation "'P'" := (Proposition 1%nat):Emma.
 Local Notation "'R'" := (Proposition 2%nat):Emma. (* Meets Rodolph *)
@@ -16,104 +17,6 @@ Local Notation "'M'" := (Proposition 8%nat):Emma.
 
 Open Scope ILL_scope.
 Open Scope Emma.
-Lemma titi: {P ⊸ M, P, !(V ⊸ A)} ⊢ A ⊕ M.
-Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
-  bang_w (V ⊸ A)...
-  weak_impl_l P M...
-  apply Oplus_R_2...
-Defined.
-
-(* EXAMPLE OF IMPOSSIBLE INTERNAL CHOICE
-Lemma originelle :              
-  {P&1, R, G, B&1, !(V⊸A), (E⊸A)&1, (P⊸M)&1,(R⊸1)&(R⊸E), (G⊸1)⊕(G⊸V), 1⊕((B⊸V)&(B⊸1))  } ⊢ A ⊕ M .
-Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
-  and_l_2 (R⊸1) (R⊸E).
-  oplus_l (G ⊸ 1) (G ⊸ V).
-  Focus 2.
-  weak_impl_l G V...
-  weak_impl_l R E...
-  bang_c (V ⊸ A).
-  bang_d (V ⊸ A).
-  weak_impl_l V A...
-  and_l_1 (E ⊸ A) 1.
-  weak_impl_l E A... (* THERE IS TWO A *)
-*)
-
-Lemma originelle :              
-  {P&1, R, G, B&1, !(V⊸A), (E⊸A)&1, (P⊸M)&1,(R⊸1)&(R⊸E), (G⊸1)⊕(G⊸V), 1⊕((B⊸V)&(B⊸1))  } ⊢ A ⊕ M .
-Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
-  oplus_l (G ⊸ 1) (G ⊸ V).
-  Focus.
-  (* BRANCHE DE GAUCHE *)
-  weak_impl_l G 1...
-  one_l.
-  oplus_l 1 ((B ⊸ V) & (B ⊸ 1)).
-
-  (* BRANCHE DE GAUCHE DE LA BRANCHE DE GAUCHE
-     (inversion gauche droite par rapport au doc, d'où le focus 2. *)
-  Focus 2.
-  and_l_2 (B ⊸ V) (B ⊸ 1).
-  and_l_1  B 1.
-  weak_impl_l B 1...
-  one_l.  
-  and_l_1 (R ⊸ 1) (R ⊸ E).
-  weak_impl_l R 1...
-  and_l_1 P 1.
-  and_l_2 (E ⊸ A) 1.
-  and_l_1 (P ⊸ M) 1.
-  do 2 one_l.
-  bang_w (V ⊸ A)...
-  weak_impl_l P M...
-  apply Oplus_R_2...
-  (* BRANCHE DE DROITE DE LA BRANCHE DE GAUCHE. *)
-  Focus.
-  and_l_2 B 1.
-  do 2 one_l.
-  and_l_2 P 1.
-  and_l_1 (E ⊸ A) 1.
-  and_l_2 (P ⊸ M) 1.
-  and_l_2 (R ⊸ 1) (R ⊸ E).
-  do 2 one_l.
-  bang_w (V ⊸ A)...
-  weak_impl_l R E...
-  weak_impl_l E A...
-  apply Oplus_R_1...
-
-  (* BRANCHE DE DROITE *)
-  weak_impl_l G V...
-  and_l_1(R ⊸ 1) (R ⊸ E).
-  weak_impl_l R 1...
-  one_l. (* +L dans le doc, mais en fait c'est 1L *)
-  oplus_l 1 ((B ⊸ V) & (B ⊸ 1)).
-  (* PARTIE GAUCHE DE LA BRANCHE DE DROITE *)
-  and_l_2 P 1.
-  and_l_2 B 1.
-  and_l_2 (E ⊸ A)  1.
-  and_l_2 (P ⊸ M) 1.  
-  repeat one_l. 
-  bang_d (V ⊸ A)... (* !D au lieu de WL *)
-  weak_impl_l V A...
-  apply Oplus_R_1...
-
-  (* BRANCHE DROITE DE LA BRANCHE DROITE *)
-  and_l_2 (B ⊸ V) (B ⊸ 1).
-  and_l_1 B 1.
-  weak_impl_l B 1...
-  one_l.
-  and_l_2 P 1.
-  and_l_2 (E ⊸ A) 1.
-  and_l_2 (P ⊸ M) 1.
-  repeat one_l.
-  bang_d (V ⊸ A)...(* !D au lieu de WL *)
-  weak_impl_l V A...
-  apply Oplus_R_1...
-Defined.
-
-(*
-Set Printing Depth 50000.
-Print originelle.
-*)
-
 
 Require Import JMeq.
 
@@ -141,102 +44,10 @@ match h with
 end.
 
 
-Eval vm_compute in  (essai _ _ originelle).
+Eval vm_compute in  (essai _ _ emma_orig.originelle).
 
 (* pas d'application de la règle droite de ⊸ *)
 
-Program Fixpoint no_impl_R (e:env) (f:formula) (h: e ⊢ f) {struct h}: boolP := 
-match h with
-  | Id Γ p x => trueP
-  | Impl_R Γ p q x => falseP
-  | Impl_L Γ Δ Δ' p q r _ _  x x0 => if no_impl_R _ _ x then no_impl_R _ _ x0 else falseP 
-  | Times_R Γ Δ Δ' p q _ x x0 => if no_impl_R _ _ x then no_impl_R _ _ x0 else falseP 
-  | Times_L Γ p q r _ x => no_impl_R _ _  x
-  | One_R _ _ => trueP 
-  | One_L Γ p _ x => no_impl_R _ _ x
-  | And_R Γ p q x x0 => if no_impl_R _ _ x then no_impl_R _ _ x0 else falseP 
-  | And_L_1 Γ p q r _ x => no_impl_R _ _ x
-  | And_L_2 Γ p q r _ x => no_impl_R _ _ x
-  | Oplus_L Γ p q r _ x x0 => if no_impl_R _ _ x then trueP else no_impl_R _ _ x0
-  | Oplus_R_1 Γ p q x => no_impl_R _ _ x
-  | Oplus_R_2 Γ p q x => no_impl_R _ _ x
-  | T_ Γ => trueP 
-  | Zero_ Γ p x => trueP 
-  | Bang_D Γ p q _ x => no_impl_R _ _ x
-  | Bang_C Γ p q _ x => no_impl_R _ _ x
-  | Bang_W Γ p q _ x => no_impl_R _ _ x
-end.
-
-Eval vm_compute in (no_impl_R _ _ originelle).
-
-(*  *)
-
-Program Fixpoint exists_oplus_on_formula (cont: forall (e1:env) (f1:formula) (h1: e1 ⊢ f1) (e2:env) (f2:formula) (h2: e2 ⊢ f2),boolP) (φl φr:formula)  (e:env) (f:formula) (h: e ⊢ f) {struct h}: boolP := 
-match h with
-  | Id _ _ p => falseP
-  | Impl_R Γ p q x => exists_oplus_on_formula cont φl φr _ _ x
-  | Impl_L Γ Δ Δ' p q r _ _ x x0 => if exists_oplus_on_formula cont φl φr _ _ x then trueP else exists_oplus_on_formula cont φl φr _ _ x0
-  | Times_R Γ Δ p q _ _ x x0 => if exists_oplus_on_formula cont φl φr _ _ x then trueP else exists_oplus_on_formula cont φl φr _ _ x0
-  | Times_L Γ p q r _ x => exists_oplus_on_formula cont φl φr _ _ x
-  | One_R _ _  => falseP
-  | One_L Γ p _ x => exists_oplus_on_formula cont φl φr _ _ x
-  | And_R Γ p q x x0 => if exists_oplus_on_formula cont φl φr _ _ x then trueP else exists_oplus_on_formula cont φl φr _ _ x0
-  | And_L_1 Γ p q r _ x => exists_oplus_on_formula cont φl φr _ _ x
-  | And_L_2 Γ p q r _ x => exists_oplus_on_formula cont φl φr _ _ x
-  | Oplus_L Γ p q r _ x x0 => 
-    if FormulaOrdered.eq_dec p φl 
-      then if FormulaOrdered.eq_dec q φr 
-        then cont _ _  x _ _ x0
-        else if exists_oplus_on_formula cont φl φr _ _ x then trueP else exists_oplus_on_formula cont φl φr _ _ x0
-      else if exists_oplus_on_formula cont φl φr _ _ x then trueP else exists_oplus_on_formula cont φl φr _ _ x0
-  | Oplus_R_1 Γ p q x => exists_oplus_on_formula cont φl φr _ _ x
-  | Oplus_R_2 Γ p q x => exists_oplus_on_formula cont φl φr _ _ x
-  | T_ Γ => falseP
-  | Zero_ Γ p x => falseP
-  | Bang_D Γ p q _ x => exists_oplus_on_formula cont φl φr _ _ x
-  | Bang_C Γ p q _ x => exists_oplus_on_formula cont φl φr _ _ x
-  | Bang_W Γ p q _ x => exists_oplus_on_formula cont φl φr _ _ x
-end.
-
-Program Fixpoint forall_impl_l_on_formula 
-  (cont:forall (e1:env) (f1:formula) (h1: e1 ⊢ f1) (e2:env) (f2:formula) (h2: e2 ⊢ f2), boolP) 
-  (φl φr:formula)  (e:env) (f:formula) (h: e ⊢ f) {struct h}: boolP := 
-match h with
-  | Id _ _ p => trueP
-  | Impl_R Γ p q x => forall_impl_l_on_formula cont φl φr _ _ x
-  | Impl_L Γ Δ Δ' p q r _ _ x x0 => 
-    if FormulaOrdered.eq_dec p φl 
-      then if FormulaOrdered.eq_dec q φr 
-        then cont _ _ x _ _ x0 (*if (cont _ _  x) then falseP else negb (cont _ _  x0) *)
-        else 
-          if forall_impl_l_on_formula cont φl φr _ _ x 
-            then forall_impl_l_on_formula cont φl φr _ _ x0
-            else falseP 
-      else if forall_impl_l_on_formula cont φl φr _ _ x then forall_impl_l_on_formula cont φl φr _ _ x0 else falseP
-  | Times_R Γ Δ p q _ _ x x0 => if forall_impl_l_on_formula cont φl φr _ _ x then forall_impl_l_on_formula cont φl φr _ _ x0 else falseP 
-  | Times_L Γ p q r _ x => forall_impl_l_on_formula cont φl φr _ _ x
-  | One_R _ _ => trueP 
-  | One_L Γ p _ x => forall_impl_l_on_formula cont φl φr _ _ x
-  | And_R Γ p q x x0 => if forall_impl_l_on_formula cont φl φr _ _ x then forall_impl_l_on_formula cont φl φr _ _ x0 else falseP 
-  | And_L_1 Γ p q r _ x => forall_impl_l_on_formula cont φl φr _ _ x
-  | And_L_2 Γ p q r _ x => forall_impl_l_on_formula cont φl φr _ _ x
-  | Oplus_L Γ p q r _ x x0 => if forall_impl_l_on_formula cont φl φr _ _ x then forall_impl_l_on_formula cont φl φr _ _ x0 else falseP 
-  | Oplus_R_1 Γ p q x => forall_impl_l_on_formula cont φl φr _ _ x
-  | Oplus_R_2 Γ p q x => forall_impl_l_on_formula cont φl φr _ _ x
-  | T_ Γ => trueP
-  | Zero_ Γ p x => trueP 
-  | Bang_D Γ p q _ x => forall_impl_l_on_formula cont φl φr _ _ x
-  | Bang_C Γ p q _ x => forall_impl_l_on_formula cont φl φr _ _ x
-  | Bang_W Γ p q _ x => forall_impl_l_on_formula cont φl φr _ _ x
-end.
-Definition orP (b1 b2:boolP) := if b1 then trueP else b2.
-Definition negP (b:boolP) := if b then falseP else trueP.
-
-Definition not_exists_oplus_on_formula lhs rhs (e1:env) (f1:formula) (h1: e1 ⊢ f1) (e2:env) (f2:formula) (h2: e2 ⊢ f2) := 
-  negP (orP (exists_oplus_on_formula (fun _ _ _ _ _ _ => trueP) lhs rhs _ _ h1) (exists_oplus_on_formula (fun _ _ _ _ _ _ => trueP) lhs rhs _ _ h2)).
-
-Eval vm_compute in (forall_impl_l_on_formula (not_exists_oplus_on_formula (G⊸1) (G⊸V)) R E _ _ originelle).
-Eval vm_compute in (forall_impl_l_on_formula (not_exists_oplus_on_formula 1 ((B ⊸ V) & (B ⊸ 1))) G 1 _ _ originelle).
 
 Program Fixpoint exists_AtheseA_on_formula 
   (cont: forall (e1:env) (f1:formula) (h1: e1 ⊢ f1),boolP)
@@ -273,8 +84,8 @@ match h with
 end.
 
 
-Eval vm_compute in exists_AtheseA_on_formula (fun _ _ _ => trueP) A M _ _ originelle.
-Eval vm_compute in exists_AtheseA_on_formula (fun _ _ _ => trueP) A M _ _ titi.
+Eval vm_compute in exists_AtheseA_on_formula (fun _ _ _ => trueP) A M _ _ emma_orig.originelle.
+Eval vm_compute in exists_AtheseA_on_formula (fun _ _ _ => trueP) A M _ _ emma_orig.titi.
 
 Lemma exists_AtheseA_on_formula_proof_eq_compat : 
   ∀ f1 f2 Γ Γ' φ (h1:Γ⊢φ) (h2:Γ'⊢φ), 
