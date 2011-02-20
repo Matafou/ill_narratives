@@ -4,22 +4,12 @@ Import ILLVarInt.MILL. (* only this *)
 Import ILLVarInt.M. (* this *)
 Import FormulaMultiSet. (* and this *)
 Require Import ILL_equiv.
-Require emma_orig.
-(* Declaration of basic propositions. *)
-Local Notation "'P'" := (Proposition 1%nat):Emma.
-Local Notation "'R'" := (Proposition 2%nat):Emma. (* Meets Rodolph *)
-Local Notation "'G'" := (Proposition 3%nat):Emma.
-Local Notation "'B'" := (Proposition 4%nat):Emma.
-Local Notation "'V'" := (Proposition 5%nat):Emma.
-Local Notation "'A'" := (Proposition 6%nat):Emma.
-Local Notation "'E'" := (Proposition 7%nat):Emma.
-Local Notation "'M'" := (Proposition 8%nat):Emma.
-
+Require Import emma_orig.
+Require Import JMeq.
 Open Scope ILL_scope.
 Open Scope Emma.
 
-Require Import JMeq.
-
+Inductive boolP : Prop := trueP:boolP | falseP:boolP.
 
 Program Fixpoint exists_AtheseA_on_formula 
   (cont: forall (e1:env) (f1:formula) (h1: e1 ⊢ f1),boolP)

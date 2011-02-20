@@ -99,7 +99,7 @@ PP:=-pp "$(CAMLP4BIN)$(CAMLP4)o -I $(CAMLLIB) -I . $(COQSRCLIBS) $(CAMLP4EXTEND)
 ###################################
 
 VFILES:=basic.v\
-  emma.v\
+  ex_meta1.v\
   formulas_spec.v\
   formulas.v\
   ILL_equiv.v\
@@ -113,7 +113,7 @@ VFILES:=basic.v\
   restrict.v\
   vars.v\
   ILL_noplusR.v\
-  subemma.v
+  ex_meta2.v
 VOFILES:=$(VFILES:.v=.vo)
 VOFILES0:=$(filter-out ,$(VOFILES))
 GLOBFILES:=$(VFILES:.v=.glob)
