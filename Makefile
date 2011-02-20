@@ -99,23 +99,24 @@ PP:=-pp "$(CAMLP4BIN)$(CAMLP4)o -I $(CAMLLIB) -I . $(COQSRCLIBS) $(CAMLP4EXTEND)
 ###################################
 
 VFILES:=basic.v\
-  ex_meta1.v\
+  vars.v\
   formulas_spec.v\
   formulas.v\
   ILL_equiv.v\
-  ILL_paper_proofs.v\
   ILL_spec.v\
   ILL.v\
-  ILLVarInt.v\
   multiset_spec.v\
   multiset.v\
+  ILLVarInt.v\
+  emma_orig.v\
   restrict2.v\
   restrict.v\
-  vars.v\
-  ILL_noplusR.v\
-  ex_meta2.v\
   narrative.v\
-  unprove.v
+  unprove.v\
+  ex_meta1.v
+#  ex_meta2.v
+#  ILL_paper_proofs.v
+#  ILL_noplusR.v
 
 VOFILES:=$(VFILES:.v=.vo)
 VOFILES0:=$(filter-out ,$(VOFILES))
@@ -125,7 +126,9 @@ GFILES:=$(VFILES:.v=.g)
 HTMLFILES:=$(VFILES:.v=.html)
 GHTMLFILES:=$(VFILES:.v=.g.html)
 
-all: $(VOFILES) 
+# ex_meta2.v ILL_paper_proofs.v ILL_noplusR.v are not compiled by
+# default but we generate there dependencies anyway
+all: $(VOFILES) ex_meta2.v.d ILL_paper_proofs.v.d ILL_noplusR.v.d
 spec: $(VIFILES)
 
 gallina: $(GFILES)
@@ -200,6 +203,7 @@ install:
 clean:
 	rm -f $(CMOFILES) $(CMIFILES) $(CMXFILES) $(CMXSFILES) $(OFILES) $(VOFILES) $(VIFILES) $(GFILES) $(MLFILES:.ml=.cmo) $(MLFILES:.ml=.cmx) *~
 	rm -f all.ps all-gal.ps all.pdf all-gal.pdf all.glob $(VFILES:.v=.glob) $(HTMLFILES) $(GHTMLFILES) $(VFILES:.v=.tex) $(VFILES:.v=.g.tex) $(VFILES:.v=.v.d)
+	rm -f *.glob *.v.d
 	- rm -rf html
 
 archclean:
@@ -211,8 +215,9 @@ printenv:
 	@echo CAMLOPTC =	$(CAMLOPTC)
 	@echo CAMLP4LIB =	$(CAMLP4LIB)
 
--include $(VFILES:.v=.v.d)
-.SECONDARY: $(VFILES:.v=.v.d)
+-include $(VFILES:.v=.v.d) ex_meta2.v.d ILL_paper_proofs.v.d ILL_noplusR.v.d
+
+.SECONDARY: $(VFILES:.v=.v.d) ex_meta2.v.d ILL_paper_proofs.v.d ILL_noplusR.v.d
 
 # WARNING
 #

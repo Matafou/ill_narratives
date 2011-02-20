@@ -788,7 +788,6 @@ Lemma aux14 : no_proof_for ({G ⊸ S, (B ⊸ S) & (B ⊸ R), G}) (S ⊕ R).
   apply aux22. assumption.
 Qed.
 
-Inspect 50.
 
 
 Hint Resolve aux3 aux4 aux4' aux2 aux6 aux8 aux9 aux9' aux9's
