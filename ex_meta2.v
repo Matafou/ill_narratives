@@ -20,34 +20,6 @@ Open Scope Emma.
 
 Require Import JMeq.
 
-Inductive boolP : Prop := trueP | falseP.
-Program Fixpoint essai (e:env) (f:formula) (h: e ⊢ f) {struct h}: boolP := 
-match h with
-  | Id Γ p x => trueP
-  | Impl_R Γ p q x => essai _ _ x
-  | Impl_L Γ Δ Δ' p q r _ _  x x0 => if essai _ _ x then trueP else essai _ _ x0
-  | Times_R Γ Δ Δ' p q _ x x0 => falseP
-  | Times_L Γ p q r _ x => falseP
-  | One_R Γ _ => falseP
-  | One_L Γ p _ x => essai _ _ x
-  | And_R Γ p q x x0 => falseP
-  | And_L_1 Γ p q r _ x => essai _ _ x
-  | And_L_2 Γ p q r _ x => essai _ _ x
-  | Oplus_L Γ p q r _ x x0 => if essai _ _ x then trueP else essai _ _ x0
-  | Oplus_R_1 Γ p q x => essai _ _ x
-  | Oplus_R_2 Γ p q x => essai _ _ x
-  | T_ Γ => falseP
-  | Zero_ Γ p _ => falseP
-  | Bang_D Γ p q _ x => essai _ _ x
-  | Bang_C Γ p q _ x => essai _ _ x
-  | Bang_W Γ p q _ x => falseP
-end.
-
-
-Eval vm_compute in  (essai _ _ emma_orig.originelle).
-
-(* pas d'application de la règle droite de ⊸ *)
-
 
 Program Fixpoint exists_AtheseA_on_formula 
   (cont: forall (e1:env) (f1:formula) (h1: e1 ⊢ f1),boolP)
