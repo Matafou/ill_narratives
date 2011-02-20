@@ -113,7 +113,10 @@ VFILES:=basic.v\
   restrict.v\
   vars.v\
   ILL_noplusR.v\
-  ex_meta2.v
+  ex_meta2.v\
+  narrative.v\
+  unprove.v
+
 VOFILES:=$(VFILES:.v=.vo)
 VOFILES0:=$(filter-out ,$(VOFILES))
 GLOBFILES:=$(VFILES:.v=.glob)
@@ -129,7 +132,7 @@ gallina: $(GFILES)
 
 html: $(GLOBFILES) $(VFILES)
 	- mkdir -p html
-	$(COQDOC) -toc -html $(COQDOCLIBS) -d html $(VFILES)
+	$(COQDOC) --utf8 -toc -html $(COQDOCLIBS) -d html $(VFILES)
 
 gallinahtml: $(GLOBFILES) $(VFILES)
 	- mkdir -p html

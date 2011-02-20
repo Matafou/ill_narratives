@@ -1,7 +1,6 @@
 Require Import Utf8_core.
 Require ILLVarInt. (* Don't want import it. *)
 Import ILLVarInt.MILL. (* only this *)
-Import ILLVarInt.M. (* this *)
 Import FormulaMultiSet. (* and this *)
 
 Local Notation "'P'" := (Proposition 1%nat):Emma.
@@ -827,7 +826,7 @@ Preterm of toto.
 Next Obligation of toto.
 *)
 
-
+(*
 Lemma essai : (∀ Γ X (heq:X=A⊕M)(h:Γ⊢X), IReach atheseA' (f' _ _ heq h) → titi.IReach atheseA h).
 Proof.
   fix 4.
@@ -987,3 +986,4 @@ Proof.
 Qed.
 
 
+*)

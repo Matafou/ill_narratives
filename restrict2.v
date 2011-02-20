@@ -1,7 +1,6 @@
 Require Import Utf8_core.
 Require ILLVarInt. (* Don't want import it. *)
 Import ILLVarInt.MILL. (* only this *)
-Import ILLVarInt.M. (* this *)
 Import FormulaMultiSet. (* and this *)
 Open Scope ILL_scope.
 

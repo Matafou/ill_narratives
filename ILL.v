@@ -302,8 +302,21 @@ Module ILL_tactics(Vars:OrderedType)(M:ILL_sig(Vars)).
 
   Ltac impl_l Γ' Δ p q := 
     apply Impl_L with Γ' Δ p q;[prove_is_in|prove_multiset_eq| | ].
+  
 
-
+  Ltac weak_impl_l p' q' := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(add p' ?env')] =>
+            let e := context C [ env' ] in  
+              match e with
+                | context C [(add (p'⊸q') ?env'')]  => 
+                  let e' := context C [ env'' ] in
+                    impl_l ({ p' }) (e')  (p') (q')
+              end
+        end
+    end.
 
 
   Ltac one_l  := 
@@ -615,6 +628,20 @@ Module ILL_tactics_refl(Vars:OrderedType)(M:ILL_sig(Vars)).
     apply Impl_L with Γ' Δ p q;[prove_is_in|prove_multiset_eq| | ].
 
 
+
+  Ltac weak_impl_l p' q' := 
+    match goal with 
+      |- ILL_proof ?env _ =>
+        match env with
+          | context C [(add p' ?env')] =>
+            let e := context C [ env' ] in  
+              match e with
+                | context C [(add (p'⊸q') ?env'')]  => 
+                  let e' := context C [ env'' ] in
+                    impl_l ({ p' }) (e')  (p') (q')
+              end
+        end
+    end.
 
 
   Ltac one_l  := 

@@ -2,7 +2,6 @@ Require Import emma_orig.
 (* Declaration of basic propositions. *)
 Import Utf8_core.
 Import ILLVarInt.MILL. (* only this *)
-Import ILLVarInt.M. (* this *)
 Import FormulaMultiSet. (* and this *)
 Require Import restrict2.
 

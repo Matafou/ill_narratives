@@ -1,8 +1,16 @@
 Require Import Utf8_core.
 Require ILLVarInt. (* Don't want import it. *)
 Import ILLVarInt.MILL. (* only this *)
-Import ILLVarInt.M. (* this *)
+Import ILLVarInt.Tacs. (* only this *)
 Import FormulaMultiSet. (* and this *)
+Open Scope ILL_scope.
+
+(* 
+Require Import Utf8_core.
+Require ILLVarInt. (* Don't want import it. *)
+Import ILLVarInt.MILL. (* only this *)
+Import FormulaMultiSet. (* and this *)
+ *)
 
 (* Declaration of basic propositions. *)
 Notation "'P'" := (Proposition 1%nat):Emma.
@@ -14,6 +22,7 @@ Notation "'S'" := (Proposition 5%nat):Emma.
 Notation "'A'" := (Proposition 6%nat):Emma.
 Notation "'E'" := (Proposition 7%nat):Emma.
 Notation "'M'" := (Proposition 8%nat):Emma.
+
 
 Open Scope ILL_scope.
 Open Scope Emma.

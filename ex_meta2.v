@@ -1,13 +1,16 @@
 Require Import Utf8_core.
 Require ILLVarInt. (* Don't want import it. *)
 Import ILLVarInt.MILL. (* only this *)
-Import ILLVarInt.M. (* this *)
+Import ILLVarInt.Tacs. (* only this *)
+Require Import unprove.
 Import FormulaMultiSet. (* and this *)
 Require Import ILL_equiv.
 Require Import emma_orig.
 Require Import JMeq.
 Open Scope ILL_scope.
 Open Scope Emma.
+
+(* Ltac up x := repeat progress setoid_rewrite (add_comm _ x).  *)
 
 Inductive boolP : Prop := trueP:boolP | falseP:boolP.
 

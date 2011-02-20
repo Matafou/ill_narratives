@@ -2,7 +2,8 @@ Require Import emma_orig.
 (* Declaration of basic propositions. *)
 Import Utf8_core.
 Import ILLVarInt.MILL. (* only this *)
-Import ILLVarInt.M. (* this *)
+Import ILLVarInt.Tacs. (* only this *)
+Require Import unprove.
 Import FormulaMultiSet. (* and this *)
 Require Import ILL_equiv.
 
