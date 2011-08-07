@@ -50,7 +50,7 @@ end.
 
 
 Eval vm_compute in exists_AtheseA_on_formula (fun _ _ _ => trueP) A M _ _ emma_orig.originelle.
-Eval vm_compute in exists_AtheseA_on_formula (fun _ _ _ => trueP) A M _ _ emma_orig.titi.
+Eval vm_compute in exists_AtheseA_on_formula (fun _ _ _ => trueP) A M _ _ emma_orig.simpl_ex.
 
 Lemma exists_AtheseA_on_formula_proof_eq_compat : 
   ∀ f1 f2 Γ Γ' φ (h1:Γ⊢φ) (h2:Γ'⊢φ), 
@@ -186,7 +186,7 @@ Qed.
 Hint Extern 0 ( _ ==  _ ) => apply eq_bool_correct;vm_compute;reflexivity : proof.
 
 
-Ltac titi p := 
+Ltac clean p := 
   try complete eauto 2 with proof;
     (dependent simple inversion p||inversion p);clear p;subst;try discriminate;simpl.
 
@@ -298,7 +298,7 @@ Ltac is_var_env gamma :=
             | H: _ = _  & _ |- _  => 
               try discriminate H;injection H;clear H;intros;subst
             | H: ?delta ⊢ _, H' : ?delta == ∅ |- _ => 
-              apply False_ind;rewrite H' in H;clear H';titi H;repeat tutu
+              apply False_ind;rewrite H' in H;clear H';clean H;repeat tutu
             | H: ?env⊢?g |- _ =>
 (*              try complete var_not_in_env_tac H; *)
                 match env with 
@@ -446,7 +446,7 @@ Ltac tutu :=
             | H: _ = _  & _ |- _  => 
               try discriminate H;injection H;clear H;intros;subst
             | H: ?delta ⊢ _, H' : ?delta == ∅ |- _ => 
-              apply False_ind;rewrite H' in H;clear - H;titi H;finish
+              apply False_ind;rewrite H' in H;clear - H;clean H;finish
             | H: ?env⊢?g |- _ =>
               (* try complete var_not_in_env_tac H;  *)
                 match env with 
@@ -495,7 +495,7 @@ end
 
 
 
-Ltac one_step p :=   titi p; (repeat tutu);try finish;auto with proof;eauto 3 with proof.
+Ltac one_step p :=   clean p; (repeat tutu);try finish;auto with proof;eauto 3 with proof.
 
 Ltac unusable_implies_tac n' f H := 
   apply unusable_implies with (1:=H) (n:=n') (φ:=f);

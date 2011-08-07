@@ -4,7 +4,7 @@ Require Import ILL.
 Require Import vars.
 Require Import multiset_spec.
 Require Import multiset.
-Require Import NatOrderedType OrderedTypeEx.
+(* Require Import NatOrderedType OrderedTypeEx. *) 
 Require Import Omega ROmega.
 Module N_OT <: OrderedType.
 
@@ -82,6 +82,8 @@ Module N_OT <: OrderedType.
     left;rewrite Heq;reflexivity.
     right;intros abs;elim Heq;injection abs;intros;assumption.
   Defined.
+
+
 
 End N_OT.
 Module MILL.

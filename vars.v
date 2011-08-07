@@ -81,7 +81,8 @@ Module VarsString <: OrderedType with Definition t := String.string.
       intros _.
       unfold BinNat.Nlt.
       simpl.
-      apply BinPos.Pcompare_refl_id.
+      rewrite  Pos.compare_xO_xI.
+      rewrite Pos.compare_refl;auto.
 
       intros Hlength;injection Hlength;clear Hlength;intro Hlength.
       intros Heq;rewrite Heq in *.
@@ -136,7 +137,7 @@ Module VarsString <: OrderedType with Definition t := String.string.
       intros Heq.
       apply compare_digits_lt_correct in Heq;[|vm_compute;reflexivity].
       unfold Ascii.nat_of_ascii.
-      assert (forall p q, (p < q)%N -> (Nnat.nat_of_N p) < (Nnat.nat_of_N q)).
+      assert (forall p q, (p < q)%N -> (N.to_nat p) < (N.to_nat q)).
       clear .
       intros p q.
       zify.
@@ -151,7 +152,7 @@ Module VarsString <: OrderedType with Definition t := String.string.
       intros Heq.
       apply compare_digits_gt_correct in Heq;[|vm_compute;reflexivity].
       unfold Ascii.nat_of_ascii.
-      assert (forall p q, (p < q)%N -> (Nnat.nat_of_N p) < (Nnat.nat_of_N q)).
+      assert (forall p q, (p < q)%N -> (N.to_nat p) < (N.to_nat q)).
       clear .
       intros p q.
       zify.

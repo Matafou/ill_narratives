@@ -184,42 +184,36 @@ Module PreMake(X:OrderedType)(Maps:FMapInterface.S with Module E:=X) <: S(X).
     intros k k' e e' a H.
     unfold add_multiple.
     case_eq (Maps.find k' a);case_eq (Maps.find k a).
-    Focus 1.
-    intros n2 Heq2.
-    intros n1 Heq1.
-    rewrite MapsPtes.F.add_neq_o;[ | intro abs;elim H;symmetry;assumption ].
-    rewrite MapsPtes.F.add_neq_o;[ | assumption].
-    rewrite Heq1;rewrite Heq2.
-    apply add_comm'.
-    assumption.
-    Unfocus.
-    Focus 1.
-    intros Heq2.
-    intros n1 Heq1.
-    rewrite MapsPtes.F.add_neq_o;[ | intro abs;elim H;symmetry;assumption ].
-    rewrite MapsPtes.F.add_neq_o;[ | assumption].
-    rewrite Heq1;rewrite Heq2.
-    apply add_comm'.
-    assumption.
-    Unfocus.
-    Focus 1.
-    intros n2 Heq2.
-    intros Heq1.
-    rewrite MapsPtes.F.add_neq_o;[ | intro abs;elim H;symmetry;assumption ].
-    rewrite MapsPtes.F.add_neq_o;[ | assumption].
-    rewrite Heq1;rewrite Heq2.
-    apply add_comm'.
-    assumption.
-    Unfocus.
-    Focus 1.
-    intros Heq2.
-    intros Heq1.
-    rewrite MapsPtes.F.add_neq_o;[ | intro abs;elim H;symmetry;assumption ].
-    rewrite MapsPtes.F.add_neq_o;[ | assumption].
-    rewrite Heq1;rewrite Heq2.
-    apply add_comm'.
-    assumption.
-    Unfocus.
+    {
+      intros n2 Heq2.
+      intros n1 Heq1.
+      rewrite MapsPtes.F.add_neq_o;[ | intro abs;elim H;symmetry;assumption ].
+      rewrite MapsPtes.F.add_neq_o;[ | assumption].
+      rewrite Heq1;rewrite Heq2.
+      apply add_comm'.
+      assumption.
+    }
+    { intros Heq2.
+      intros n1 Heq1.
+      rewrite MapsPtes.F.add_neq_o;[ | intro abs;elim H;symmetry;assumption ].
+      rewrite MapsPtes.F.add_neq_o;[ | assumption].
+      rewrite Heq1;rewrite Heq2.
+      apply add_comm'.
+      assumption. }
+    { intros n2 Heq2.
+      intros Heq1.
+      rewrite MapsPtes.F.add_neq_o;[ | intro abs;elim H;symmetry;assumption ].
+      rewrite MapsPtes.F.add_neq_o;[ | assumption].
+      rewrite Heq1;rewrite Heq2.
+      apply add_comm'.
+      assumption. }
+    { intros Heq2.
+      intros Heq1.
+      rewrite MapsPtes.F.add_neq_o;[ | intro abs;elim H;symmetry;assumption ].
+      rewrite MapsPtes.F.add_neq_o;[ | assumption].
+      rewrite Heq1;rewrite Heq2.
+      apply add_comm'.
+      assumption. }
   Qed.
 
 
@@ -231,46 +225,40 @@ Module PreMake(X:OrderedType)(Maps:FMapInterface.S with Module E:=X) <: S(X).
     pattern a,(Maps.fold add_multiple a ms).
     apply MapsPtes.fold_rec_bis.
 
-    Focus 1.
-    intros m m' a0 H H0 a' H1 ms' H2.
-    apply H0.
-    rewrite H;exact H1.
-    assumption.
-    Unfocus.
+    { intros m m' a0 H H0 a' H1 ms' H2.
+      apply H0.
+      rewrite H;exact H1.
+      assumption. }
 
-    Focus 1.
-    intros a' H ms' H0.
-    rewrite MapsPtes.fold_Empty.
-    assumption.
-    auto with *.
-    clear -H.
-    unfold Maps.Equal, Maps.Empty in *.
-    intros a e.
-    intros abs.
-    rewrite MapsPtes.F.find_mapsto_iff in abs.
-    generalize (H a).
-    rewrite abs.
-    rewrite MapsPtes.F.empty_o.
-    discriminate.
-    Unfocus.
+    { intros a' H ms' H0.
+      rewrite MapsPtes.fold_Empty.
+      assumption.
+      auto with *.
+      clear -H.
+      unfold Maps.Equal, Maps.Empty in *.
+      intros a e.
+      intros abs.
+      rewrite MapsPtes.F.find_mapsto_iff in abs.
+      generalize (H a).
+      rewrite abs.
+      rewrite MapsPtes.F.empty_o.
+      discriminate. }
 
-    Focus 1.
-    intros k e a0 m' H H0 H1 a' H2 ms' H3.
-    rewrite <- MapsPtes.fold_Equal.
-    5:eexact H2.
-    rewrite MapsPtes.fold_add.
-    rewrite H1.
-    reflexivity.
-    reflexivity.
-    assumption.
-    auto with *.
-    apply add_multiple_morph_Proper.
-    apply transpose_neqkey_equal_add_multiple.
-    apply H0.
-    auto with *.
-    apply add_multiple_morph_Proper.
-    apply transpose_neqkey_equal_add_multiple.
-    Unfocus.
+    { intros k e a0 m' H H0 H1 a' H2 ms' H3.
+      rewrite <- MapsPtes.fold_Equal.
+      5:eexact H2.
+      rewrite MapsPtes.fold_add.
+      rewrite H1.
+      reflexivity.
+      reflexivity.
+      assumption.
+      auto with *.
+      apply add_multiple_morph_Proper.
+      apply transpose_neqkey_equal_add_multiple.
+      apply H0.
+      auto with *.
+      apply add_multiple_morph_Proper.
+      apply transpose_neqkey_equal_add_multiple. }
   Qed.
 
   Lemma is_empty_empty : is_empty empty = true.
@@ -365,119 +353,115 @@ Module PreMake(X:OrderedType)(Maps:FMapInterface.S with Module E:=X) <: S(X).
     case (X.eq_dec a b);intros a_eq_b.
     rewrite a_eq_b.
 
-    Focus 1.
-    case_eq (Maps.find b ms);[intro n1 |];intro Heq1.
-    rewrite MapsPtes.F.add_eq_o;[ | reflexivity].
-    rewrite a_eq_b.
-    rewrite MapsPtes.F.add_eq_o;[ | reflexivity].
-    rewrite a_eq_b.
-    rewrite Heq1.
-    rewrite a_eq_b.
-    intros k.
-    case (X.eq_dec k b);intros Heq2.
-    rewrite Heq2.
-    rewrite MapsPtes.F.add_eq_o.
-    rewrite MapsPtes.F.add_eq_o.
-    f_equal;omega.
-    reflexivity.
-    reflexivity.
-    do 4 (rewrite MapsPtes.F.add_neq_o;[|intros abs;elim Heq2;rewrite abs;reflexivity]).
-    reflexivity.
-    rewrite a_eq_b.
-    rewrite MapsPtes.F.add_eq_o.
-    rewrite MapsPtes.F.add_eq_o.
-    rewrite a_eq_b.
-    rewrite Heq1.
-    rewrite a_eq_b.
-    intro k.
-    case (X.eq_dec k b);intros Heq2.
-    rewrite Heq2.
-    rewrite MapsPtes.F.add_eq_o.
-    rewrite MapsPtes.F.add_eq_o.
-    f_equal; omega.
-    reflexivity.
-    reflexivity.
-    do 4 (rewrite MapsPtes.F.add_neq_o;[|intros abs;elim Heq2;rewrite abs;reflexivity]).
-    reflexivity.
-    reflexivity.
-    reflexivity.
-    Unfocus.
-  
-    Focus 1.
-    case_eq (Maps.find b ms);[intro n1 |];intro Heq1.
-    rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim a_eq_b;rewrite abs;reflexivity].
-    case_eq (Maps.find a ms);[intro n2 |];intro Heq2.
-    rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim a_eq_b;rewrite abs;reflexivity].
-    rewrite Heq1.
-    intros k.
-    case(X.eq_dec k a);intros Heq3.
-    rewrite Heq3.
-    rewrite MapsPtes.F.add_eq_o;[ | reflexivity].
-    rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim a_eq_b;rewrite abs;reflexivity].
-    rewrite MapsPtes.F.add_eq_o;[ | reflexivity].
-    reflexivity.
-    rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq3;rewrite abs;reflexivity].
-    case(X.eq_dec k b);intros Heq4.
-    rewrite Heq4.
-    repeat (rewrite MapsPtes.F.add_eq_o;[ | reflexivity]).
-    reflexivity.
-    do 2 (rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq4;rewrite abs;reflexivity]).
-     rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq3;rewrite abs;reflexivity].
-     reflexivity.
-     rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim a_eq_b;rewrite abs;reflexivity].
-     rewrite Heq1.
-     intro k.
-    case(X.eq_dec k a);intros Heq3.
-    rewrite Heq3.
-    rewrite MapsPtes.F.add_eq_o;[ | reflexivity].
-    rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim a_eq_b;rewrite abs;reflexivity].
-    rewrite MapsPtes.F.add_eq_o;[ | reflexivity].
-    reflexivity.
-    rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq3;rewrite abs;reflexivity].
-    case(X.eq_dec k b);intros Heq4.
-    rewrite Heq4.
-    repeat (rewrite MapsPtes.F.add_eq_o;[ | reflexivity]).
-    reflexivity.
-    do 2 (rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq4;rewrite abs;reflexivity]).
-     rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq3;rewrite abs;reflexivity].
-     reflexivity.
-     rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim a_eq_b;rewrite abs;reflexivity].
-    case_eq (Maps.find a ms);[intro n2 |];intro Heq2.
-    rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim a_eq_b;rewrite abs;reflexivity].
-    rewrite Heq1.
-    intro k.
-    case(X.eq_dec k a);intros Heq3.
-    rewrite Heq3.
-    rewrite MapsPtes.F.add_eq_o;[ | reflexivity].
-    rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim a_eq_b;rewrite abs;reflexivity].
-    rewrite MapsPtes.F.add_eq_o;[ | reflexivity].
-    reflexivity.
-    rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq3;rewrite abs;reflexivity].
-    case(X.eq_dec k b);intros Heq4.
-    rewrite Heq4.
-    repeat (rewrite MapsPtes.F.add_eq_o;[ | reflexivity]).
-    reflexivity.
-    do 2 (rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq4;rewrite abs;reflexivity]).
-     rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq3;rewrite abs;reflexivity].
-     reflexivity.
-     rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim a_eq_b;rewrite abs;reflexivity].
-    rewrite Heq1.
-    intro k.
-    case(X.eq_dec k a);intros Heq3.
-    rewrite Heq3.
-    rewrite MapsPtes.F.add_eq_o;[ | reflexivity].
-    rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim a_eq_b;rewrite abs;reflexivity].
-    rewrite MapsPtes.F.add_eq_o;[ | reflexivity].
-    reflexivity.
-    rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq3;rewrite abs;reflexivity].
-    case(X.eq_dec k b);intros Heq4.
-    rewrite Heq4.
-    repeat (rewrite MapsPtes.F.add_eq_o;[ | reflexivity]).
-    reflexivity.
-    do 2 (rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq4;rewrite abs;reflexivity]).
-     rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq3;rewrite abs;reflexivity].
-     reflexivity.
-    Unfocus.
+    { case_eq (Maps.find b ms);[intro n1 |];intro Heq1.
+      rewrite MapsPtes.F.add_eq_o;[ | reflexivity].
+      rewrite a_eq_b.
+      rewrite MapsPtes.F.add_eq_o;[ | reflexivity].
+      rewrite a_eq_b.
+      rewrite Heq1.
+      rewrite a_eq_b.
+      intros k.
+      case (X.eq_dec k b);intros Heq2.
+      rewrite Heq2.
+      rewrite MapsPtes.F.add_eq_o.
+      rewrite MapsPtes.F.add_eq_o.
+      f_equal;omega.
+      reflexivity.
+      reflexivity.
+      do 4 (rewrite MapsPtes.F.add_neq_o;[|intros abs;elim Heq2;rewrite abs;reflexivity]).
+      reflexivity.
+      rewrite a_eq_b.
+      rewrite MapsPtes.F.add_eq_o.
+      rewrite MapsPtes.F.add_eq_o.
+      rewrite a_eq_b.
+      rewrite Heq1.
+      rewrite a_eq_b.
+      intro k.
+      case (X.eq_dec k b);intros Heq2.
+      rewrite Heq2.
+      rewrite MapsPtes.F.add_eq_o.
+      rewrite MapsPtes.F.add_eq_o.
+      f_equal; omega.
+      reflexivity.
+      reflexivity.
+      do 4 (rewrite MapsPtes.F.add_neq_o;[|intros abs;elim Heq2;rewrite abs;reflexivity]).
+      reflexivity.
+      reflexivity.
+      reflexivity. }
+
+    { case_eq (Maps.find b ms);[intro n1 |];intro Heq1.
+      rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim a_eq_b;rewrite abs;reflexivity].
+      case_eq (Maps.find a ms);[intro n2 |];intro Heq2.
+      rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim a_eq_b;rewrite abs;reflexivity].
+      rewrite Heq1.
+      intros k.
+      case(X.eq_dec k a);intros Heq3.
+      rewrite Heq3.
+      rewrite MapsPtes.F.add_eq_o;[ | reflexivity].
+      rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim a_eq_b;rewrite abs;reflexivity].
+      rewrite MapsPtes.F.add_eq_o;[ | reflexivity].
+      reflexivity.
+      rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq3;rewrite abs;reflexivity].
+      case(X.eq_dec k b);intros Heq4.
+      rewrite Heq4.
+      repeat (rewrite MapsPtes.F.add_eq_o;[ | reflexivity]).
+      reflexivity.
+      do 2 (rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq4;rewrite abs;reflexivity]).
+      rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq3;rewrite abs;reflexivity].
+      reflexivity.
+      rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim a_eq_b;rewrite abs;reflexivity].
+      rewrite Heq1.
+      intro k.
+      case(X.eq_dec k a);intros Heq3.
+      rewrite Heq3.
+      rewrite MapsPtes.F.add_eq_o;[ | reflexivity].
+      rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim a_eq_b;rewrite abs;reflexivity].
+      rewrite MapsPtes.F.add_eq_o;[ | reflexivity].
+      reflexivity.
+      rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq3;rewrite abs;reflexivity].
+      case(X.eq_dec k b);intros Heq4.
+      rewrite Heq4.
+      repeat (rewrite MapsPtes.F.add_eq_o;[ | reflexivity]).
+      reflexivity.
+      do 2 (rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq4;rewrite abs;reflexivity]).
+      rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq3;rewrite abs;reflexivity].
+      reflexivity.
+      rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim a_eq_b;rewrite abs;reflexivity].
+      case_eq (Maps.find a ms);[intro n2 |];intro Heq2.
+      rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim a_eq_b;rewrite abs;reflexivity].
+      rewrite Heq1.
+      intro k.
+      case(X.eq_dec k a);intros Heq3.
+      rewrite Heq3.
+      rewrite MapsPtes.F.add_eq_o;[ | reflexivity].
+      rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim a_eq_b;rewrite abs;reflexivity].
+      rewrite MapsPtes.F.add_eq_o;[ | reflexivity].
+      reflexivity.
+      rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq3;rewrite abs;reflexivity].
+      case(X.eq_dec k b);intros Heq4.
+      rewrite Heq4.
+      repeat (rewrite MapsPtes.F.add_eq_o;[ | reflexivity]).
+      reflexivity.
+      do 2 (rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq4;rewrite abs;reflexivity]).
+      rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq3;rewrite abs;reflexivity].
+      reflexivity.
+      rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim a_eq_b;rewrite abs;reflexivity].
+      rewrite Heq1.
+      intro k.
+      case(X.eq_dec k a);intros Heq3.
+      rewrite Heq3.
+      rewrite MapsPtes.F.add_eq_o;[ | reflexivity].
+      rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim a_eq_b;rewrite abs;reflexivity].
+      rewrite MapsPtes.F.add_eq_o;[ | reflexivity].
+      reflexivity.
+      rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq3;rewrite abs;reflexivity].
+      case(X.eq_dec k b);intros Heq4.
+      rewrite Heq4.
+      repeat (rewrite MapsPtes.F.add_eq_o;[ | reflexivity]).
+      reflexivity.
+      do 2 (rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq4;rewrite abs;reflexivity]).
+      rewrite MapsPtes.F.add_neq_o;[ | intros abs;elim Heq3;rewrite abs;reflexivity].
+      reflexivity. }
   Qed.
 
   Lemma add_comm : forall a b ms, eq (add a (add b ms)) (add b (add a ms)).
@@ -540,51 +524,47 @@ Module PreMake(X:OrderedType)(Maps:FMapInterface.S with Module E:=X) <: S(X).
     pattern ms1,(Maps.fold f ms1 ms2).
     apply MapsPtes.fold_rec.
 
-    Focus 1.
-    intros m H ms1' H1 ms2' H2.
-    rewrite MapsPtes.fold_Empty.
-    assumption.    
-    auto with *.
-    rewrite <- H1.
-    assumption.
-    Unfocus.
+    { intros m H ms1' H1 ms2' H2.
+      rewrite MapsPtes.fold_Empty.
+      assumption.    
+      auto with *.
+      rewrite <- H1.
+      assumption. }
 
-    Focus 1.
-    intros k e a m' m'' H H0 H1 H2 ms1' H3 ms2' H4.
-    intros k'.
-    case (X.eq_dec k k');intros k_eq_k'.
-    rewrite <- k_eq_k' in *.
-    assert (Equivalence (@Maps.Equal nat)).
-    auto with *.
+    { intros k e a m' m'' H H0 H1 H2 ms1' H3 ms2' H4.
+      intros k'.
+      case (X.eq_dec k k');intros k_eq_k'.
+      rewrite <- k_eq_k' in *.
+      assert (Equivalence (@Maps.Equal nat)).
+      auto with *.
 
-    rewrite (@MapsPtes.fold_Add nat _ (@Maps.Equal nat) H5 f f_proper f_transpose  m' ms1' k e);trivial .
-    apply (f_morph k k' e a (Maps.fold f m' ms2'));trivial.
-    apply H2;trivial.
-    reflexivity.
-    
-    intro k''. 
-    rewrite <- H3.
-    apply H1.    
+      rewrite (@MapsPtes.fold_Add nat _ (@Maps.Equal nat) H5 f f_proper f_transpose  m' ms1' k e);trivial .
+      apply (f_morph k k' e a (Maps.fold f m' ms2'));trivial.
+      apply H2;trivial.
+      reflexivity.
+      
+      intro k''. 
+      rewrite <- H3.
+      apply H1.    
 
 
-    rewrite f_in'.
-    assert(MapsPtes.Add k e m' ms1').
-    intro k''. 
-    rewrite <- H3.
-    apply H1.    
-    rewrite MapsPtes.fold_Add.    
-    6:eexact H5.
-    rewrite f_in'.
-    apply H2.
-    reflexivity.
-    assumption.
-    assumption.
-    auto with *.
-    assumption.
-    assumption.
-    assumption.
-    assumption.
-    Unfocus.
+      rewrite f_in'.
+      assert(MapsPtes.Add k e m' ms1').
+      intro k''. 
+      rewrite <- H3.
+      apply H1.    
+      rewrite MapsPtes.fold_Add.    
+      6:eexact H5.
+      rewrite f_in'.
+      apply H2.
+      reflexivity.
+      assumption.
+      assumption.
+      auto with *.
+      assumption.
+      assumption.
+      assumption.
+      assumption. }
   Qed.
 
   Lemma empty_no_mem : forall a, mem a empty = false.
@@ -712,107 +692,103 @@ Module PreMake(X:OrderedType)(Maps:FMapInterface.S with Module E:=X) <: S(X).
     pattern m1,(Maps.fold add_multiple m1 m2).
     apply MapsPtes.fold_rec.
 
-    Focus 1.
-    intros m H k e.
-    unfold add_multiple at 2.
-    replace (Maps.find k m) with (@None nat) by (symmetry;apply Empty_not_find;assumption).
-    rewrite MapsPtes.fold_Add with (m1:=m) (k:=k) (e:=e);auto with *.
-    rewrite MapsPtes.fold_Empty;auto with *.
-    apply transpose_neqkey_equal_add_multiple.
-    intros abs.
-    red in abs.
-    destruct abs as [v H1];elim (H k v H1).
-    red;tauto.
-    Unfocus.
+    { intros m H k e.
+      unfold add_multiple at 2.
+      replace (Maps.find k m) with (@None nat) by (symmetry;apply Empty_not_find;assumption).
+      rewrite MapsPtes.fold_Add with (m1:=m) (k:=k) (e:=e);auto with *.
+      rewrite MapsPtes.fold_Empty;auto with *.
+      apply transpose_neqkey_equal_add_multiple.
+      intros abs.
+      red in abs.
+      destruct abs as [v H1];elim (H k v H1).
+      red;tauto. }
 
-    Focus 1.
-    intros k e a m' m'' H H0 H1 H2 k0 e0.
-    rewrite morph with (ms1':= (add_multiple k0 e0 (add_multiple k e m')))
-      (ms2':=m2);trivial; try reflexivity.
-    case (X.eq_dec k k0);intro Heq.
-    unfold add_multiple at 2 3 4 5.
-    case_eq (Maps.find k a);[intro n|];intro Heq1.
-    rewrite <- Heq.
-    rewrite (MapsPtes.F.not_find_in_iff m' k) in H0.
-    rewrite H0.
-    do 2 (rewrite MapsPtes.F.add_eq_o;[|reflexivity]).
-    rewrite morph with (ms1':=(add_multiple k0 (S (e0 + e)) m')) (ms2':=m2);trivial;try reflexivity. 
-    rewrite (H2 k0 (S (e0+e))). 
-    rewrite Heq.
-    rewrite add_add_add.
-    unfold add_multiple.
-    rewrite Heq in Heq1;rewrite Heq1.
-    replace ((S(e0 + e) + n)) with (e0 + (S (e + n))) by omega.
-    reflexivity.
-    reflexivity.
-    rewrite add_add_add.
-    unfold add_multiple.
-    rewrite  Heq in H0.
-    rewrite H0.
-    reflexivity.
-    rewrite <- Heq;reflexivity.
-    rewrite <- Heq.
-    rewrite (MapsPtes.F.not_find_in_iff m' k) in H0.
-    rewrite H0.
-    do 2 (rewrite MapsPtes.F.add_eq_o;[|reflexivity]).
-    rewrite morph with (ms1':=(add_multiple k0 (S(e0 + e)) m')) (ms2':=m2);trivial;try reflexivity. 
-    rewrite (H2 k0 (S(e0+e))). 
-    rewrite Heq.
-    rewrite add_add_add.
-    unfold add_multiple.
-    rewrite Heq in Heq1;rewrite Heq1.
-    reflexivity.
-    reflexivity.
-    rewrite add_add_add.
-    unfold add_multiple.
-    rewrite  Heq in H0.
-    rewrite H0.
-    reflexivity.
-    rewrite <- Heq;reflexivity.
-    rewrite morph with (ms1':= (add_multiple k e (add_multiple k0 e0 m')))
-      (ms2':=m2);trivial;try reflexivity.    
-    rewrite MapsPtes.fold_Add with (k:=k) (e:=e) (m1:=(add_multiple k0 e0 m'));auto with *.
-    rewrite H2.
-    rewrite add_multiple_comm;reflexivity.
-    apply transpose_neqkey_equal_add_multiple.
-    unfold add_multiple.
-    destruct (Maps.find k0 m').
-    rewrite MapsPtes.F.add_in_iff.
-    intros abs;destruct abs.
-    apply Heq;rewrite H3;reflexivity.
-    apply H0;apply H3.
-    rewrite MapsPtes.F.add_in_iff.
-    intros abs;destruct abs.
-    apply Heq;rewrite H3;reflexivity.
-    apply H0;apply H3.
-    red.
-    intro y.
-    replace  (Maps.add k e (add_multiple k0 e0 m')) with 
-       (add_multiple k e (add_multiple k0 e0 m')).
-    rewrite add_multiple_comm;reflexivity.
-    unfold  add_multiple at 1.
-    assert (~Maps.In k (add_multiple k0 e0 m')).
-    unfold add_multiple.
-    destruct (Maps.find k0 m').
-    rewrite MapsPtes.F.add_in_iff.
-    intros abs;destruct abs.
-    apply Heq;rewrite H3;reflexivity.
-    apply H0;apply H3.
-    rewrite MapsPtes.F.add_in_iff.
-    intros abs;destruct abs.
-    apply Heq;rewrite H3;reflexivity.
-    apply H0;apply H3.
-    rewrite MapsPtes.F.not_find_in_iff in H3.
-    rewrite H3;reflexivity.
-    rewrite add_multiple_comm;reflexivity.
-    setoid_replace m'' with (add_multiple k e m').
-    reflexivity.
-    replace (add_multiple k e m') with (Maps.add k e m').
-    apply H1.
-    unfold add_multiple.
-    rewrite MapsPtes.F.not_find_in_iff in H0.
-    rewrite H0;reflexivity.
-    Unfocus.
+    { intros k e a m' m'' H H0 H1 H2 k0 e0.
+      rewrite morph with (ms1':= (add_multiple k0 e0 (add_multiple k e m')))
+        (ms2':=m2);trivial; try reflexivity.
+      case (X.eq_dec k k0);intro Heq.
+      unfold add_multiple at 2 3 4 5.
+      case_eq (Maps.find k a);[intro n|];intro Heq1.
+      rewrite <- Heq.
+      rewrite (MapsPtes.F.not_find_in_iff m' k) in H0.
+      rewrite H0.
+      do 2 (rewrite MapsPtes.F.add_eq_o;[|reflexivity]).
+      rewrite morph with (ms1':=(add_multiple k0 (S (e0 + e)) m')) (ms2':=m2);trivial;try reflexivity. 
+      rewrite (H2 k0 (S (e0+e))). 
+      rewrite Heq.
+      rewrite add_add_add.
+      unfold add_multiple.
+      rewrite Heq in Heq1;rewrite Heq1.
+      replace ((S(e0 + e) + n)) with (e0 + (S (e + n))) by omega.
+      reflexivity.
+      reflexivity.
+      rewrite add_add_add.
+      unfold add_multiple.
+      rewrite  Heq in H0.
+      rewrite H0.
+      reflexivity.
+      rewrite <- Heq;reflexivity.
+      rewrite <- Heq.
+      rewrite (MapsPtes.F.not_find_in_iff m' k) in H0.
+      rewrite H0.
+      do 2 (rewrite MapsPtes.F.add_eq_o;[|reflexivity]).
+      rewrite morph with (ms1':=(add_multiple k0 (S(e0 + e)) m')) (ms2':=m2);trivial;try reflexivity. 
+      rewrite (H2 k0 (S(e0+e))). 
+      rewrite Heq.
+      rewrite add_add_add.
+      unfold add_multiple.
+      rewrite Heq in Heq1;rewrite Heq1.
+      reflexivity.
+      reflexivity.
+      rewrite add_add_add.
+      unfold add_multiple.
+      rewrite  Heq in H0.
+      rewrite H0.
+      reflexivity.
+      rewrite <- Heq;reflexivity.
+      rewrite morph with (ms1':= (add_multiple k e (add_multiple k0 e0 m')))
+        (ms2':=m2);trivial;try reflexivity.    
+      rewrite MapsPtes.fold_Add with (k:=k) (e:=e) (m1:=(add_multiple k0 e0 m'));auto with *.
+      rewrite H2.
+      rewrite add_multiple_comm;reflexivity.
+      apply transpose_neqkey_equal_add_multiple.
+      unfold add_multiple.
+      destruct (Maps.find k0 m').
+      rewrite MapsPtes.F.add_in_iff.
+      intros abs;destruct abs.
+      apply Heq;rewrite H3;reflexivity.
+      apply H0;apply H3.
+      rewrite MapsPtes.F.add_in_iff.
+      intros abs;destruct abs.
+      apply Heq;rewrite H3;reflexivity.
+      apply H0;apply H3.
+      red.
+      intro y.
+      replace  (Maps.add k e (add_multiple k0 e0 m')) with 
+        (add_multiple k e (add_multiple k0 e0 m')).
+      rewrite add_multiple_comm;reflexivity.
+      unfold  add_multiple at 1.
+      assert (~Maps.In k (add_multiple k0 e0 m')).
+      unfold add_multiple.
+      destruct (Maps.find k0 m').
+      rewrite MapsPtes.F.add_in_iff.
+      intros abs;destruct abs.
+      apply Heq;rewrite H3;reflexivity.
+      apply H0;apply H3.
+      rewrite MapsPtes.F.add_in_iff.
+      intros abs;destruct abs.
+      apply Heq;rewrite H3;reflexivity.
+      apply H0;apply H3.
+      rewrite MapsPtes.F.not_find_in_iff in H3.
+      rewrite H3;reflexivity.
+      rewrite add_multiple_comm;reflexivity.
+      setoid_replace m'' with (add_multiple k e m').
+      reflexivity.
+      replace (add_multiple k e m') with (Maps.add k e m').
+      apply H1.
+      unfold add_multiple.
+      rewrite MapsPtes.F.not_find_in_iff in H0.
+      rewrite H0;reflexivity. }
   Qed.
 
   Lemma union_rec_left : forall a ms ms', eq (union (add a ms) ms') (add a (union ms ms')).
@@ -851,28 +827,24 @@ Module PreMake(X:OrderedType)(Maps:FMapInterface.S with Module E:=X) <: S(X).
     pattern m1,(Maps.fold add_multiple m1 m2).
     apply MapsPtes.fold_rec.
 
-    Focus 1.
-    intros m H k e.
-    rewrite MapsPtes.fold_Empty;auto with *.
-    Unfocus.
+    { intros m H k e.
+      rewrite MapsPtes.fold_Empty;auto with *. }
 
-    Focus 1.
-    intros k e a m' m'' H H0 H1 H2 k0 e0.
-    rewrite morph with (ms1':= (add_multiple k e m'))
-      (ms2':=(add_multiple k0 e0 m2));trivial; try reflexivity.
-    rewrite MapsPtes.fold_Add with (k:=k) (e:=e) (m1:= m');auto with *.
-    rewrite H2.
-    apply add_multiple_comm.
-    apply transpose_neqkey_equal_add_multiple.
-    unfold add_multiple.
-    rewrite (MapsPtes.F.not_find_in_iff m' k) in H0.
-    rewrite H0.
-    red;tauto.
-    unfold add_multiple.
-    rewrite (MapsPtes.F.not_find_in_iff m' k) in H0.
-    rewrite H0.
-    exact H1.
-    Unfocus.
+    { intros k e a m' m'' H H0 H1 H2 k0 e0.
+      rewrite morph with (ms1':= (add_multiple k e m'))
+        (ms2':=(add_multiple k0 e0 m2));trivial; try reflexivity.
+      rewrite MapsPtes.fold_Add with (k:=k) (e:=e) (m1:= m');auto with *.
+      rewrite H2.
+      apply add_multiple_comm.
+      apply transpose_neqkey_equal_add_multiple.
+      unfold add_multiple.
+      rewrite (MapsPtes.F.not_find_in_iff m' k) in H0.
+      rewrite H0.
+      red;tauto.
+      unfold add_multiple.
+      rewrite (MapsPtes.F.not_find_in_iff m' k) in H0.
+      rewrite H0.
+      exact H1. }
   Qed.
 
   Lemma union_rec_right : forall a ms ms', eq (union ms (add a ms')) (add a (union ms ms')).
@@ -1021,66 +993,60 @@ Qed.
           [intros n'|];intros Heq').
     destruct n'.
 
-    Focus 1.
-    rewrite MapsFact.add_neq_o;[|intro;elim H;symmetry;assumption].    
-    rewrite Heq'.
-    rewrite MapsFact.remove_neq_o;[| assumption].
-    rewrite Heq.
-    rewrite MapsFact.Equal_mapsto_iff.
-    intros k e.
-    do 2 rewrite MapsFact.find_mapsto_iff.
-    case (X.eq_dec k φ); case (X.eq_dec k φ');intros Heq1 Heq2.
-    elim H;apply X.eq_trans with k.
-    symmetry;assumption.
-    assumption.
-    rewrite MapsFact.remove_eq_o;[|symmetry;assumption ].
-    rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
-    rewrite MapsFact.remove_eq_o;[|symmetry;assumption ].
-    reflexivity.
-    rewrite MapsFact.remove_neq_o;[|intro;elim Heq2;symmetry;assumption ].
-    rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
-    rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
-    reflexivity.
-    rewrite MapsFact.remove_neq_o;[|intro;elim Heq2;symmetry;assumption ].
-    rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
-    rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
-    rewrite MapsFact.remove_neq_o;[|intro;elim Heq2;symmetry;assumption ].
-    reflexivity.
-    Unfocus.
+    { rewrite MapsFact.add_neq_o;[|intro;elim H;symmetry;assumption].    
+      rewrite Heq'.
+      rewrite MapsFact.remove_neq_o;[| assumption].
+      rewrite Heq.
+      rewrite MapsFact.Equal_mapsto_iff.
+      intros k e.
+      do 2 rewrite MapsFact.find_mapsto_iff.
+      case (X.eq_dec k φ); case (X.eq_dec k φ');intros Heq1 Heq2.
+      elim H;apply X.eq_trans with k.
+      symmetry;assumption.
+      assumption.
+      rewrite MapsFact.remove_eq_o;[|symmetry;assumption ].
+      rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
+      rewrite MapsFact.remove_eq_o;[|symmetry;assumption ].
+      reflexivity.
+      rewrite MapsFact.remove_neq_o;[|intro;elim Heq2;symmetry;assumption ].
+      rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
+      rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
+      reflexivity.
+      rewrite MapsFact.remove_neq_o;[|intro;elim Heq2;symmetry;assumption ].
+      rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
+      rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
+      rewrite MapsFact.remove_neq_o;[|intro;elim Heq2;symmetry;assumption ].
+      reflexivity. }
 
-    Focus 1.
-    rewrite MapsFact.add_neq_o;[|intro;elim H;symmetry;assumption].    
-    rewrite Heq'.
-    rewrite MapsFact.add_neq_o;[| assumption].
-    rewrite Heq.
-    rewrite MapsFact.Equal_mapsto_iff.
-    intros k e.
-    do 2 rewrite MapsFact.find_mapsto_iff.
-    case (X.eq_dec k φ); case (X.eq_dec k φ');intros Heq1 Heq2.
-    elim H;apply X.eq_trans with k.
-    symmetry;assumption.
-    assumption.
-    rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
-    rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
-    rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
-    reflexivity.
-    rewrite MapsFact.add_neq_o;[|intro;elim Heq2;symmetry;assumption ].
-    rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
-    rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
-    reflexivity.
-    rewrite MapsFact.add_neq_o;[|intro;elim Heq2;symmetry;assumption ].
-    rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
-    rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
-    rewrite MapsFact.add_neq_o;[|intro;elim Heq2;symmetry;assumption ].
-    reflexivity.
-    Unfocus.
+    { rewrite MapsFact.add_neq_o;[|intro;elim H;symmetry;assumption].    
+      rewrite Heq'.
+      rewrite MapsFact.add_neq_o;[| assumption].
+      rewrite Heq.
+      rewrite MapsFact.Equal_mapsto_iff.
+      intros k e.
+      do 2 rewrite MapsFact.find_mapsto_iff.
+      case (X.eq_dec k φ); case (X.eq_dec k φ');intros Heq1 Heq2.
+      elim H;apply X.eq_trans with k.
+      symmetry;assumption.
+      assumption.
+      rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
+      rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
+      rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
+      reflexivity.
+      rewrite MapsFact.add_neq_o;[|intro;elim Heq2;symmetry;assumption ].
+      rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
+      rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
+      reflexivity.
+      rewrite MapsFact.add_neq_o;[|intro;elim Heq2;symmetry;assumption ].
+      rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
+      rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
+      rewrite MapsFact.add_neq_o;[|intro;elim Heq2;symmetry;assumption ].
+      reflexivity. }
 
-    Focus 1.
-    rewrite MapsFact.add_neq_o;[|intro;elim H;symmetry;assumption].    
-    rewrite Heq.
-    rewrite Heq'.
-    apply MapsPtes.F.Equal_refl.
-    Unfocus.
+    { rewrite MapsFact.add_neq_o;[|intro;elim H;symmetry;assumption].    
+      rewrite Heq.
+      rewrite Heq'.
+      apply MapsPtes.F.Equal_refl. }
 
 
 
@@ -1088,62 +1054,56 @@ Qed.
     rewrite Heq'.
     destruct n'.
 
-    Focus 1.
-    rewrite MapsFact.remove_neq_o;[|intro;elim H;assumption].    
-    rewrite Heq.
-    rewrite MapsFact.Equal_mapsto_iff.
-    intros k e.
-    do 2 rewrite MapsFact.find_mapsto_iff.
-    case (X.eq_dec k φ); case (X.eq_dec k φ');intros Heq1 Heq2.
-    elim H;apply X.eq_trans with k.
-    symmetry;assumption.
-    assumption.
-    rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
-    rewrite MapsFact.remove_eq_o;[|symmetry;assumption ].
-    rewrite MapsFact.remove_eq_o;[|symmetry;assumption ].
-    reflexivity.
-    rewrite MapsFact.remove_neq_o;[|intro;elim Heq2;symmetry;assumption ].
-    rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
-    rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
-    reflexivity.
-    rewrite MapsFact.remove_neq_o;[|intro;elim Heq2;symmetry;assumption ].
-    rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
-    rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
-    rewrite MapsFact.remove_neq_o;[|intro;elim Heq2;symmetry;assumption ].
-    reflexivity.
-    Unfocus.
+    { rewrite MapsFact.remove_neq_o;[|intro;elim H;assumption].    
+      rewrite Heq.
+      rewrite MapsFact.Equal_mapsto_iff.
+      intros k e.
+      do 2 rewrite MapsFact.find_mapsto_iff.
+      case (X.eq_dec k φ); case (X.eq_dec k φ');intros Heq1 Heq2.
+      elim H;apply X.eq_trans with k.
+      symmetry;assumption.
+      assumption.
+      rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
+      rewrite MapsFact.remove_eq_o;[|symmetry;assumption ].
+      rewrite MapsFact.remove_eq_o;[|symmetry;assumption ].
+      reflexivity.
+      rewrite MapsFact.remove_neq_o;[|intro;elim Heq2;symmetry;assumption ].
+      rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
+      rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
+      reflexivity.
+      rewrite MapsFact.remove_neq_o;[|intro;elim Heq2;symmetry;assumption ].
+      rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
+      rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
+      rewrite MapsFact.remove_neq_o;[|intro;elim Heq2;symmetry;assumption ].
+      reflexivity. }
 
-    Focus 1.
-    rewrite MapsFact.add_neq_o;[|intro;elim H;assumption].    
-    rewrite Heq.
-    rewrite MapsFact.Equal_mapsto_iff.
-    intros k e.
-    do 2 rewrite MapsFact.find_mapsto_iff.
-    case (X.eq_dec k φ); case (X.eq_dec k φ');intros Heq1 Heq2.
-    elim H;apply X.eq_trans with k.
-    symmetry;assumption.
-    assumption.
-    rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
-    rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
-    rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
-    reflexivity.
-    rewrite MapsFact.add_neq_o;[|intro;elim Heq2;symmetry;assumption ].
-    rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
-    rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
-    reflexivity.
-    rewrite MapsFact.add_neq_o;[|intro;elim Heq2;symmetry;assumption ].
-    rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
-    rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
-    rewrite MapsFact.add_neq_o;[|intro;elim Heq2;symmetry;assumption ].
-    reflexivity.
-    Unfocus.
+    { rewrite MapsFact.add_neq_o;[|intro;elim H;assumption].    
+      rewrite Heq.
+      rewrite MapsFact.Equal_mapsto_iff.
+      intros k e.
+      do 2 rewrite MapsFact.find_mapsto_iff.
+      case (X.eq_dec k φ); case (X.eq_dec k φ');intros Heq1 Heq2.
+      elim H;apply X.eq_trans with k.
+      symmetry;assumption.
+      assumption.
+      rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
+      rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
+      rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
+      reflexivity.
+      rewrite MapsFact.add_neq_o;[|intro;elim Heq2;symmetry;assumption ].
+      rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
+      rewrite MapsFact.add_eq_o;[|symmetry;assumption ].
+      reflexivity.
+      rewrite MapsFact.add_neq_o;[|intro;elim Heq2;symmetry;assumption ].
+      rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
+      rewrite MapsFact.add_neq_o;[|intro;elim Heq1;symmetry;assumption ].
+      rewrite MapsFact.add_neq_o;[|intro;elim Heq2;symmetry;assumption ].
+      reflexivity. }
 
-    Focus 1.
-    rewrite MapsFact.add_neq_o;[|intro;elim H;symmetry;assumption  ].    
-    rewrite Heq.
-    rewrite Heq'.
-    reflexivity.
-    Unfocus.
+    { rewrite MapsFact.add_neq_o;[|intro;elim H;symmetry;assumption  ].    
+      rewrite Heq.
+      rewrite Heq'.
+      reflexivity. }
   Qed.
   
   Lemma is_empty_morph_eq : forall (Γ Γ' : t), eq Γ Γ' -> is_empty Γ = is_empty Γ'.
@@ -1171,48 +1131,45 @@ Qed.
     unfold mem,union.
     apply MapsPtes.fold_rec.
 
-    Focus 1.
-    intros m H H0.
-    apply Maps.mem_2 in H0.
-    rewrite MapsPtes.F.in_find_iff in H0.
-    rewrite Empty_not_find in H0.
-    elim H0;reflexivity.
-    assumption.
-    Unfocus.
+    { intros m H H0.
+      apply Maps.mem_2 in H0.
+      rewrite MapsPtes.F.in_find_iff in H0.
+      rewrite Empty_not_find in H0.
+      elim H0;reflexivity.
+      assumption. }
 
-    Focus 1.
-    intros k e a0 m' m'' H H0 H1 H2 H3.
-    unfold mem,add,add_multiple.
-    destruct (Maps.find k a0).    
-    case (X.eq_dec a k);intros heq.
-    rewrite MapsPtes.F.add_eq_b;auto.
-    rewrite MapsPtes.F.add_neq_b;auto.
-    apply H2.
-    red in H1.
-    generalize (H1 a).
-    rewrite (MapsFact.mem_find_b) in H3. 
-    destruct (Maps.find a m'');try discriminate.
-    rewrite MapsPtes.F.add_neq_o.
-    rewrite MapsFact.mem_find_b.
-    intros.
-    rewrite <- H4.
-    reflexivity.
-    auto.
-    case (X.eq_dec a k);intros heq.
-    rewrite MapsPtes.F.add_eq_b;auto.
-    rewrite MapsPtes.F.add_neq_b;auto.
-    apply H2.
-    red in H1.
-    generalize (H1 a).
-    rewrite (MapsFact.mem_find_b) in H3. 
-    destruct (Maps.find a m'');try discriminate.
-    rewrite MapsPtes.F.add_neq_o.
-    rewrite MapsFact.mem_find_b.
-    intros.
-    rewrite <- H4.
-    reflexivity.
-    auto.
-    Unfocus.
+    {
+      intros k e a0 m' m'' H H0 H1 H2 H3.
+      unfold mem,add,add_multiple.
+      destruct (Maps.find k a0).    
+      case (X.eq_dec a k);intros heq.
+      rewrite MapsPtes.F.add_eq_b;auto.
+      rewrite MapsPtes.F.add_neq_b;auto.
+      apply H2.
+      red in H1.
+      generalize (H1 a).
+      rewrite (MapsFact.mem_find_b) in H3. 
+      destruct (Maps.find a m'');try discriminate.
+      rewrite MapsPtes.F.add_neq_o.
+      rewrite MapsFact.mem_find_b.
+      intros.
+      rewrite <- H4.
+      reflexivity.
+      auto.
+      case (X.eq_dec a k);intros heq.
+      rewrite MapsPtes.F.add_eq_b;auto.
+      rewrite MapsPtes.F.add_neq_b;auto.
+      apply H2.
+      red in H1.
+      generalize (H1 a).
+      rewrite (MapsFact.mem_find_b) in H3. 
+      destruct (Maps.find a m'');try discriminate.
+      rewrite MapsPtes.F.add_neq_o.
+      rewrite MapsFact.mem_find_b.
+      intros.
+      rewrite <- H4.
+      reflexivity.
+      auto. }
   Qed.
 
   Lemma mem_union_r : forall a ms ms', mem a ms' = true -> mem a (union ms ms') = true.
@@ -1221,21 +1178,17 @@ Qed.
     unfold mem,union.
     apply MapsPtes.fold_rec.
 
-    Focus 1.
-    tauto.
-    Unfocus.
+    { tauto. }
 
-    Focus 1.
-    intros k e a0 m' m'' H H0 H1 H2 H3.
-    unfold mem,add,add_multiple.
-    destruct (Maps.find k a0).    
-    case (X.eq_dec a k);intros heq.
-    rewrite MapsPtes.F.add_eq_b;auto.
-    rewrite MapsPtes.F.add_neq_b;auto.
-    case ( X.eq_dec a k);intros.
-    apply  MapsPtes.F.add_eq_b;auto.
-    rewrite MapsPtes.F.add_neq_b;auto.
-    Unfocus.
+    { intros k e a0 m' m'' H H0 H1 H2 H3.
+      unfold mem,add,add_multiple.
+      destruct (Maps.find k a0).    
+      case (X.eq_dec a k);intros heq.
+      rewrite MapsPtes.F.add_eq_b;auto.
+      rewrite MapsPtes.F.add_neq_b;auto.
+      case ( X.eq_dec a k);intros.
+      apply  MapsPtes.F.add_eq_b;auto.
+      rewrite MapsPtes.F.add_neq_b;auto. }
   Qed.
 
   Lemma mem_union_destruct : forall a ms ms', mem a (union ms ms') = true -> mem a ms = true \/mem a ms' = true.
@@ -1244,43 +1197,43 @@ Qed.
     unfold mem,union,add_multiple.
     apply MapsPtes.fold_rec.
 
-    Focus 1.
-    tauto.
-    Unfocus.
+    {
+      tauto.
+    }
 
-    Focus 1.
-    intros k e a0 m' m''. 
-    case (Maps.find k a0).
-    intros n H H0 H1 H2 H3.
-    case (X.eq_dec a k);intros heq.
-    red in H1.
-    rewrite MapsPtes.F.mem_find_b.
-    rewrite H1.
-    rewrite MapsPtes.F.add_eq_o;auto.
-    rewrite MapsPtes.F.add_neq_b in H3;auto.
-    destruct (H2 H3);auto.
-    left.
-    red in H1.
-    rewrite MapsPtes.F.mem_find_b.
-    rewrite H1.
-    rewrite MapsPtes.F.add_neq_o;auto.
-    rewrite <- MapsPtes.F.mem_find_b;auto.
-    intros H H0 H1 H2 H3.
-    case (X.eq_dec a k);intros heq.
-    red in H1.
-    rewrite MapsPtes.F.mem_find_b.
-    rewrite H1.
-    rewrite MapsPtes.F.add_eq_o;auto.
-    rewrite MapsPtes.F.add_neq_b in H3;auto.
-    destruct (H2 H3);auto.
-    left.
-    red in H1.
-    rewrite MapsPtes.F.mem_find_b.
-    rewrite H1.
-    rewrite MapsPtes.F.add_neq_o;auto.
-    rewrite <- MapsPtes.F.mem_find_b;auto.
+    {
+      intros k e a0 m' m''. 
+      case (Maps.find k a0).
+      intros n H H0 H1 H2 H3.
+      case (X.eq_dec a k);intros heq.
+      red in H1.
+      rewrite MapsPtes.F.mem_find_b.
+      rewrite H1.
+      rewrite MapsPtes.F.add_eq_o;auto.
+      rewrite MapsPtes.F.add_neq_b in H3;auto.
+      destruct (H2 H3);auto.
+      left.
+      red in H1.
+      rewrite MapsPtes.F.mem_find_b.
+      rewrite H1.
+      rewrite MapsPtes.F.add_neq_o;auto.
+      rewrite <- MapsPtes.F.mem_find_b;auto.
+      intros H H0 H1 H2 H3.
+      case (X.eq_dec a k);intros heq.
+      red in H1.
+      rewrite MapsPtes.F.mem_find_b.
+      rewrite H1.
+      rewrite MapsPtes.F.add_eq_o;auto.
+      rewrite MapsPtes.F.add_neq_b in H3;auto.
+      destruct (H2 H3);auto.
+      left.
+      red in H1.
+      rewrite MapsPtes.F.mem_find_b.
+      rewrite H1.
+      rewrite MapsPtes.F.add_neq_o;auto.
+      rewrite <- MapsPtes.F.mem_find_b;auto.
 
-    Unfocus.
+    }
   Qed.
 
 
@@ -1829,7 +1782,7 @@ Module MakeAVL(X:OrderedType )<:S(X).
     apply X.eq_refl.
 
     destruct this1.
-    Focus 1.
+{
     destruct this2.
     destruct n.
     exists k.

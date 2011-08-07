@@ -86,16 +86,16 @@ Proof.
   unfold appears_in_env, exists_in_env,fold.
   revert Γ' H.
   apply MapsPtes.fold_rec. 
-  Focus 1.
+  {
   intros m H Γ' H0.
   rewrite H0 in H.
   rewrite MapsPtes.fold_Empty.
   reflexivity.
   auto.
   assumption.
-  Unfocus.
+  }
 
-  Focus 1.
+  {
   intros k e a m' m'' H H0 H1 H2 Γ' H3.
   rewrite MapsPtes.fold_Add.
   f_equal.
@@ -105,11 +105,11 @@ Proof.
   apply iter_bool_proper.
   apply iter_transpose_nkey.
   assumption.
-  Focus 1. 
+  { 
   intro.
   rewrite <- H3.
   apply H1.
-  Unfocus.
+  }
 Qed.
 
 Add Morphism appears_in_env with signature (Logic.eq ==> eq ==> Logic.eq) as morph_appears_in_env.
