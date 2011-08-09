@@ -99,6 +99,7 @@ PP:=-pp "$(CAMLP4BIN)$(CAMLP4)o -I $(CAMLLIB) -I . $(COQSRCLIBS) $(CAMLP4EXTEND)
 ###################################
 
 VFILES:=basic.v\
+  boolP.v\
   vars.v\
   formulas_spec.v\
   formulas.v\
