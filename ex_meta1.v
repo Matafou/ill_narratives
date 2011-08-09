@@ -869,7 +869,17 @@ Lemma aux32 : no_proof_for ({(B ⊸ S) & (B ⊸ R), G ⊸ S, G}) (S ⊕ R).
 Qed.
 
 Lemma aux34 : all_proofs_of ({G ⊸ S, G}) (S ⊕ R).
-  intros p; one_step p.
+  intros p. 
+clean p.
+try finish.
+(repeat decomp).
+Focus 2.
+
+ ;auto with proof;eauto 3 with proof.
+(repeat decomp).
+discriminate.
+  one_step p.
+  
 Qed.
 
 Lemma aux33 : all_proofs_of ({1, G ⊸ S, G}) (S ⊕ R).
