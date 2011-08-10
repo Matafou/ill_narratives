@@ -897,6 +897,6 @@ Proof.
   apply aux1. 
 
   rewrite aux27.
-  destruct (exist right_choices_between_S_and_R i0);reflexivity.  
+  destruct (exist check_S_R i0);reflexivity.  
 Qed.
 
