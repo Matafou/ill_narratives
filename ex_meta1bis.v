@@ -18,24 +18,24 @@ Program Fixpoint exist
   (cont: forall {e1} {f1} (h1: e1 ⊢ f1),boolP)
   `(h: e ⊢ f) {struct h}: boolP := 
   match h with
-    | Oplus_R_1 Γ p q h' => cont _ _ h ORP exist cont h'
-    | Oplus_R_2 Γ q p h' => cont _ _ h ORP exist cont h'
+    | Oplus_R_1 _ _ _ h' => cont _ _ h ORP exist cont h'
+    | Oplus_R_2 _ _ _ h' => cont _ _ h ORP exist cont h'
     | Id _ _ p => cont _ _ h
-    | Impl_R Γ p q h' => cont _ _ h ORP exist cont h'
-    | Impl_L Γ Δ Δ' p q r _ _ h' h'0 => cont _ _ h (*ORP exist cont h' *) ORP exist cont h'0
-    | Times_R Γ Δ p q _ _ h' h'0 => cont _ _ h ORP exist cont h' ORP exist cont h'0
-    | Times_L Γ p q r _ h' => cont _ _ h ORP exist cont h'
+    | Impl_R _ _ _ h' => cont _ _ h ORP exist cont h'
+    | Impl_L _ _ _ _ _ _ _ _ h' h'0 => cont _ _ h (*ORP exist cont h' *) ORP exist cont h'0
+    | Times_R _ _ _ _ _ _ h' h'0 => cont _ _ h ORP exist cont h' ORP exist cont h'0
+    | Times_L _ _ _ _ _ h' => cont _ _ h ORP exist cont h'
     | One_R _ _ => cont _ _ h
-    | One_L Γ p _ h' => cont _ _ h ORP exist cont h'
-    | And_R Γ p q h' h'0 => cont _ _ h ORP exist cont h' ORP exist cont h'0
-    | And_L_1 Γ p q r _ h' => cont _ _ h ORP exist cont h'
-    | And_L_2 Γ p q r _ h' => cont _ _ h ORP exist cont h'
-    | Oplus_L Γ p q r _ h' h'0 => cont _ _ h ORP exist cont h' ORP exist cont h'0
-    | T_ Γ => cont _ _ h
-    | Zero_ Γ p h' => cont _ _ h
-    | Bang_D Γ p q _ h' => cont _ _ h ORP exist cont h'
-    | Bang_C Γ p q _ h' => cont _ _ h ORP exist cont h'
-    | Bang_W Γ p q _ h' => cont _ _ h ORP exist cont h'
+    | One_L _ p _ h' => cont _ _ h ORP exist cont h'
+    | And_R _ _ _ h' h'0 => cont _ _ h ORP exist cont h' ORP exist cont h'0
+    | And_L_1 _ _ _ _ _ h' => cont _ _ h ORP exist cont h'
+    | And_L_2 _ _ _ _ _ h' => cont _ _ h ORP exist cont h'
+    | Oplus_L _ _ _ _ _ h' h'0 => cont _ _ h ORP exist cont h' ORP exist cont h'0
+    | T_ _ => cont _ _ h
+    | Zero_ _ p h' => cont _ _ h
+    | Bang_D _ _ _ _ h' => cont _ _ h ORP exist cont h'
+    | Bang_C _ _ _ _ h' => cont _ _ h ORP exist cont h'
+    | Bang_W _ _ _ _ h' => cont _ _ h ORP exist cont h'
   end.
 
 
@@ -43,24 +43,24 @@ Program Fixpoint for_all
   (cont: forall (e1:env) (f1:formula) (h1: e1 ⊢ f1),boolP)
   `(h: e ⊢ f) {struct h}: boolP := 
   match h with
-    | Oplus_R_1 Γ p q h' => cont _ _ h ORP for_all cont h'
-    | Oplus_R_2 Γ q p h' => cont _ _ h ORP for_all cont h'
+    | Oplus_R_1 _ _ _ h' => cont _ _ h ORP for_all cont h'
+    | Oplus_R_2 _ _ _ h' => cont _ _ h ORP for_all cont h'
     | Id _ _ p => cont _ _ h
-    | Impl_R Γ p q h' => cont _ _ h ORP for_all cont h'
-    | Impl_L Γ Δ Δ' p q r _ _ h' h'0 => cont _ _ h ORP for_all cont h'
-    | Times_R Γ Δ p q _ _ h' h'0 => cont _ _ h ORP (for_all cont h' ANDP for_all cont h'0)
-    | Times_L Γ p q r _ h' => cont _ _ h ORP for_all cont h'
+    | Impl_R _ _ _ h' => cont _ _ h ORP for_all cont h'
+    | Impl_L _ _ _ _ _ _ _ _ h' h'0 => cont _ _ h ORP for_all cont h'
+    | Times_R _ _ _ _ _ _ h' h'0 => cont _ _ h ORP (for_all cont h' ANDP for_all cont h'0)
+    | Times_L _ _ _ _ _ h' => cont _ _ h ORP for_all cont h'
     | One_R _ _ => cont _ _ h
-    | One_L Γ p _ h' => cont _ _ h ORP for_all cont h'
-    | And_R Γ p q h' h'0 => cont _ _ h ORP (for_all cont h' ANDP for_all cont h'0)
-    | And_L_1 Γ p q r _ h' => cont _ _ h ORP for_all cont h'
-    | And_L_2 Γ p q r _ h' => cont _ _ h ORP for_all cont h'
-    | Oplus_L Γ p q r _ h' h'0 => cont _ _ h ORP (for_all cont h' ANDP for_all cont h'0)
-    | T_ Γ => cont _ _ h
-    | Zero_ Γ p h' => cont _ _ h
-    | Bang_D Γ p q _ h' => cont _ _ h ORP for_all cont h'
-    | Bang_C Γ p q _ h' => cont _ _ h ORP for_all cont h'
-    | Bang_W Γ p q _ h' => cont _ _ h ORP for_all cont h'
+    | One_L _ p _ h' => cont _ _ h ORP for_all cont h'
+    | And_R _ _ _ h' h'0 => cont _ _ h ORP (for_all cont h' ANDP for_all cont h'0)
+    | And_L_1 _ _ _ _ _ h' => cont _ _ h ORP for_all cont h'
+    | And_L_2 _ _ _ _ _ h' => cont _ _ h ORP for_all cont h'
+    | Oplus_L _ _ _ _ _ h' h'0 => cont _ _ h ORP (for_all cont h' ANDP for_all cont h'0)
+    | T_ _ => cont _ _ h
+    | Zero_ _ p h' => cont _ _ h
+    | Bang_D _ _ _ _ h' => cont _ _ h ORP for_all cont h'
+    | Bang_C _ _ _ _ h' => cont _ _ h ORP for_all cont h'
+    | Bang_W _ _ _ _ h' => cont _ _ h ORP for_all cont h'
   end.
 
 Definition eq_formula_boolP e f := 
@@ -70,13 +70,13 @@ Infix "?=?" := eq_formula_boolP (at level 60).
 
 Definition choices_between_A_and_M e f `{h: e ⊢ f} := 
   match h with
-    | Oplus_L Γ p q r _ x x0 => p ?=? A ANDP q ?=? M
+    | Oplus_L Γ p q _ _ x x0 => p ?=? A ANDP q ?=? M
     | _ => falseP
   end.
 
 Definition choices_between_S_and_R e f `{h: e ⊢ f} := 
   match h with
-    | Oplus_L Γ p q r _ x x0 => p ?=? S ANDP q ?=? R
+    | Oplus_L Γ p q _ _ x x0 => p ?=? S ANDP q ?=? R
     | _ => falseP
   end.
 
@@ -91,13 +91,20 @@ Definition yes e f `{h: e ⊢ f} := trueP.
 
 Definition essai e f `{h: e ⊢ f} := 
   match h with
-    | Oplus_L Γ p q r _ x x0 => p ?=? (G ⊸ 1) ANDP q ?=? (G ⊸ S)
+    | Oplus_L Γ p q _ _ x x0 => p ?=? (G ⊸ 1) ANDP q ?=? (G ⊸ S)
     | _ => falseP
   end.
 
 Definition essai2 e f `{h: e ⊢ f} := 
   match h with
-    | And_L_1 Γ p q r _ x => p ?=? B
+    | And_L_1 Γ p q _ _ x => p ?=? B
+    | _ => falseP
+  end.
+
+Definition right_choices_between_S_and_R e f `{h: e ⊢ f} := 
+  match h with
+    | Oplus_R_1 _ p q _ => p?=?S ANDP q?=?R
+    | Oplus_R_2 _ p q _ => p?=?S ANDP q?=?R
     | _ => falseP
   end.
 
@@ -110,26 +117,30 @@ Eval vm_compute in (exist right_choices_between_A_and_M simpl_ex).
 Lemma simple: { G, ((B⊸S)&(B⊸R))&1,(G⊸B)⊕(G⊸S)} ⊢ S⊕R.
 Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
   oplus_l (G⊸B) (G⊸S).
-  weak_impl_l G B...
-  and_l_1 ((B ⊸ S) & (B ⊸ R)) 1.
-
-  and_l_1 (B ⊸ S) (B ⊸ R).
-  weak_impl_l B S...
-  apply Oplus_R_1...
-
-(* 
-  and_l_2 (B ⊸ S) (B ⊸ R).
-  weak_impl_l B R...
-  apply Oplus_R_2...
- *)
-
-  weak_impl_l G S...
-  and_l_2 ((B ⊸ S) & (B ⊸ R)) 1.
-  one_l.
-  apply Oplus_R_1...
+  { weak_impl_l (G) (B)...
+    and_l_1 ((B ⊸ S) & (B ⊸ R)) 1.
+    and_l_1 (B ⊸ S) (B ⊸ R).
+    weak_impl_l (B) (S)...
+    apply Oplus_R_1... }
+  { weak_impl_l (G) (S)...
+    and_l_2 ((B ⊸ S) & (B ⊸ R)) 1.
+    one_l.
+    apply Oplus_R_1... }
 Defined.
 
+(* With the help of automatic tactics. *)
+Lemma simple': { G, ((B⊸S)&(B⊸R))&1,(G⊸B)⊕(G⊸S)} ⊢ S⊕R.
+Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
+  oplus_l (G⊸B) (G⊸S).
+  finish_proof_strong.
+  finish_proof_strong.
+Defined.
+
+
 Eval vm_compute in (exist choices_between_A_and_M simple).
+Eval vm_compute in (exist choices_between_A_and_M simple').
+Eval vm_compute in (exist right_choices_between_S_and_R simple).
+Eval vm_compute in (exist right_choices_between_S_and_R simple').
 
 
 Lemma orP_right : ∀ (a b c:boolP) , a = b -> a ORP c = (b ORP c).
@@ -574,14 +585,14 @@ Ltac unusable_var_strong_tac n1 n2 H :=
 
 Section ex_meta1.
 
-  Definition right_choices_between_S_and_R e f `{h: e ⊢ f} := 
+  Definition check_S_R e f `{h: e ⊢ f} := 
     match h with
       | Oplus_R_1 Γ p q x => p?=?S ANDP q?=?R
       | Oplus_R_2 Γ p q x => p?=?S ANDP q?=?R
       | _ => falseP
     end.
 
-  Instance checkSR :f_comp right_choices_between_S_and_R.
+  Instance checkSR :f_comp check_S_R.
   Proof.
     constructor.
     intros Γ Γ' φ h1 h2 H.
@@ -602,12 +613,12 @@ Qed.
 Lemma aux4 : no_proof_for ({G ⊸ S, B ⊸ S, G}) (S ⊕ R).
 Proof.
   intros p.
-  unusable_implies_tac 4 S p.
+  unusable_implies_tac 4 (S) p.
 Qed.
 Lemma aux4' : no_proof_for ({B ⊸ S,G ⊸ S,  G}) (S ⊕ R).
 Proof.
   intros p.
-  unusable_implies_tac 4 S p.
+  unusable_implies_tac 4 (S) p.
 Qed.
 
 Lemma aux6 : no_proof_for ({G, (G ⊸ B) ⊕ (G ⊸ S)}) B.
@@ -629,31 +640,31 @@ Qed.
 Lemma aux8 : ∀ x, no_proof_for ({B ⊸ R, G}) (Proposition x).
 Proof.
   intros H p.
-  unusable_implies_tac 4 R p.
+  unusable_implies_tac 4 (R) p.
 Qed.
 
 Lemma aux9 : no_proof_for ({S,B ⊸ R}) (S ⊕ R).
 Proof.
   intros p.
-  unusable_implies_tac 4 R p.
+  unusable_implies_tac 4 (R) p.
 Qed.
 
 
 Lemma aux9' : no_proof_for ({B ⊸ R,S}) (S ⊕ R).
 Proof.
   intros p.
-  unusable_implies_tac 4 R p.
+  unusable_implies_tac 4 (R) p.
 Qed.
 
 Lemma aux9's : no_proof_for ({B ⊸ R,S}) S.
 Proof.
   intros p.
-  unusable_implies_tac 4 R p.
+  unusable_implies_tac 4 (R) p.
 Qed.
 Lemma aux10 : ∀ x,no_proof_for ({G ⊸ S, B ⊸ R, G}) (Proposition x).
 Proof.
   intros H p.
-  unusable_implies_tac 4 R p.
+  unusable_implies_tac 4 (R) p.
 Qed.
 
 Lemma aux11 : no_proof_for ({B ⊸ R, G, (G ⊸ B) ⊕ (G ⊸ S)}) S.
@@ -699,7 +710,7 @@ Lemma aux13 : no_proof_for ({B ⊸ R, G, (G ⊸ B) ⊕ (G ⊸ S)}) (S ⊕ R).
 Qed.
 
 Lemma aux16 :no_proof_for ({B ⊸ S, G}) G.
-  intro p. unusable_implies_tac 4 S p.
+  intro p. unusable_implies_tac 4 (S) p.
 Qed.
 
 Lemma aux15 :no_proof_for ({(B ⊸ S) & (B ⊸ R), G}) G.
@@ -709,17 +720,15 @@ Lemma aux15 :no_proof_for ({(B ⊸ S) & (B ⊸ R), G}) G.
 Qed.
 
 Lemma aux18 : no_proof_for ({B ⊸ S, S}) (S ⊕ R).
-  intro p. unusable_implies_tac 4 S p.
+  intro p. unusable_implies_tac 4 (S) p.
 Qed.
 
 Lemma aux18s :no_proof_for ({B ⊸ S, S}) (S).
-  intro p. unusable_implies_tac 4 S p.
+  intro p. unusable_implies_tac 4 (S) p.
 Qed.
 
 Lemma aux19 : no_proof_for ({S, (B ⊸ S) & (B ⊸ R)}) S.
   intro p. one_step p.
-
-
   apply aux18s. assumption.
   apply aux9's. assumption.
 Qed.
@@ -733,12 +742,12 @@ Qed.
 Lemma aux10' : no_proof_for ({B ⊸ R,G ⊸ S, G}) (S ⊕ R).
 Proof.
   intros p.
-  unusable_implies_tac 4 R p.
+  unusable_implies_tac 4 (R) p.
 Qed.
 Lemma aux10's : no_proof_for ({B ⊸ R,G ⊸ S, G}) S.
 Proof.
   intros p.
-  unusable_implies_tac 4 R p.
+  unusable_implies_tac 4 (R) p.
 Qed.
 Lemma aux21 : no_proof_for ({(B ⊸ S) & (B ⊸ R), G}) G.
   intro p. one_step p.
@@ -754,7 +763,7 @@ Qed.
 Lemma aux4's : no_proof_for ({B ⊸ S,G ⊸ S,  G}) S.
 Proof.
   intros p.
-  unusable_implies_tac 4 S p.
+  unusable_implies_tac 4 (S) p.
 Qed.
 
 Lemma aux20 : no_proof_for ({G ⊸ S, (B ⊸ S) & (B ⊸ R), G}) S.
@@ -767,7 +776,7 @@ Qed.
 Lemma aux10'r : no_proof_for ({B ⊸ R,G ⊸ S, G}) R.
 Proof.
   intros p.
-  unusable_implies_tac 4 R p.
+  unusable_implies_tac 4 (R) p.
 Qed.
 Lemma aux22 : no_proof_for ({G ⊸ S, (B ⊸ S) & (B ⊸ R), G}) R.
   intro p. one_step p.

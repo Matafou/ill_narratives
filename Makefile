@@ -114,7 +114,8 @@ VFILES:=basic.v\
   restrict.v\
   narrative.v\
   unprove.v\
-  ex_meta1.v
+  ex_meta1.v\
+  ex_meta1bis.v
 #  ex_meta2.v
 #  ILL_paper_proofs.v
 #  ILL_noplusR.v
