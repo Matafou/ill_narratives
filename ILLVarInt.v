@@ -1,6 +1,6 @@
 Require Import OrderedType.
 Require Import Utf8_core.
-Require Import ILL.
+Require Import ILLType.
 Require Import vars.
 Require Import multiset_spec.
 Require Import multiset.

@@ -61,7 +61,7 @@ Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
   oplus_l 1 ((B ⊸ S) & (B ⊸ 1)).
 
   (* BRANCHE DE GAUCHE DE LA BRANCHE DE GAUCHE
-     (inversion gauche droite par rapport au doc, d'où le focus 2. *)
+     inversion gauche droite par rapport au doc, d'où le focus 2. *)
   Focus 2.
   and_l_2 (B ⊸ S) (B ⊸ 1).
   and_l_1  (B) 1.
