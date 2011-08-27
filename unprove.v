@@ -355,7 +355,7 @@ Proof.
   induction H1;intros  Heq1 Heq2;simpl in *;try discriminate.
 
   Focus 1.
-  rewrite H in Heq2.
+  rewrite e in Heq2.
   unfold appears_in_env,exists_in_env,fold,Maps'.fold in Heq2. simpl in Heq2.
   apply appears_false_is_appears_true in Heq1.
   rewrite Heq1 in Heq2.
@@ -366,7 +366,7 @@ Proof.
   assumption.
   assert (Heq2' := Heq2).
   apply (appears_false_remove _ _ (p⊸q)) in Heq2.
-  rewrite H0 in Heq2.
+  rewrite e0 in Heq2.
   apply appears_false_union in Heq2.
   destruct Heq2.
   apply in_not_exists_in_env.
@@ -375,12 +375,12 @@ Proof.
   apply eq_is_eq in H4;subst.
   assert (appears true n (p⊸q) = false).
   apply not_exists_in_env_in with (Γ:=Γ); assumption.
-  simpl in H4.
-  rewrite Bool.orb_false_iff in H4;intuition.
+  simpl in H1.
+  rewrite Bool.orb_false_iff in H1;intuition.
   apply not_exists_in_env_in with (Γ:=Δ'); assumption.
 
   Focus.
-  rewrite H in Heq2.
+  rewrite e in Heq2.
   apply appears_false_union in Heq2;destruct Heq2.
   rewrite Bool.orb_true_iff in Heq1;destruct Heq1.
   apply IHILL_proof1;assumption.
@@ -395,8 +395,8 @@ Proof.
   intros φ H3.
   assert (appears true n (p⊗q) = false) by
     (apply not_exists_in_env_in with (Γ:=Γ);assumption).
-  simpl in H0.
-  rewrite Bool.orb_false_iff in H0;intuition.
+  simpl in H.
+  rewrite Bool.orb_false_iff in H;intuition.
   destruct (mem_destruct _ _ _ H3) as [H5|H5].
   apply eq_is_eq in H5;subst;assumption.
   destruct (mem_destruct _ _ _ H5) as [H6|H6].
@@ -422,8 +422,8 @@ Proof.
   intros φ H3.
   assert (appears true n (p&q) = false) by
     (apply not_exists_in_env_in with (Γ:=Γ);assumption).
-  simpl in H0.
-  rewrite Bool.orb_false_iff in H0;intuition.
+  simpl in H.
+  rewrite Bool.orb_false_iff in H;intuition.
   destruct (mem_destruct _ _ _ H3) as [H5|H5].
   apply eq_is_eq in H5;subst;assumption.
   apply not_exists_in_env_in with (Γ:=Γ\p&q); assumption.
@@ -437,8 +437,8 @@ Proof.
   intros φ H3.
   assert (appears true n (p&q) = false) by
     (apply not_exists_in_env_in with (Γ:=Γ);assumption).
-  simpl in H0.
-  rewrite Bool.orb_false_iff in H0;intuition.
+  simpl in H.
+  rewrite Bool.orb_false_iff in H;intuition.
   destruct (mem_destruct _ _ _ H3) as [H5|H5].
   apply eq_is_eq in H5;subst;assumption.
   apply not_exists_in_env_in with (Γ:=Γ\p&q); assumption.
@@ -452,15 +452,15 @@ Proof.
   intros φ H3.
   assert (appears true n (p⊕q) = false) by
     (apply not_exists_in_env_in with (Γ:=Γ);assumption).
-  simpl in H0.
-  rewrite Bool.orb_false_iff in H0;intuition.
+  simpl in H.
+  rewrite Bool.orb_false_iff in H;intuition.
   destruct (mem_destruct _ _ _ H3) as [H5|H5].
   apply eq_is_eq in H5;subst;assumption.
   apply not_exists_in_env_in with (Γ:=Γ\p⊕q); assumption.
 
   Focus.
   assert (H':=  not_exists_in_env_in _ _ Heq2).
-  generalize (H' _ H).
+  generalize (H' _ e).
   simpl;discriminate.
 
   Focus.
@@ -472,7 +472,7 @@ Proof.
   intros φ H3.
   assert (appears true n (!p) = false) by
     (apply not_exists_in_env_in with (Γ:=Γ);assumption).
-  simpl in H0.
+  simpl in H.
   destruct (mem_destruct _ _ _ H3) as [H5|H5].
   apply eq_is_eq in H5;subst;assumption.
   apply not_exists_in_env_in with (Γ:=Γ\!p); assumption.
@@ -486,7 +486,7 @@ Proof.
   intros φ H3.
   assert (appears true n (!p) = false) by
     (apply not_exists_in_env_in with (Γ:=Γ);assumption).
-  simpl in H0.
+  simpl in H.
   destruct (mem_destruct _ _ _ H3) as [H5|H5].
   apply eq_is_eq in H5;subst;assumption.
   apply not_exists_in_env_in with (Γ:=Γ); assumption.
@@ -500,7 +500,7 @@ Proof.
   intros φ H3.
   assert (appears true n (!p) = false) by
     (apply not_exists_in_env_in with (Γ:=Γ);assumption).
-  simpl in H0.
+  simpl in H.
   apply not_exists_in_env_in with (Γ:=Γ\!p); assumption.
 Qed.  
 
@@ -568,7 +568,7 @@ Proof.
   Focus.
   subst.
   exists (Proposition n);split.
-  rewrite H.
+  rewrite e.
   apply add_is_mem.
   apply FormulaOrdered.eq_refl.
   simpl.
@@ -582,27 +582,27 @@ Proof.
   destruct (IHILL_proof2 n (refl_equal _)) as [φ [h1 h2]].
   intros φ' H3.
   destruct (mem_destruct _ _ _ H3);clear H3.
-  apply eq_is_eq in H4;subst.
-  generalize (Hnotzero _ H).
+  apply eq_is_eq in H1;subst.
+  generalize (Hnotzero _ e).
   simpl.
   intros h;rewrite Bool.orb_false_iff in h;destruct h;assumption.
   apply Hnotzero.
   apply mem_remove_2 with (b:=p ⊸ q).
-  rewrite H0;apply mem_union_r;assumption.
+  rewrite e0;apply mem_union_r;assumption.
   destruct (mem_destruct _ _ _ h1);clear h1.
-  apply eq_is_eq in H3;subst.
+  apply eq_is_eq in H1;subst.
   exists (p ⊸ q);split.
   assumption.
   simpl;rewrite h2;  apply Bool.orb_true_r.
   exists φ;split;try assumption.
   apply mem_remove_2 with (b:=p ⊸ q).
-  rewrite H0;apply mem_union_r;assumption.
+  rewrite e0;apply mem_union_r;assumption.
 
   Focus.
   subst.
   destruct (IHILL_proof _ (refl_equal _)).
   intros φ' H1.
-  assert (H2 := Hnotzero _ H);simpl in H2.
+  assert (H2 := Hnotzero _ e);simpl in H2.
   rewrite Bool.orb_false_iff in H2;destruct H2.
   destruct (mem_destruct _ _ _ H1) as [H4|H4];clear H1.
   apply eq_is_eq in H4;subst;assumption.
@@ -610,7 +610,7 @@ Proof.
   apply eq_is_eq in H1;subst;assumption.
   apply Hnotzero.
   eauto using mem_remove_2.
-  destruct H1 as [H1 H2].
+  destruct H0 as [H1 H2].
   destruct (mem_destruct _ _ _ H1) as [H4|H4];clear H1.
   apply eq_is_eq in H4;subst.
   exists (p⊗q);split;try assumption.
@@ -628,7 +628,7 @@ Proof.
   destruct (IHILL_proof _ (refl_equal _)).
   intros φ' H1.
   eauto using mem_remove_2.
-  destruct H1 as [H1 H2].
+  destruct H0 as [H1 H2].
   exists x;split.
   eauto using mem_remove_2.
   assumption.
@@ -637,13 +637,13 @@ Proof.
   subst.
   destruct (IHILL_proof _ (refl_equal _)).
   intros φ' H1.
-  assert (H2 := Hnotzero _ H);simpl in H2.
+  assert (H2 := Hnotzero _ e);simpl in H2.
   rewrite Bool.orb_false_iff in H2;destruct H2.
   destruct (mem_destruct _ _ _ H1) as [H4|H4];clear H1.
   apply eq_is_eq in H4;subst;assumption.
   apply Hnotzero.
   eauto using mem_remove_2.
-  destruct H1 as [H1 H2].
+  destruct H0 as [H1 H2].
   destruct (mem_destruct _ _ _ H1) as [H4|H4];clear H1.
   apply eq_is_eq in H4;subst.
   exists (p&q);split;try assumption.
@@ -656,13 +656,13 @@ Proof.
   subst.
   destruct (IHILL_proof _ (refl_equal _)).
   intros φ' H1.
-  assert (H2 := Hnotzero _ H);simpl in H2.
+  assert (H2 := Hnotzero _ e);simpl in H2.
   rewrite Bool.orb_false_iff in H2;destruct H2.
   destruct (mem_destruct _ _ _ H1) as [H4|H4];clear H1.
   apply eq_is_eq in H4;subst;assumption.
   apply Hnotzero.
   eauto using mem_remove_2.
-  destruct H1 as [H1 H2].
+  destruct H0 as [H1 H2].
   destruct (mem_destruct _ _ _ H1) as [H4|H4];clear H1.
   apply eq_is_eq in H4;subst.
   exists (p&q);split;try assumption.
@@ -673,10 +673,10 @@ Proof.
 
   Focus.
   subst.  
-  clear H1.
+(*   clear H1. *)
   destruct (IHILL_proof1 _ (refl_equal _)).
   intros φ' H1.
-  assert (H2 := Hnotzero _ H);simpl in H2.
+  assert (H2 := Hnotzero _ e);simpl in H2.
   rewrite Bool.orb_false_iff in H2;destruct H2.
   destruct (mem_destruct _ _ _ H1) as [H4|H4];clear H1.
   apply eq_is_eq in H4;subst;assumption.
@@ -692,18 +692,18 @@ Proof.
   assumption.
 
   Focus.
-  assert (H1:=Hnotzero _ H);simpl in H1;discriminate.
+  assert (H1:=Hnotzero _ e);simpl in H1;discriminate.
 
   Focus.
   subst.  
   destruct (IHILL_proof _ (refl_equal _)).
   intros φ' H1.
-  assert (H2 := Hnotzero _ H);simpl in H2.
+  assert (H2 := Hnotzero _ e);simpl in H2.
   destruct (mem_destruct _ _ _ H1) as [H4|H4];clear H1.
   apply eq_is_eq in H4;subst;assumption.
   apply Hnotzero.
   eauto using mem_remove_2.
-  destruct H1 as [H1 H2].
+  destruct H0 as [H1 H2].
   destruct (mem_destruct _ _ _ H1) as [H4|H4];clear H1.
   apply eq_is_eq in H4;subst.
   exists (!p);split;try assumption.
@@ -715,12 +715,12 @@ Proof.
   subst.  
   destruct (IHILL_proof _ (refl_equal _)).
   intros φ' H1.
-  assert (H2 := Hnotzero _ H);simpl in H2.
+  assert (H2 := Hnotzero _ e);simpl in H2.
   destruct (mem_destruct _ _ _ H1) as [H4|H4];clear H1.
   apply eq_is_eq in H4;subst;assumption.
   apply Hnotzero.
   eauto using mem_remove_2.
-  destruct H1 as [H1 H2].
+  destruct H0 as [H1 H2].
   destruct (mem_destruct _ _ _ H1) as [H4|H4];clear H1.
   apply eq_is_eq in H4;subst.
   exists (!p);split;try assumption.
@@ -732,9 +732,9 @@ Proof.
   subst.  
   destruct (IHILL_proof _ (refl_equal _)).
   intros φ' H1.
-  assert (H2 := Hnotzero _ H);simpl in H2.
+  assert (H2 := Hnotzero _ e);simpl in H2.
   eauto using mem_remove_2.
-  destruct H1 as [H1 H2].
+  destruct H0 as [H1 H2].
   exists x;split.
   eauto using mem_remove_2.
   assumption.
@@ -754,12 +754,12 @@ Proof.
   Focus.
   assert (Htop':= Htop _ Hin).
   simpl in Htop'.
-  rewrite H in Hin.
+  rewrite e in Hin.
   destruct (mem_destruct _ _ _ Hin);clear Hin.
-  apply eq_is_eq in H0;subst.
+  apply eq_is_eq in H;subst.
   simpl in *.
   discriminate.
-  rewrite empty_no_mem in H0;discriminate.
+  rewrite empty_no_mem in H;discriminate.
 
   Focus.
   discriminate.
@@ -772,52 +772,52 @@ Proof.
   destruct (proof_of_var') as [φ' [h1 h2]].
   intros φ' H6.
   apply Hzero.
-  apply mem_remove_2 with (Proposition n ⊸ q);rewrite H0;apply mem_union_l; assumption.
+  apply mem_remove_2 with (Proposition n ⊸ q);rewrite e0;apply mem_union_l; assumption.
   apply Hsub in h2.
-  2:apply mem_remove_2 with (Proposition n ⊸ q);rewrite H0;apply mem_union_l; assumption.
+  2:apply mem_remove_2 with (Proposition n ⊸ q);rewrite e0;apply mem_union_l; assumption.
   subst.
   apply IHp1 with (φ:=q);try assumption.
   simpl;tauto.
   simpl;tauto.
   intros φ' H1 H2.
   apply Harr;try assumption.
-  apply mem_remove_2 with (Proposition n ⊸ q);rewrite H0;apply mem_union_l; assumption.
+  apply mem_remove_2 with (Proposition n ⊸ q);rewrite e0;apply mem_union_l; assumption.
   intros φ' H1.
   apply Hzero;try assumption.
-  apply mem_remove_2 with (Proposition n ⊸ q);rewrite H0;apply mem_union_l; assumption.
+  apply mem_remove_2 with (Proposition n ⊸ q);rewrite e0;apply mem_union_l; assumption.
   intros φ' H1.
   apply Htop;try assumption.
-  apply mem_remove_2 with (Proposition n ⊸ q);rewrite H0;apply mem_union_l; assumption.
+  apply mem_remove_2 with (Proposition n ⊸ q);rewrite e0;apply mem_union_l; assumption.
   intros φ' H1 H2.
   apply Hsub;try assumption.
-  apply mem_remove_2 with (Proposition n ⊸ q);rewrite H0;apply mem_union_l; assumption.
+  apply mem_remove_2 with (Proposition n ⊸ q);rewrite e0;apply mem_union_l; assumption.
   (* not top application *)
   assert (Hin':(Proposition n ⊸ φ)∈(Δ∪Δ')).
-  rewrite <- H0.
+  rewrite <- e0.
   rewrite <- mem_remove_1.
   exact Hin.
   assumption.
   destruct (mem_union_destruct _ _ _ Hin') as [Hin1|Hin1].
   (* in Δ *)
   apply (IHp1 _ Hin1);try assumption.
-  assert (Htop' := Htop _ H).
+  assert (Htop' := Htop _ e).
   simpl in Htop';rewrite Bool.orb_false_iff in Htop';destruct Htop';assumption.
-  assert (Harr' := Harr _ H (refl_equal _)).
+  assert (Harr' := Harr _ e (refl_equal _)).
   simpl in Harr'. 
   destruct p1;try discriminate.
   simpl;reflexivity.
   intros φ' H1 H2.
   apply Harr;try assumption.
-  apply mem_remove_2 with (p1 ⊸ q);rewrite H0;apply mem_union_l; assumption.
+  apply mem_remove_2 with (p1 ⊸ q);rewrite e0;apply mem_union_l; assumption.
   intros φ' H1.
   apply Hzero;try assumption.
-  apply mem_remove_2 with (p1 ⊸ q);rewrite H0;apply mem_union_l; assumption.
+  apply mem_remove_2 with (p1 ⊸ q);rewrite e0;apply mem_union_l; assumption.
   intros φ' H1.
   apply Htop;try assumption.
-  apply mem_remove_2 with (p1 ⊸ q);rewrite H0;apply mem_union_l; assumption.
+  apply mem_remove_2 with (p1 ⊸ q);rewrite e0;apply mem_union_l; assumption.
   intros φ' H1 H2.
   apply Hsub;try assumption.
-  apply mem_remove_2 with (p1 ⊸ q);rewrite H0;apply mem_union_l; assumption.
+  apply mem_remove_2 with (p1 ⊸ q);rewrite e0;apply mem_union_l; assumption.
   (* in Δ' *)
   assert (Hin2 : (Proposition n ⊸ φ) ∈ (q::Δ')).
   apply mem_add_comm;assumption.
@@ -826,31 +826,31 @@ Proof.
   intros φ' H1 H2.
   destruct (mem_destruct _ _ _ H1) as [H3|H3];clear H1.
   apply eq_is_eq in H3;subst.
-  assert (Harr':=Harr _ H (refl_equal _)).
+  assert (Harr':=Harr _ e (refl_equal _)).
   simpl in Harr'.
   destruct p1;try discriminate.
   apply is_arrows_of_prop_arrow_from_prop;assumption.
   apply Harr;try assumption.
-  apply mem_remove_2 with (p1 ⊸ q);rewrite H0;apply mem_union_r; assumption.
+  apply mem_remove_2 with (p1 ⊸ q);rewrite e0;apply mem_union_r; assumption.
   (* sub 0 *)
   intros φ' H1.
   destruct (mem_destruct _ _ _ H1) as [H3|H3];clear H1.
   apply eq_is_eq in H3;subst.
-  assert (Hzero':=Hzero _ H);simpl in Hzero';rewrite Bool.orb_false_iff in Hzero';destruct Hzero';assumption.
+  assert (Hzero':=Hzero _ e);simpl in Hzero';rewrite Bool.orb_false_iff in Hzero';destruct Hzero';assumption.
   apply Hzero.
-  apply mem_remove_2 with (p1 ⊸ q);rewrite H0;apply mem_union_r; assumption.
+  apply mem_remove_2 with (p1 ⊸ q);rewrite e0;apply mem_union_r; assumption.
   (* sub top *)
   intros φ' H1.
   destruct (mem_destruct _ _ _ H1) as [H3|H3];clear H1.
   apply eq_is_eq in H3;subst.
-  assert (Htop':=Htop _ H);simpl in Htop';rewrite Bool.orb_false_iff in Htop';destruct Htop';assumption.
+  assert (Htop':=Htop _ e);simpl in Htop';rewrite Bool.orb_false_iff in Htop';destruct Htop';assumption.
   apply Htop.
-  apply mem_remove_2 with (p1 ⊸ q);rewrite H0;apply mem_union_r; assumption.
+  apply mem_remove_2 with (p1 ⊸ q);rewrite e0;apply mem_union_r; assumption.
   (* sub n *)
   intros φ' H1 H2.
   destruct (mem_destruct _ _ _ H1) as [H3|H3];clear H1.
   apply eq_is_eq in H3;subst.
-  assert (Hsub' := Hsub _ H).
+  assert (Hsub' := Hsub _ e).
   simpl in Hsub'.
   rewrite H2 in Hsub'.
   rewrite Bool.orb_true_r in Hsub'.
@@ -858,10 +858,10 @@ Proof.
   injection Hsub'';clear - Heq;intros;subst.
   elim Heq;apply FormulaOrdered.eq_refl.
   apply Hsub;try assumption.
-  apply mem_remove_2 with (p1 ⊸ q);rewrite H0;apply mem_union_r; assumption.
+  apply mem_remove_2 with (p1 ⊸ q);rewrite e0;apply mem_union_r; assumption.
 
   Focus.
-  rewrite H in Hin.
+  rewrite e in Hin.
   simpl in Htopr;rewrite Bool.orb_false_iff in Htopr;destruct Htopr as [Htopp1 Htopq].
   simpl in Harrr;rewrite Bool.orb_false_iff in Harrr;destruct Harrr as [Harrrp1 Harrrq].
   destruct (mem_union_destruct _ _ _ Hin) as [Hin1|Hin1].
@@ -870,37 +870,37 @@ Proof.
   (* contain *)
   intros φ' H0 H1.
   apply Harr;try assumption.
-  rewrite H; auto using mem_union_l.
+  rewrite e; auto using mem_union_l.
   (* Zero *)
   intros φ' H0.
   apply Hzero.
-  rewrite H; auto using mem_union_l.
+  rewrite e; auto using mem_union_l.
   (* Top *)
   intros φ' H0.
   apply Htop.
-  rewrite H; auto using mem_union_l.
+  rewrite e; auto using mem_union_l.
   (* eq *)
   intros φ' H0 H1.
   apply Hsub;try assumption.
-  rewrite H; auto using mem_union_l.
+  rewrite e; auto using mem_union_l.
   (* in Δ' *)
   apply (IHp2 _ Hin1);try assumption.
   (* contain *)
   intros φ' H0 H1.
   apply Harr;try assumption.
-  rewrite H; auto using mem_union_r.
+  rewrite e; auto using mem_union_r.
   (* Zero *)
   intros φ' H0.
   apply Hzero.
-  rewrite H; auto using mem_union_r.
+  rewrite e; auto using mem_union_r.
   (* Top *)
   intros φ' H0.
   apply Htop.
-  rewrite H; auto using mem_union_r.
+  rewrite e; auto using mem_union_r.
   (* eq *)
   intros φ' H0 H1.
   apply Hsub;try assumption.
-  rewrite H; auto using mem_union_r.
+  rewrite e; auto using mem_union_r.
 
   Focus.
   apply IHp with φ;try assumption.
@@ -913,12 +913,12 @@ Proof.
   intros φ' H0 H1.
   destruct (mem_destruct _ _ _ H0) as [H2|H2];clear H0.
   apply eq_is_eq in H2;subst.
-  assert (Harr' := Harr _ H);simpl in Harr';rewrite H1 in Harr'.
+  assert (Harr' := Harr _ e);simpl in Harr';rewrite H1 in Harr'.
   rewrite Bool.orb_true_r in Harr';assert (Harr'':= Harr' (refl_equal _)).
   rewrite Bool.andb_true_iff in Harr'';destruct Harr'';assumption.
   destruct (mem_destruct _ _ _ H2) as [H0|H0];clear H2.
   apply eq_is_eq in H0;subst.
-  assert (Harr' := Harr _ H);simpl in Harr';rewrite H1 in Harr'.
+  assert (Harr' := Harr _ e);simpl in Harr';rewrite H1 in Harr'.
   rewrite Bool.orb_true_l in Harr';assert (Harr'':= Harr' (refl_equal _)).
   rewrite Bool.andb_true_iff in Harr'';destruct Harr'';assumption.
   apply mem_remove_2 in H0.
@@ -927,11 +927,11 @@ Proof.
   intros φ' H0.
   destruct (mem_destruct _ _ _ H0) as [H2|H2];clear H0.
   apply eq_is_eq in H2;subst.
-  assert (Hzero' := Hzero _ H);simpl in Hzero'. 
+  assert (Hzero' := Hzero _ e);simpl in Hzero'. 
   rewrite Bool.orb_false_iff in Hzero';destruct Hzero';assumption.
   destruct (mem_destruct _ _ _ H2) as [H0|H0];clear H2.
   apply eq_is_eq in H0;subst.
-  assert (Hzero' := Hzero _ H);simpl in Hzero'.
+  assert (Hzero' := Hzero _ e);simpl in Hzero'.
   rewrite Bool.orb_false_iff in Hzero';destruct Hzero';assumption.
   apply mem_remove_2 in H0.
   auto.
@@ -939,11 +939,11 @@ Proof.
   intros φ' H0.
   destruct (mem_destruct _ _ _ H0) as [H2|H2];clear H0.
   apply eq_is_eq in H2;subst.
-  assert (Htop' := Htop _ H);simpl in Htop'. 
+  assert (Htop' := Htop _ e);simpl in Htop'. 
   rewrite Bool.orb_false_iff in Htop';destruct Htop';assumption.
   destruct (mem_destruct _ _ _ H2) as [H0|H0];clear H2.
   apply eq_is_eq in H0;subst.
-  assert (Htop' := Htop _ H);simpl in Htop'.
+  assert (Htop' := Htop _ e);simpl in Htop'.
   rewrite Bool.orb_false_iff in Htop';destruct Htop';assumption.
   apply mem_remove_2 in H0.
   auto.
@@ -951,20 +951,20 @@ Proof.
   intros φ' H0 H1.
   destruct (mem_destruct _ _ _ H0) as [H2|H2];clear H0.
   apply eq_is_eq in H2;subst.
-  assert (Hsub' := Hsub _ H);simpl in Hsub';rewrite H1 in Hsub'.
+  assert (Hsub' := Hsub _ e);simpl in Hsub';rewrite H1 in Hsub'.
   rewrite Bool.orb_true_r in Hsub';assert (Hsub'':= Hsub' (refl_equal _)).
   discriminate.
   destruct (mem_destruct _ _ _ H2) as [H0|H0];clear H2.
   apply eq_is_eq in H0;subst.
-  assert (Hsub' := Hsub _ H);simpl in Hsub';rewrite H1 in Hsub'.
+  assert (Hsub' := Hsub _ e);simpl in Hsub';rewrite H1 in Hsub'.
   rewrite Bool.orb_true_l in Hsub';assert (Hsub'':= Hsub' (refl_equal _)).
   discriminate.
   apply mem_remove_2 in H0.
   auto.
 
   Focus.
-  clear - H Hin.
-  rewrite H in Hin.
+  clear - e Hin.
+  rewrite e in Hin.
   rewrite empty_no_mem in Hin;discriminate.
 
   Focus.
@@ -1010,7 +1010,7 @@ Proof.
   intros φ' H0 H1.
   destruct (mem_destruct _ _ _ H0) as [H2|H2];clear H0.
   apply eq_is_eq in H2;subst.
-  assert (Harr' := Harr _ H);simpl in Harr';rewrite H1 in Harr'.
+  assert (Harr' := Harr _ e);simpl in Harr';rewrite H1 in Harr'.
   rewrite Bool.orb_true_l in Harr';assert (Harr'':= Harr' (refl_equal _)).
   rewrite Bool.andb_true_iff in Harr'';destruct Harr'';assumption.
   apply mem_remove_2 in H2.
@@ -1019,7 +1019,7 @@ Proof.
   intros φ' H0.
   destruct (mem_destruct _ _ _ H0) as [H2|H2];clear H0.
   apply eq_is_eq in H2;subst.
-  assert (Hzero' := Hzero _ H);simpl in Hzero'. 
+  assert (Hzero' := Hzero _ e);simpl in Hzero'. 
   rewrite Bool.orb_false_iff in Hzero';destruct Hzero';assumption.
   apply mem_remove_2 in H2.
   auto.
@@ -1027,7 +1027,7 @@ Proof.
   intros φ' H0.
   destruct (mem_destruct _ _ _ H0) as [H2|H2];clear H0.
   apply eq_is_eq in H2;subst.
-  assert (Htop' := Htop _ H);simpl in Htop'. 
+  assert (Htop' := Htop _ e);simpl in Htop'. 
   rewrite Bool.orb_false_iff in Htop';destruct Htop';assumption.
   apply mem_remove_2 in H2.
   auto.
@@ -1035,7 +1035,7 @@ Proof.
   intros φ' H0 H1.
   destruct (mem_destruct _ _ _ H0) as [H2|H2];clear H0.
   apply eq_is_eq in H2;subst.
-  assert (Hsub' := Hsub _ H);simpl in Hsub';rewrite H1 in Hsub'.
+  assert (Hsub' := Hsub _ e);simpl in Hsub';rewrite H1 in Hsub'.
   rewrite Bool.orb_true_l in Hsub';assert (Hsub'':= Hsub' (refl_equal _)).
   discriminate.
   apply mem_remove_2 in H2.
@@ -1052,7 +1052,7 @@ Proof.
   intros φ' H0 H1.
   destruct (mem_destruct _ _ _ H0) as [H2|H2];clear H0.
   apply eq_is_eq in H2;subst.
-  assert (Harr' := Harr _ H);simpl in Harr';rewrite H1 in Harr'.
+  assert (Harr' := Harr _ e);simpl in Harr';rewrite H1 in Harr'.
   rewrite Bool.orb_true_r in Harr';assert (Harr'':= Harr' (refl_equal _)).
   rewrite Bool.andb_true_iff in Harr'';destruct Harr'';assumption.
   apply mem_remove_2 in H2.
@@ -1061,7 +1061,7 @@ Proof.
   intros φ' H0.
   destruct (mem_destruct _ _ _ H0) as [H2|H2];clear H0.
   apply eq_is_eq in H2;subst.
-  assert (Hzero' := Hzero _ H);simpl in Hzero'. 
+  assert (Hzero' := Hzero _ e);simpl in Hzero'. 
   rewrite Bool.orb_false_iff in Hzero';destruct Hzero';assumption.
   apply mem_remove_2 in H2.
   auto.
@@ -1069,7 +1069,7 @@ Proof.
   intros φ' H0.
   destruct (mem_destruct _ _ _ H0) as [H2|H2];clear H0.
   apply eq_is_eq in H2;subst.
-  assert (Htop' := Htop _ H);simpl in Htop'. 
+  assert (Htop' := Htop _ e);simpl in Htop'. 
   rewrite Bool.orb_false_iff in Htop';destruct Htop';assumption.
   apply mem_remove_2 in H2.
   auto.
@@ -1077,7 +1077,7 @@ Proof.
   intros φ' H0 H1.
   destruct (mem_destruct _ _ _ H0) as [H2|H2];clear H0.
   apply eq_is_eq in H2;subst.
-  assert (Hsub' := Hsub _ H);simpl in Hsub';rewrite H1 in Hsub'.
+  assert (Hsub' := Hsub _ e);simpl in Hsub';rewrite H1 in Hsub'.
   rewrite Bool.orb_true_r in Hsub';assert (Hsub'':= Hsub' (refl_equal _)).
   discriminate.
   apply mem_remove_2 in H2.
@@ -1094,7 +1094,7 @@ Proof.
   intros φ' H0 H1.
   destruct (mem_destruct _ _ _ H0) as [H2|H2];clear H0.
   apply eq_is_eq in H2;subst.
-  assert (Harr' := Harr _ H);simpl in Harr';rewrite H1 in Harr'.
+  assert (Harr' := Harr _ e);simpl in Harr';rewrite H1 in Harr'.
   rewrite Bool.orb_true_l in Harr';assert (Harr'':= Harr' (refl_equal _)).
   rewrite Bool.andb_true_iff in Harr'';destruct Harr'';assumption.
   apply mem_remove_2 in H2.
@@ -1103,7 +1103,7 @@ Proof.
   intros φ' H0.
   destruct (mem_destruct _ _ _ H0) as [H2|H2];clear H0.
   apply eq_is_eq in H2;subst.
-  assert (Hzero' := Hzero _ H);simpl in Hzero'. 
+  assert (Hzero' := Hzero _ e);simpl in Hzero'. 
   rewrite Bool.orb_false_iff in Hzero';destruct Hzero';assumption.
   apply mem_remove_2 in H2.
   auto.
@@ -1111,7 +1111,7 @@ Proof.
   intros φ' H0.
   destruct (mem_destruct _ _ _ H0) as [H2|H2];clear H0.
   apply eq_is_eq in H2;subst.
-  assert (Htop' := Htop _ H);simpl in Htop'. 
+  assert (Htop' := Htop _ e);simpl in Htop'. 
   rewrite Bool.orb_false_iff in Htop';destruct Htop';assumption.
   apply mem_remove_2 in H2.
   auto.
@@ -1119,7 +1119,7 @@ Proof.
   intros φ' H0 H1.
   destruct (mem_destruct _ _ _ H0) as [H2|H2];clear H0.
   apply eq_is_eq in H2;subst.
-  assert (Hsub' := Hsub _ H);simpl in Hsub';rewrite H1 in Hsub'.
+  assert (Hsub' := Hsub _ e);simpl in Hsub';rewrite H1 in Hsub'.
   rewrite Bool.orb_true_l in Hsub';assert (Hsub'':= Hsub' (refl_equal _)).
   discriminate.
   apply mem_remove_2 in H2.
@@ -1147,7 +1147,7 @@ Proof.
   simpl in Htopr;discriminate.
 
   Focus.
-  assert (Hzero' := Hzero _ H);simpl in Hzero';discriminate.
+  assert (Hzero' := Hzero _ e);simpl in Hzero';discriminate.
 
   Focus.
   apply IHp with φ;try assumption.
@@ -1160,7 +1160,7 @@ Proof.
   intros φ' H0 H1.
   destruct (mem_destruct _ _ _ H0) as [H2|H2];clear H0.
   apply eq_is_eq in H2;subst.
-  assert (Harr' := Harr _ H);simpl in Harr';rewrite H1 in Harr'.
+  assert (Harr' := Harr _ e);simpl in Harr';rewrite H1 in Harr'.
   auto.
   apply mem_remove_2 in H2.
   auto.
@@ -1168,7 +1168,7 @@ Proof.
   intros φ' H0.
   destruct (mem_destruct _ _ _ H0) as [H2|H2];clear H0.
   apply eq_is_eq in H2;subst.
-  assert (Hzero' := Hzero _ H);simpl in Hzero'. 
+  assert (Hzero' := Hzero _ e);simpl in Hzero'. 
   assumption.
   apply mem_remove_2 in H2.
   auto.
@@ -1176,7 +1176,7 @@ Proof.
   intros φ' H0.
   destruct (mem_destruct _ _ _ H0) as [H2|H2];clear H0.
   apply eq_is_eq in H2;subst.
-  assert (Htop' := Htop _ H);simpl in Htop'. 
+  assert (Htop' := Htop _ e);simpl in Htop'. 
   assumption.
   apply mem_remove_2 in H2.
   auto.
@@ -1184,7 +1184,7 @@ Proof.
   intros φ' H0 H1.
   destruct (mem_destruct _ _ _ H0) as [H2|H2];clear H0.
   apply eq_is_eq in H2;subst.
-  assert (Hsub' := Hsub _ H);simpl in Hsub';rewrite H1 in Hsub'.
+  assert (Hsub' := Hsub _ e);simpl in Hsub';rewrite H1 in Hsub'.
   assert (Hsub'':= Hsub' (refl_equal _)).
   discriminate.
   apply mem_remove_2 in H2.
@@ -1287,23 +1287,23 @@ Proof.
   induction p;intros.
 
   Focus 1.
-  rewrite H in Hin. 
+  rewrite e in Hin. 
   destruct (mem_destruct _ _ _ Hin).
-  apply eq_is_eq in H0;subst.
+  apply eq_is_eq in H;subst.
   simpl in Hnotsub. 
   destruct (FormulaOrdered.eq_dec (Proposition n) (Proposition n)).
   discriminate.
   elim n0;reflexivity.
-  rewrite empty_no_mem in H0;discriminate.
+  rewrite empty_no_mem in H;discriminate.
 
   Focus.
   discriminate.
 
   Focus.
   assert (Hin':=Hin).
-  destruct (Hsub _ H) as [Hsub1 [Hsub2 Hsub3]].
+  destruct (Hsub _ e) as [Hsub1 [Hsub2 Hsub3]].
   rewrite mem_remove_1 with (b:=p1⊸q) in Hin by (simpl;tauto).
-  rewrite H0 in Hin.
+  rewrite e0 in Hin.
   destruct (mem_union_destruct _ _ _ Hin) as [Hin1|Hin1].
   apply IHp1;try assumption.
   case_eq (sub_formula (Proposition n) p1);intros Hsub4;try reflexivity.
@@ -1327,7 +1327,7 @@ Proof.
   intros φ' H1.
   apply Hsub.
   apply mem_remove_2 with (b:=p1 ⊸ q).
-  rewrite H0;apply mem_union_l;assumption.
+  rewrite e0;apply mem_union_l;assumption.
   apply IHp2;try assumption.
   apply mem_add_comm;assumption.
   intros φ' H1.
@@ -1348,10 +1348,10 @@ Proof.
   apply is_arrows_of_prop_arrow_from_prop;assumption.
   apply Hsub.
   apply mem_remove_2 with (b:=p1 ⊸ q).
-  rewrite H0;apply mem_union_r;assumption.
+  rewrite e0;apply mem_union_r;assumption.
 
   Focus.
-  rewrite H in Hin.
+  rewrite e in Hin.
   destruct (mem_union_destruct _ _ _ Hin) as [Hin1|Hin1];clear Hin.
   apply IHp1;try assumption.
   simpl in Hnotsub;rewrite Bool.orb_false_iff in Hnotsub;destruct Hnotsub;
@@ -1360,7 +1360,7 @@ Proof.
   simpl in Hcontainsr;rewrite Bool.orb_false_iff in Hcontainsr;destruct Hcontainsr;assumption.
   intros φ' H0.  
   apply Hsub.
-  rewrite H;auto using mem_union_l, mem_union_r.
+  rewrite e;auto using mem_union_l, mem_union_r.
   apply IHp2;try assumption.
   simpl in Hnotsub;rewrite Bool.orb_false_iff in Hnotsub;destruct Hnotsub;
     assumption.
@@ -1368,10 +1368,10 @@ Proof.
   simpl in Hcontainsr;rewrite Bool.orb_false_iff in Hcontainsr;destruct Hcontainsr;assumption.
   intros φ' H0.  
   apply Hsub.
-  rewrite H;auto using mem_union_l, mem_union_r.
+  rewrite e;auto using mem_union_l, mem_union_r.
 
   Focus.
-  destruct (Hsub _ H) as [Hsub1 [Hsub2 Hsub3]].
+  destruct (Hsub _ e) as [Hsub1 [Hsub2 Hsub3]].
   apply IHp;try assumption.
   rewrite mem_remove_1 with (b:=p⊗q) in Hin by (simpl;tauto).
   do 2 apply mem_add_comm;assumption.
@@ -1402,10 +1402,10 @@ Proof.
   apply mem_remove_2 in H1;assumption.
 
   Focus.
-  rewrite H in Hin; rewrite empty_no_mem in Hin;discriminate.
+  rewrite e in Hin; rewrite empty_no_mem in Hin;discriminate.
 
   Focus.
-  destruct (Hsub _ H) as [Hsub1 [Hsub2 Hsub3]].
+  destruct (Hsub _ e) as [Hsub1 [Hsub2 Hsub3]].
   apply IHp;try assumption.
   rewrite mem_remove_1 with (b:=1) in Hin by (simpl;tauto).
   assumption.
@@ -1419,7 +1419,7 @@ Proof.
   simpl in Hcontainsr;rewrite Bool.orb_false_iff in Hcontainsr;destruct Hcontainsr;assumption.
 
   Focus.
-  destruct (Hsub _ H) as [Hsub1 [Hsub2 Hsub3]].
+  destruct (Hsub _ e) as [Hsub1 [Hsub2 Hsub3]].
   apply IHp;try assumption.
   rewrite mem_remove_1 with (b:=p&q) in Hin by (simpl;tauto).
   apply mem_add_comm;assumption.
@@ -1438,7 +1438,7 @@ Proof.
   apply mem_remove_2 in H2;auto.
 
   Focus.
-  destruct (Hsub _ H) as [Hsub1 [Hsub2 Hsub3]].
+  destruct (Hsub _ e) as [Hsub1 [Hsub2 Hsub3]].
   apply IHp;try assumption.
   rewrite mem_remove_1 with (b:=p&q) in Hin by (simpl;tauto).
   apply mem_add_comm;assumption.
@@ -1457,7 +1457,7 @@ Proof.
   apply mem_remove_2 in H2;auto.
 
   Focus.
-  destruct (Hsub _ H) as [Hsub1 [Hsub2 Hsub3]].
+  destruct (Hsub _ e) as [Hsub1 [Hsub2 Hsub3]].
   apply IHp1;try assumption.
   rewrite mem_remove_1 with (b:=p1⊕q) in Hin by (simpl;tauto).
   apply mem_add_comm;assumption.
@@ -1491,10 +1491,10 @@ Proof.
   discriminate.
 
   Focus.
-  destruct (Hsub _ H) as [_ [abs _]];simpl;discriminate.
+  destruct (Hsub _ e) as [_ [abs _]];simpl;discriminate.
 
   Focus.
-  destruct (Hsub _ H) as [Hsub1 [Hsub2 Hsub3]].
+  destruct (Hsub _ e) as [Hsub1 [Hsub2 Hsub3]].
   apply IHp;try assumption.
   rewrite mem_remove_1 with (b:=!p) in Hin by (simpl;tauto).
   apply mem_add_comm;assumption.
@@ -1510,7 +1510,7 @@ Proof.
   apply mem_remove_2 in H2;auto.
 
   Focus.
-  destruct (Hsub _ H) as [Hsub1 [Hsub2 Hsub3]].
+  destruct (Hsub _ e) as [Hsub1 [Hsub2 Hsub3]].
   apply IHp;try assumption.
   apply mem_add_comm;assumption.
   intros φ' H1.
@@ -1525,7 +1525,7 @@ Proof.
   auto.
 
   Focus.
-  destruct (Hsub _ H) as [Hsub1 [Hsub2 Hsub3]].
+  destruct (Hsub _ e) as [Hsub1 [Hsub2 Hsub3]].
   apply IHp;try assumption.
   rewrite mem_remove_1 with (b:=!p) in Hin by (simpl;tauto).
   assumption.
@@ -1608,8 +1608,7 @@ Lemma unusable_var_in_env_strong:
     ,False.
 Proof.
   intros n Γ φ p.
-  induction p;intros.
-
+  induction p;intros; try rename e into H; try try rename e0 into H0.
   Focus 1.
   rewrite H in Hin. 
   destruct (mem_destruct _ _ _ Hin).

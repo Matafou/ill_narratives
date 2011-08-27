@@ -47,26 +47,26 @@ Module Type ILL_sig(Vars : OrderedType).
      règle. *)
   Definition env := FormulaMultiSet.t.
 
-  Inductive ILL_proof : env → formula → Prop :=
-    Id : ∀ Γ p, Γ == {p} -> Γ ⊢ p
-(*   | Cut : ∀ Γ Δ p q, Γ ⊢ p → p::Δ ⊢ q → Δ ∪ Γ ⊢ q  *)
-  | Impl_R : ∀ Γ p q, p::Γ ⊢ q → Γ ⊢ p ⊸ q
-  | Impl_L : ∀ Γ Δ Δ' p q r, p ⊸ q ∈ Γ -> Γ \ p⊸q == Δ ∪ Δ' ->  Δ ⊢ p → q::Δ' ⊢ r → Γ ⊢ r
-  | Times_R : ∀ Γ Δ Δ' p q , Γ == Δ ∪ Δ' -> Δ ⊢ p → Δ' ⊢ q → Γ ⊢ p ⊗ q
-  | Times_L : ∀ Γ p q r , p ⊗ q ∈ Γ -> q :: p :: (Γ \ p⊗q) ⊢ r → Γ ⊢ r
-  | One_R : ∀ Γ, Γ == ∅ -> Γ ⊢ 1
-  | One_L : ∀ Γ p , 1 ∈ Γ -> Γ \ 1 ⊢ p → Γ ⊢ p
-  | And_R : ∀ Γ p q , Γ ⊢ p → Γ ⊢ q → Γ ⊢ p & q
-  | And_L_1 : ∀ Γ p q r , p&q ∈ Γ ->  p:: (Γ \ p&q) ⊢ r → Γ ⊢ r
-  | And_L_2 : ∀ Γ p q r , p&q ∈ Γ ->  q::(Γ \ p&q) ⊢ r → Γ ⊢ r
-  | Oplus_L : ∀ Γ p q r , p⊕q ∈ Γ ->  p :: (Γ \ p⊕q) ⊢ r → q :: (Γ \ p⊕q) ⊢ r → Γ ⊢ r
-  | Oplus_R_1 : ∀ Γ p q , Γ ⊢ p → Γ ⊢ p ⊕ q
-  | Oplus_R_2 : ∀ Γ p q , Γ ⊢ q → Γ ⊢ p ⊕ q 
-  | T_ : ∀ Γ, Γ ⊢ ⊤
-  | Zero_ : ∀ Γ p , 0 ∈ Γ → Γ ⊢ p
-  | Bang_D : ∀ Γ p q , !p∈Γ -> p :: (Γ \ !p) ⊢ q → Γ ⊢ q
-  | Bang_C : ∀ Γ p q , !p∈Γ -> !p :: Γ ⊢ q →  Γ ⊢ q
-  | Bang_W : ∀ Γ p q , !p∈Γ -> Γ \ !p ⊢ q →  Γ ⊢ q
+  Inductive ILL_proof Γ: formula → Type :=
+    Id : ∀ p, Γ == {p} -> Γ ⊢ p
+(*   | Cut : ∀ Δ p q, Γ ⊢ p → p::Δ ⊢ q → Δ ∪ Γ ⊢ q  *)
+  | Impl_R : ∀ p q, p::Γ ⊢ q → Γ ⊢ p ⊸ q
+  | Impl_L : ∀ Δ Δ' p q r, p ⊸ q ∈ Γ -> Γ \ p⊸q == Δ ∪ Δ' ->  Δ ⊢ p → q::Δ' ⊢ r → Γ ⊢ r
+  | Times_R : ∀ Δ Δ' p q , Γ == Δ ∪ Δ' -> Δ ⊢ p → Δ' ⊢ q → Γ ⊢ p ⊗ q
+  | Times_L : ∀ p q r , p ⊗ q ∈ Γ -> q :: p :: (Γ \ p⊗q) ⊢ r → Γ ⊢ r
+  | One_R : Γ == ∅ -> Γ ⊢ 1
+  | One_L : ∀ p , 1 ∈ Γ -> Γ \ 1 ⊢ p → Γ ⊢ p
+  | And_R : ∀ p q , Γ ⊢ p → Γ ⊢ q → Γ ⊢ p & q
+  | And_L_1 : ∀ p q r , p&q ∈ Γ ->  p:: (Γ \ p&q) ⊢ r → Γ ⊢ r
+  | And_L_2 : ∀ p q r , p&q ∈ Γ ->  q::(Γ \ p&q) ⊢ r → Γ ⊢ r
+  | Oplus_L : ∀ p q r , p⊕q ∈ Γ ->  p :: (Γ \ p⊕q) ⊢ r → q :: (Γ \ p⊕q) ⊢ r → Γ ⊢ r
+  | Oplus_R_1 : ∀ p q , Γ ⊢ p → Γ ⊢ p ⊕ q
+  | Oplus_R_2 : ∀ p q , Γ ⊢ q → Γ ⊢ p ⊕ q 
+  | T_ : Γ ⊢ ⊤
+  | Zero_ : ∀ p , 0 ∈ Γ → Γ ⊢ p
+  | Bang_D : ∀ p q , !p∈Γ -> p :: (Γ \ !p) ⊢ q → Γ ⊢ q
+  | Bang_C : ∀ p q , !p∈Γ -> !p :: Γ ⊢ q →  Γ ⊢ q
+  | Bang_W : ∀ p q , !p∈Γ -> Γ \ !p ⊢ q →  Γ ⊢ q
   (* Syntax defined simutaneously. *)
     where " x ⊢ y " := (ILL_proof x y) : ILL_scope.
 
@@ -114,7 +114,7 @@ Module Type ILL_sig(Vars : OrderedType).
   Parameter ILL_proof_pre_morph : forall φ Γ Γ', Γ == Γ' ->  (Γ⊢φ) -> (Γ'⊢φ).
 
   (* On peut réécrire à l'intérieur d'un ⊢. *)
-  Add Morphism ILL_proof with signature (FormulaMultiSet.eq ==> Logic.eq ==> iff) as ILL_proof_morph.
+  Add Morphism ILL_proof with signature (FormulaMultiSet.eq ==> Logic.eq ==> equivT) as ILL_proof_morph.
   Proof.
     intros Γ Γ' Heq φ;split;apply ILL_proof_pre_morph.
     assumption.

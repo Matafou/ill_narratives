@@ -6,106 +6,114 @@ Import ILLVarInt.Tacs. (* only this *)
 Require Import unprove.
 Import FormulaMultiSet. (* and this *)
 Require Import ILL_equiv.
-Require Import boolP.
+(* Require Import boolP. *)
+
+Infix "?=" := Bool.eqb (at level 80).
+
+Infix "OR" := orb (at level 70).
+Infix "AND" := andb (at level 70).
 
 Local Open Scope ILL_scope.
 Local Open Scope Emma.
 Require Import JMeq.
+Require Import Setoid.
 
 Generalizable All Variables.
 
+Implicit Arguments Oplus_R_1.
+
 Program Fixpoint exist
-  (cont: forall {e1} {f1} (h1: e1 ⊢ f1),boolP)
-  `(h: e ⊢ f) {struct h}: boolP := 
+  (cont: forall {e1} {f1} (h1: e1 ⊢ f1),bool)
+  `(h: e ⊢ f) {struct h}: bool := 
   match h with
-    | Oplus_R_1 _ _ _ h' => cont _ _ h ORP exist cont h'
-    | Oplus_R_2 _ _ _ h' => cont _ _ h ORP exist cont h'
-    | Id _ _ p => cont _ _ h
-    | Impl_R _ _ _ h' => cont _ _ h ORP exist cont h'
-    | Impl_L _ _ _ _ _ _ _ _ h' h'0 => cont _ _ h (*ORP exist cont h' *) ORP exist cont h'0
-    | Times_R _ _ _ _ _ _ h' h'0 => cont _ _ h ORP exist cont h' ORP exist cont h'0
-    | Times_L _ _ _ _ _ h' => cont _ _ h ORP exist cont h'
-    | One_R _ _ => cont _ _ h
-    | One_L _ p _ h' => cont _ _ h ORP exist cont h'
-    | And_R _ _ _ h' h'0 => cont _ _ h ORP exist cont h' ORP exist cont h'0
-    | And_L_1 _ _ _ _ _ h' => cont _ _ h ORP exist cont h'
-    | And_L_2 _ _ _ _ _ h' => cont _ _ h ORP exist cont h'
-    | Oplus_L _ _ _ _ _ h' h'0 => cont _ _ h ORP exist cont h' ORP exist cont h'0
-    | T_ _ => cont _ _ h
-    | Zero_ _ p h' => cont _ _ h
-    | Bang_D _ _ _ _ h' => cont _ _ h ORP exist cont h'
-    | Bang_C _ _ _ _ h' => cont _ _ h ORP exist cont h'
-    | Bang_W _ _ _ _ h' => cont _ _ h ORP exist cont h'
+    | Oplus_R_1 _ _ h' => cont _ _ h OR exist cont h'
+    | Oplus_R_2 _ _ h' => cont _ _ h OR exist cont h'
+    | Id _ p => cont _ _ h
+    | Impl_R _ _ h' => cont _ _ h OR exist cont h'
+    | Impl_L _ _ _ _ _ _ _ h' h'0 => cont _ _ h (*OR exist cont h' *) OR exist cont h'0
+    | Times_R _ _ _ _ _ h' h'0 => cont _ _ h OR exist cont h' OR exist cont h'0
+    | Times_L _ _ _ _ h' => cont _ _ h OR exist cont h'
+    | One_R _ => cont _ _ h
+    | One_L p _ h' => cont _ _ h OR exist cont h'
+    | And_R _ _ h' h'0 => cont _ _ h OR exist cont h' OR exist cont h'0
+    | And_L_1 _ _ _ _ h' => cont _ _ h OR exist cont h'
+    | And_L_2 _ _ _ _ h' => cont _ _ h OR exist cont h'
+    | Oplus_L _ _ _ _ h' h'0 => cont _ _ h OR exist cont h' OR exist cont h'0
+    | T_ => cont _ _ h
+    | Zero_ p h' => cont _ _ h
+    | Bang_D _ _ _ h' => cont _ _ h OR exist cont h'
+    | Bang_C _ _ _ h' => cont _ _ h OR exist cont h'
+    | Bang_W _ _ _ h' => cont _ _ h OR exist cont h'
   end.
 
 
 Program Fixpoint for_all
-  (cont: forall (e1:env) (f1:formula) (h1: e1 ⊢ f1),boolP)
-  `(h: e ⊢ f) {struct h}: boolP := 
+  (cont: forall (e1:env) (f1:formula) (h1: e1 ⊢ f1),bool)
+  `(h: e ⊢ f) {struct h}: bool := 
   match h with
-    | Oplus_R_1 _ _ _ h' => cont _ _ h ORP for_all cont h'
-    | Oplus_R_2 _ _ _ h' => cont _ _ h ORP for_all cont h'
-    | Id _ _ p => cont _ _ h
-    | Impl_R _ _ _ h' => cont _ _ h ORP for_all cont h'
-    | Impl_L _ _ _ _ _ _ _ _ h' h'0 => cont _ _ h ORP for_all cont h'
-    | Times_R _ _ _ _ _ _ h' h'0 => cont _ _ h ORP (for_all cont h' ANDP for_all cont h'0)
-    | Times_L _ _ _ _ _ h' => cont _ _ h ORP for_all cont h'
-    | One_R _ _ => cont _ _ h
-    | One_L _ p _ h' => cont _ _ h ORP for_all cont h'
-    | And_R _ _ _ h' h'0 => cont _ _ h ORP (for_all cont h' ANDP for_all cont h'0)
-    | And_L_1 _ _ _ _ _ h' => cont _ _ h ORP for_all cont h'
-    | And_L_2 _ _ _ _ _ h' => cont _ _ h ORP for_all cont h'
-    | Oplus_L _ _ _ _ _ h' h'0 => cont _ _ h ORP (for_all cont h' ANDP for_all cont h'0)
-    | T_ _ => cont _ _ h
-    | Zero_ _ p h' => cont _ _ h
-    | Bang_D _ _ _ _ h' => cont _ _ h ORP for_all cont h'
-    | Bang_C _ _ _ _ h' => cont _ _ h ORP for_all cont h'
-    | Bang_W _ _ _ _ h' => cont _ _ h ORP for_all cont h'
+    | Oplus_R_1 _ _ h' => cont _ _ h OR for_all cont h'
+    | Oplus_R_2 _ _ h' => cont _ _ h OR for_all cont h'
+    | Id _ p => cont _ _ h
+    | Impl_R _ _ h' => cont _ _ h OR for_all cont h'
+    | Impl_L _ _ _ _ _ _ _ h' h'0 => cont _ _ h OR for_all cont h'
+    | Times_R _ _ _ _ _ h' h'0 => cont _ _ h OR (for_all cont h' AND for_all cont h'0)
+    | Times_L _ _ _ _ h' => cont _ _ h OR for_all cont h'
+    | One_R _ => cont _ _ h
+    | One_L p _ h' => cont _ _ h OR for_all cont h'
+    | And_R _ _ h' h'0 => cont _ _ h OR (for_all cont h' AND for_all cont h'0)
+    | And_L_1 _ _ _ _ h' => cont _ _ h OR for_all cont h'
+    | And_L_2 _ _ _ _ h' => cont _ _ h OR for_all cont h'
+    | Oplus_L _ _ _ _ h' h'0 => cont _ _ h OR (for_all cont h' AND for_all cont h'0)
+    | T_ => cont _ _ h
+    | Zero_ p h' => cont _ _ h
+    | Bang_D _ _ _ h' => cont _ _ h OR for_all cont h'
+    | Bang_C _ _ _ h' => cont _ _ h OR for_all cont h'
+    | Bang_W _ _ _ h' => cont _ _ h OR for_all cont h'
   end.
 
-Definition eq_formula_boolP e f := 
-  if FormulaOrdered.eq_dec e f then trueP else falseP.
+Definition eq_formula_bool e f := 
+  if FormulaOrdered.eq_dec e f then true else false.
 
-Infix "?=?" := eq_formula_boolP (at level 60).
+Infix "?=?" := eq_formula_bool (at level 60).
 
 Definition choices_between_A_and_M e f `{h: e ⊢ f} := 
   match h with
-    | Oplus_L Γ p q _ _ x x0 => p ?=? A ANDP q ?=? M
-    | _ => falseP
+    | Oplus_L p q _ _ x x0 => p ?=? A AND q ?=? M
+    | _ => false
   end.
 
 Definition choices_between_S_and_R e f `{h: e ⊢ f} := 
   match h with
-    | Oplus_L Γ p q _ _ x x0 => p ?=? S ANDP q ?=? R
-    | _ => falseP
+    | Oplus_L p q _ _ x x0 => p ?=? S AND q ?=? R
+    | _ => false
   end.
 
 Definition right_choices_between_A_and_M e f `{h: e ⊢ f} := 
   match h with
-    | Oplus_R_1 Γ p q x => p?=?A ANDP q?=?M
-    | Oplus_R_2 Γ p q x => p?=?A ANDP q?=?M
-    | _ => falseP
+    | Oplus_R_1 p q x => p?=?A AND q?=?M
+    | Oplus_R_2 p q x => p?=?A AND q?=?M
+    | _ => false
   end.
 
-Definition yes e f `{h: e ⊢ f} := trueP.
+Definition yes e f `{h: e ⊢ f} := true.
 
 Definition essai e f `{h: e ⊢ f} := 
   match h with
-    | Oplus_L Γ p q _ _ x x0 => p ?=? (G ⊸ 1) ANDP q ?=? (G ⊸ S)
-    | _ => falseP
+    | Oplus_L p q _ _ x x0 => p ?=? (G ⊸ 1) AND q ?=? (G ⊸ S)
+    | _ => false
   end.
 
 Definition essai2 e f `{h: e ⊢ f} := 
   match h with
-    | And_L_1 Γ p q _ _ x => p ?=? B
-    | _ => falseP
+    | And_L_1 p q _ _ x => p ?=? B
+    | _ => false
   end.
 
 Definition right_choices_between_S_and_R e f `{h: e ⊢ f} := 
   match h with
-    | Oplus_R_1 _ p q _ => p?=?S ANDP q?=?R
-    | Oplus_R_2 _ p q _ => p?=?S ANDP q?=?R
-    | _ => falseP
+    | Oplus_R_1 p q _ => p?=?S AND q?=?R
+    | Oplus_R_2 p q _ => p?=?S AND q?=?R
+    | _ => false
   end.
 
 Eval vm_compute in (exist essai2 originelle).
@@ -143,19 +151,19 @@ Eval vm_compute in (exist right_choices_between_S_and_R simple).
 Eval vm_compute in (exist right_choices_between_S_and_R simple').
 
 
-Lemma orP_right : ∀ (a b c:boolP) , a = b -> a ORP c = (b ORP c).
+Lemma orP_right : ∀ (a b c:bool) , a = b -> a OR c = (b OR c).
 Proof.
   intros a b c H.  
   rewrite H.
   destruct b;simpl;auto.
 Qed.
   
-Class f_comp (f:(∀ `(h:e1 ⊢ f1), boolP)) := {
+Class f_comp (f:(∀ `(h:e1 ⊢ f1), bool)) := {
   fcomp : (∀ Γ Γ' φ (h1:Γ⊢φ) (h2:Γ'⊢φ), Proof_eq.eq h1 h2 -> f h1 = f h2)
 }.
 
 
-
+(* Type checkable equality. *)
 Definition f_comp_eq `(f1:f_comp f) `(f2:f_comp f) := True.
 
 Lemma f_comp_eq_refl: forall `(f1:f_comp f), f_comp_eq f1 f1.
@@ -170,7 +178,6 @@ Lemma f_comp_eq_trans: forall `(f1:f_comp f) `(f2:f_comp f) `(f3:f_comp f), f_co
   trivial.
 Qed.
 
-Require Import Setoid.
 
   
 Add Parametric Relation {f}: (f_comp f) f_comp_eq
@@ -207,7 +214,7 @@ Qed.
 
   
 Definition all_proofsof `(h:f_comp f) e gamma :=
-  (forall (p:e⊢gamma), exist f p =trueP).
+  (forall (p:e⊢gamma), exist f p = true).
 
 Definition no_proof_for env gamma := (forall (p:env⊢gamma), False).
 Hint Unfold all_proofsof no_proof_for : proof.
@@ -230,7 +237,7 @@ Hint Resolve all_proofsof_pre_morph : proof.
 Lemma all_proofsof_pre_morph' : 
   forall φ Γ Γ' `(h:f_comp f),
     all_proofsof h Γ φ -> eq_bool Γ Γ' = true -> 
-    forall (p:Γ'⊢φ), exist f p =trueP.
+    forall (p:Γ'⊢φ), exist f p =true.
 Proof.
   intros φ Γ Γ' f h H H0 p.
   eapply all_proofsof_pre_morph;eauto.
@@ -240,8 +247,19 @@ Hint Rewrite all_proofsof_pre_morph' : proof.
 
 Add Parametric Morphism `(h:f_comp f):
   (all_proofsof h)
-  with signature (eq ==> Logic.eq ==> iff)
+  with signature (eq ==> Logic.eq ==> basic.equivT)
     as all_proof_of_morph.
+Proof.
+  intros x y H φ.
+  split;intros;eauto;
+    eapply all_proofsof_pre_morph;eauto;
+      try apply eq_bool_complete;try assumption;try symmetry;try assumption.
+Qed.
+
+Add Parametric Morphism `(h:f_comp f):
+  (all_proofsof h)
+  with signature (eq ==> Logic.eq ==> iff)
+    as all_proof_of_morph_2.
 Proof.
   intros x y H φ.
   split;intros;eauto;
@@ -305,7 +323,7 @@ Ltac finish :=
     try autorewrite with proof;
       try complete (apply False_ind;auto with proof);
       match goal with 
-        |- (if ?e then trueP else trueP ) = trueP => 
+        |- (if ?e then true else true ) = true => 
           case e;reflexivity
         | i:?e⊢Proposition ?n' |- _ => 
           elim var_in_env with (n:=n') (3:=i);vm_compute;reflexivity
@@ -399,7 +417,7 @@ Ltac decomp :=
                                       apply Proof_eq.sym;
                                     apply Proof_eq.eq_pre_morph);
           destruct h as [i' h];
-            rewrite exists_AtheseA_on_formula_proof_eq_compat with (h2:=i') (2:=h);
+            try rewrite exists_AtheseA_on_formula_proof_eq_compat with (h2:=i') (2:=h);
               clear H h heq
 end
 end
@@ -423,7 +441,7 @@ end
                                       apply Proof_eq.sym;apply Proof_eq.eq_pre_morph
 |
   destruct h as [i' h];
-    rewrite exists_AtheseA_on_formula_proof_eq_compat with (h2:=i') (2:=h);clear i h;try (rewrite H in *;clear H)
+    try (rewrite exists_AtheseA_on_formula_proof_eq_compat with (h2:=i') (2:=h));clear i h;try (rewrite H in *;clear H)
 ]
 end
 
@@ -458,9 +476,9 @@ Section ex_meta1.
 
   Definition check_S_R e f `{h: e ⊢ f} := 
     match h with
-      | Oplus_R_1 Γ p q x => p?=?S ANDP q?=?R
-      | Oplus_R_2 Γ p q x => p?=?S ANDP q?=?R
-      | _ => falseP
+      | Oplus_R_1 p q x => p?=?S AND q?=?R
+      | Oplus_R_2 p q x => p?=?S AND q?=?R
+      | _ => false
     end.
 
   Instance checkSR :f_comp check_S_R.
@@ -474,8 +492,19 @@ Section ex_meta1.
 
   Definition all_proofs_of := all_proofsof checkSR.
 
+  Require Import Morphisms.
+  Definition allT (X:Type) (Pred:X -> Type) := forall x:X, Pred x.
 
-
+(*  Instance all_iff_morphism (X : Type) :
+    Proper (pointwise_relation X basic.equivT ==> basic.equivT) (@allT X).
+  Proof.
+    intros equivT.
+    simpl_relation.
+    unfold allT in *.
+    intuition.
+    apply H.
+    intros x.    simpl.
+*)
 Lemma aux3 : all_proofs_of ({S}) (S ⊕ R).
 Proof.
   intros p ; one_step p.
@@ -497,12 +526,28 @@ Proof.
   intros p. one_step p.
 Qed.
 
+(*Lemma aux6' : no_proof_for ({S, (G ⊸ B) ⊕ (G ⊸ S)}) (S ⊕ R).
+Proof.
+  intros p.
+  one_step p.
+
+
+  assert( (G ⊸ B :: ({S, (G ⊸ B) ⊕ (G ⊸ S)} \ (G ⊸ B) ⊕ (G ⊸ S))) ==
+    ({ G ⊸ B , S })).
+  apply eq_bool_correct.
+  vm_compute.
+  reflexivity .
+  setoid_rewrite H in X.
+  unusable_var_strong_tac.
+  unusable_implies_tac 4 (B) X.
+Qed.
+*)
 Lemma aux2 : all_proofs_of ({B ⊸ S, G, (G ⊸ B) ⊕ (G ⊸ S)}) (S ⊕ R).
   intros p ; one_step p.
   exfalso.
   apply aux6.
   assumption.
-  apply False_ind.
+  exfalso.
   apply aux4.
   assumption.
 Qed.
@@ -546,7 +591,7 @@ Lemma aux12 : no_proof_for ({B ⊸ R, G, (G ⊸ B) ⊕ (G ⊸ S)}) R.
 Proof.
   intros p; one_step p.
   apply aux6;assumption.
-  eapply aux10;eassumption.
+  eapply aux10; eassumption.
 Qed.
 
 
