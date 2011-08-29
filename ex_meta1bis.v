@@ -191,7 +191,7 @@ Lemma exists_AtheseA_on_formula_proof_eq_compat :
   ∀ Γ Γ' φ (h1:Γ⊢φ) (h2:Γ'⊢φ),  Proof_eq.eq h1 h2 -> exist f h1 = exist f h2.
 Proof.
   intros f H Γ Γ' φ h1 h2 H0.
-  induction H0;simpl;try complete (
+  induction H0;simpl ;try complete (
     try rewrite IHeq; try rewrite IHeq1;try rewrite IHeq2;
       repeat apply orP_right;apply H;auto;subst;auto;
           try setoid_rewrite (H Γ1 Γ2);eauto;try constructor;auto ).
