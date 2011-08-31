@@ -86,29 +86,27 @@ Proof.
   unfold appears_in_env, exists_in_env,fold.
   revert Γ' H.
   apply MapsPtes.fold_rec. 
-  {
-  intros m H Γ' H0.
-  rewrite H0 in H.
-  rewrite MapsPtes.fold_Empty.
-  reflexivity.
-  auto.
-  assumption.
+  { intros m H Γ' H0.
+    rewrite H0 in H.
+    rewrite MapsPtes.fold_Empty.
+    reflexivity.
+    auto.
+    assumption.
   }
-
-  {
-  intros k e a m' m'' H H0 H1 H2 Γ' H3.
-  rewrite MapsPtes.fold_Add.
-  f_equal.
-  apply H2.
-  reflexivity.
-  auto.
-  apply iter_bool_proper.
-  apply iter_transpose_nkey.
-  assumption.
-  { 
-  intro.
-  rewrite <- H3.
-  apply H1.
+  { intros k e a m' m'' H H0 H1 H2 Γ' H3.
+    rewrite MapsPtes.fold_Add.
+    f_equal.
+    apply H2.
+    reflexivity.
+    auto.
+    apply iter_bool_proper.
+    apply iter_transpose_nkey.
+    assumption.
+    { 
+      intro.
+      rewrite <- H3.
+      apply H1.
+    }
   }
 Qed.
 
