@@ -1,4 +1,4 @@
-Require Import Utf8_core.
+Require Import Utf8_core Omega.
 Require Import FMapInterface.
 Require Import FMapFacts.
 Require Import FMapAVL.

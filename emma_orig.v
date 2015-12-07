@@ -5,13 +5,6 @@ Import ILLVarInt.Tacs. (* only this *)
 Import FormulaMultiSet. (* and this *)
 Open Scope ILL_scope.
 
-(* 
-Require Import Utf8_core.
-Require ILLVarInt. (* Don't want import it. *)
-Import ILLVarInt.MILL. (* only this *)
-Import FormulaMultiSet. (* and this *)
- *)
-
 (* Declaration of basic propositions. *)
 Notation "'P'" := (Proposition 1%nat):Emma.
 Notation "'R'" := (Proposition 2%nat):Emma. (* Meets Rodolph *)
@@ -54,133 +47,126 @@ Lemma originelle :
   {P&1, R, G, B&1, !(S⊸A), (E⊸A)&1, (P⊸M)&1,(R⊸1)&(R⊸E), (G⊸1)⊕(G⊸S), 1⊕((B⊸S)&(B⊸1))  } ⊢ A ⊕ M .
 Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
   oplus_l (G ⊸ 1) (G ⊸ S).
-  Focus.
-  (* BRANCHE DE GAUCHE *)
-  weak_impl_l (G) 1...
-  one_l.
-  oplus_l 1 ((B ⊸ S) & (B ⊸ 1)).
-
-  (* BRANCHE DE GAUCHE DE LA BRANCHE DE GAUCHE
-     inversion gauche droite par rapport au doc, d'où le focus 2. *)
-  Focus 2.
-  and_l_2 (B ⊸ S) (B ⊸ 1).
-  and_l_1  (B) 1.
-  weak_impl_l (B) 1...
-  one_l.  
-  and_l_1 (R ⊸ 1) (R ⊸ E).
-  weak_impl_l (R) 1...
-  and_l_1 (P) 1.
-  and_l_2 (E ⊸ A) 1.
-  and_l_1 (P ⊸ M) 1.
-  do 2 one_l.
-  bang_w (S ⊸ A)...
-  weak_impl_l (P) (M)...
-  apply Oplus_R_2...
-  (* BRANCHE DE DROITE DE LA BRANCHE DE GAUCHE. *)
-  Focus.
-  and_l_2 (B) 1.
-  do 2 one_l.
-  and_l_2 (P) 1.
-  and_l_1 (E ⊸ A) 1.
-  and_l_2 (P ⊸ M) 1.
-  and_l_2 (R ⊸ 1) (R ⊸ E).
-  do 2 one_l.
-  bang_w (S ⊸ A)...
-  weak_impl_l (R) (E)...
-  weak_impl_l (E) (A)...
-  apply Oplus_R_1...
-
-  (* BRANCHE DE DROITE *)
-  weak_impl_l (G) (S)...
-  and_l_1(R ⊸ 1) (R ⊸ E).
-  weak_impl_l (R) 1...
-  one_l. (* +L dans le doc, mais en fait c'est 1L *)
-  oplus_l 1 ((B ⊸ S) & (B ⊸ 1)).
-  (* PARTIE GAUCHE DE LA BRANCHE DE DROITE *)
-  and_l_2 (P) 1.
-  and_l_2 (B) 1.
-  and_l_2 (E ⊸ A)  1.
-  and_l_2 (P ⊸ M) 1.  
-  repeat one_l. 
-  bang_d (S ⊸ A)... (* !D au lieu de WL *)
-  weak_impl_l (S) (A)...
-  apply Oplus_R_1...
-
-  (* BRANCHE DROITE DE LA BRANCHE DROITE *)
-  and_l_2 (B ⊸ S) (B ⊸ 1).
-  and_l_1 (B) 1.
-  weak_impl_l (B) 1...
-  one_l.
-  and_l_2 (P) 1.
-  and_l_2 (E ⊸ A) 1.
-  and_l_2 (P ⊸ M) 1.
-  repeat one_l.
-  bang_d (S ⊸ A)...(* !D au lieu de WL *)
-  weak_impl_l (S) (A)...
-  apply Oplus_R_1...
+  - (* Left branch *)
+    weak_impl_l (G) 1...
+    one_l.
+    oplus_l 1 ((B ⊸ S) & (B ⊸ 1)).
+    all:swap 1 2. (* switch subgoals to match the order of the document *)
+    (* Left left. *) 
+    + and_l_2 (B ⊸ S) (B ⊸ 1).
+      and_l_1  (B) 1.
+      weak_impl_l (B) 1...
+      one_l.  
+      and_l_1 (R ⊸ 1) (R ⊸ E).
+      weak_impl_l (R) 1...
+      and_l_1 (P) 1.
+      and_l_2 (E ⊸ A) 1.
+      and_l_1 (P ⊸ M) 1.
+      do 2 one_l.
+      bang_w (S ⊸ A)...
+      weak_impl_l (P) (M)...
+      apply Oplus_R_2...
+    + (* Left right *)
+      and_l_2 (B) 1.
+      do 2 one_l.
+      and_l_2 (P) 1.
+      and_l_1 (E ⊸ A) 1.
+      and_l_2 (P ⊸ M) 1.
+      and_l_2 (R ⊸ 1) (R ⊸ E).
+      do 2 one_l.
+      bang_w (S ⊸ A)...
+      weak_impl_l (R) (E)...
+      weak_impl_l (E) (A)...
+      apply Oplus_R_1...
+  - (* Right branch of the document *)
+    weak_impl_l (G) (S)...
+    and_l_1(R ⊸ 1) (R ⊸ E).
+    weak_impl_l (R) 1...
+    one_l. (* +L in the document but actually 1L *)
+    oplus_l 1 ((B ⊸ S) & (B ⊸ 1)).
+    (* PARTIE GAUCHE DE LA BRANCHE DE DROITE *)
+    and_l_2 (P) 1.
+    and_l_2 (B) 1.
+    and_l_2 (E ⊸ A)  1.
+    and_l_2 (P ⊸ M) 1.  
+    repeat one_l. 
+    bang_d (S ⊸ A)... (* !D instead of WL *)
+    weak_impl_l (S) (A)...
+    apply Oplus_R_1...
+    + (* Right right *)
+      and_l_2 (B ⊸ S) (B ⊸ 1).
+      and_l_1 (B) 1.
+      weak_impl_l (B) 1...
+      one_l.
+      and_l_2 (P) 1.
+      and_l_2 (E ⊸ A) 1.
+      and_l_2 (P ⊸ M) 1.
+      repeat one_l.
+      bang_d (S ⊸ A)... (* !D instead of WL *)
+      weak_impl_l (S) (A)...
+      apply Oplus_R_1...
 Defined.
 
-  Ltac search_goal n g := 
-    match n with
-      | O => fail 1
-      | (Init.Datatypes.S ?m) => 
-        match goal with 
-          | |- ?g' => 
-            match g with 
-              ?env⊢?e =>
-              match g' with
-                ?env'⊢e => 
-                same_env env env'
-              end
-            end
-          | |- ?env ⊢ ?e  => 
-            match env with 
-              | {e} => apply Id;prove_multiset_eq
-              | context C [(add 1 ?env')] =>
-                (one_l;search_goal m g)||fail 0
-              | context C [(add ( ?p' & ?q') ?env')] =>
-                (and_l_2 p' q';search_goal m g)|| fail 0
-              | context C [(add ( ?p' & ?q') ?env')] =>
-                (and_l_1 p' q';search_goal m g)|| fail 0
-              | context C [(add ( ?p' ⊗ ?q') ?env')] =>
-                (times_l p' q';search_goal m g) || fail 0
-              | context C [add (?p'⊸?q') ?env'] =>
-                let e := context C [ env' ] in 
-                  match e with 
-                    | context C' [ p'::?env''] => 
-                      let e' := context C' [env''] in 
-                        (impl_l ({p'}) e' p' q';[constructor;prove_multiset_eq|search_goal m g])
-                    (* apply Impl_L with (Γ:={p'}) (Δ:=e') (p:=p') (q:=q'); *)
-                    (*   [constructor;prove_multiset_eq |search_goal m g|prove_multiset_eq] *)
-                  end
-              | context C [add ( !?p') ?env'] => 
-                (bang_w p';search_goal m g)
-            (* let e := context C [env'] in  *)
-            (*   apply Bang_W with (Γ:=e) (p:=p');[search_goal m g|prove_multiset_eq] *)
-            end || fail 0
-          | |-  _ ⊢ ?p ⊕ ?q => 
-            apply Oplus_R_1;search_goal m g
-          | |- _ ⊢ ?p ⊕ ?q => 
-            apply Oplus_R_2;search_goal m g
+Ltac search_goal n g := 
+  match n with
+  | O => fail 1
+  | (Init.Datatypes.S ?m) => 
+    match goal with 
+    | |- ?g' => 
+      match g with 
+        ?env⊢?e =>
+        match g' with
+          ?env'⊢e => 
+          same_env env env'
         end
-    end.
+      end
+    | |- ?env ⊢ ?e  => 
+      match env with 
+      | {e} => apply Id;prove_multiset_eq
+      | context C [(add 1 ?env')] =>
+        (one_l;search_goal m g)||fail 0
+      | context C [(add ( ?p' & ?q') ?env')] =>
+        (and_l_2 p' q';search_goal m g)|| fail 0
+      | context C [(add ( ?p' & ?q') ?env')] =>
+        (and_l_1 p' q';search_goal m g)|| fail 0
+      | context C [(add ( ?p' ⊗ ?q') ?env')] =>
+        (times_l p' q';search_goal m g) || fail 0
+      | context C [add (?p'⊸?q') ?env'] =>
+        let e := context C [ env' ] in 
+        match e with 
+        | context C' [ p'::?env''] => 
+          let e' := context C' [env''] in 
+          (impl_l ({p'}) e' p' q';[constructor;prove_multiset_eq|search_goal m g])
+            (* apply Impl_L with (Γ:={p'}) (Δ:=e') (p:=p') (q:=q'); *)
+            (*   [constructor;prove_multiset_eq |search_goal m g|prove_multiset_eq] *)
+        end
+      | context C [add ( !?p') ?env'] => 
+        (bang_w p';search_goal m g)
+          (* let e := context C [env'] in  *)
+          (*   apply Bang_W with (Γ:=e) (p:=p');[search_goal m g|prove_multiset_eq] *)
+      end || fail 0
+    | |-  _ ⊢ ?p ⊕ ?q => 
+      apply Oplus_R_1;search_goal m g
+    | |- _ ⊢ ?p ⊕ ?q => 
+      apply Oplus_R_2;search_goal m g
+    end
+  end.
   
-  Debug Off.
 
 Lemma originelle' :              
   {P&1, R, G, B&1, !(S⊸A), (E⊸A)&1, (P⊸M)&1,(R⊸1)&(R⊸E), (G⊸1)⊕(G⊸S), 1⊕((B⊸S)&(B⊸1))  } ⊢ A ⊕ M .
 Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
   oplus_l (G ⊸ 1) (G ⊸ S).
-  { weak_impl_l (G) 1...
+  - weak_impl_l (G) 1...
     one_l.
     oplus_l 1 ((B ⊸ S) & (B ⊸ 1)).
-    { and_l_2 (B) 1.
+    + and_l_2 (B) 1.
       do 2 one_l.
       and_l_2 (P) 1.
       and_l_1 (E ⊸ A) 1.
       Time search_goal 6 ({R ⊸ E, E ⊸ A, R} ⊢ A ⊕ M).
-      finish_proof_strong. }
-    { and_l_2 (B ⊸ S) (B ⊸ 1).
+      finish_proof_strong.
+    + and_l_2 (B ⊸ S) (B ⊸ 1).
       and_l_1  (B) 1.
       weak_impl_l (B) 1...
       one_l.  
@@ -188,21 +174,23 @@ Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
       weak_impl_l (R) 1...
       and_l_1 (P) 1.
       Time search_goal 6 ({P ⊸ M, P} ⊢ A ⊕ M).
-      finish_proof_strong. } }
-  { weak_impl_l (G) (S)...
+      finish_proof_strong.
+  - weak_impl_l (G) (S)...
     and_l_1(R ⊸ 1) (R ⊸ E).
     weak_impl_l (R) 1...
     one_l.
     oplus_l 1 ((B ⊸ S) & (B ⊸ 1)).
-    { search_goal 10 ({S, !(S ⊸ A)} ⊢ A ⊕ M).
+    + search_goal 10 ({S, !(S ⊸ A)} ⊢ A ⊕ M).
       bang_d (S ⊸ A)... (* !D au lieu de WL *)
-      finish_proof_strong. }
-    { and_l_2 (B ⊸ S) (B ⊸ 1).
+      finish_proof_strong.
+    + and_l_2 (B ⊸ S) (B ⊸ 1).
       and_l_1 (B) 1.
       Time search_goal 10 ({S, !(S ⊸ A)} ⊢ A ⊕ M).
       bang_d (S ⊸ A)... (* !D au lieu de WL *)
-      finish_proof_strong. } }
+      finish_proof_strong.
   Qed.
+
+
 (*
 Lemma originelle2 :              
   {P&1, R, G, B&1, !(S⊸A), (E⊸A)&1, (P⊸M)&1,(R⊸1)&(R⊸E), (G⊸1)⊕(G⊸S), 1⊕((B⊸S)&(B⊸1))  } ⊢ A ⊕ M .

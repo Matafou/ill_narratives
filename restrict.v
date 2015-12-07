@@ -251,7 +251,7 @@ Proof.
   assert (h:arr (p ⊸ q)).
   apply H0;assumption.
   inversion h;clear h;subst.
-  constructor assumption.
+  constructor; assumption.
   inversion H.
 
   destruct (mem_destruct _ _ _ H);clear H.
@@ -280,12 +280,12 @@ Proof.
   assert (h':arr (p ⊗ q)).
   auto.
   inversion h';clear h';subst.
-  inversion H;constructor assumption.
+  inversion H;constructor ; assumption.
   destruct (mem_destruct _ _ _ H2) as [H3| H3];clear H2.
   apply eq_is_eq in H3;subst.
   assert (h':arr (p ⊗ q)) by  auto.
   inversion h';clear h';subst.
-  inversion H;constructor assumption.
+  inversion H;constructor ; assumption.
   apply mem_remove_2 in H3;auto.
 
   apply mem_remove_2 in H;auto.
@@ -294,7 +294,7 @@ Proof.
   apply eq_is_eq in H3;subst.
   assert (h':arr (p & q)) by  auto.
   inversion h';clear h';subst.
-  inversion H;constructor assumption.
+  inversion H;constructor ; assumption.
   apply mem_remove_2 in H3;auto.
 
 
@@ -302,21 +302,21 @@ Proof.
   apply eq_is_eq in H3;subst.
   assert (h':arr (p & q)) by  auto.
   inversion h';clear h';subst.
-  inversion H;constructor assumption.
+  inversion H;constructor ; assumption.
   apply mem_remove_2 in H3;auto.
 
   destruct (mem_destruct _ _ _ H) as [H3| H3];clear H.
   apply eq_is_eq in H3;subst.
   assert (h':arr (p ⊕ q)) by  auto.
   inversion h';clear h';subst.
-  inversion H;constructor assumption.
+  inversion H;constructor ; assumption.
   apply mem_remove_2 in H3;auto.
 
   destruct (mem_destruct _ _ _ H) as [H3| H3];clear H.
   apply eq_is_eq in H3;subst.
   assert (h':arr (p ⊕ q)) by  auto.
   inversion h';clear h';subst.
-  inversion H;constructor assumption.
+  inversion H;constructor ; assumption.
   apply mem_remove_2 in H3;auto.
 
   inversion H1.
@@ -330,7 +330,7 @@ Proof.
   apply eq_is_eq in H3;subst.
   assert (h':arr (!p)) by  auto.
   inversion h';clear h';subst.
-  inversion H;constructor assumption.
+  inversion H;constructor ; assumption.
   apply mem_remove_2 in H3;auto.
 
   apply mem_remove_2 in H;auto.

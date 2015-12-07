@@ -142,11 +142,11 @@ Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
     repeat rewrite Heq in *.
 (*     rewrite Heq in H. *)
 (*     rewrite Heq in H0. *)
-    econstructor (complete eauto).
+    econstructor; (now eauto).
 
     Focus 1.
     rewrite Heq in *.
-    econstructor eassumption.
+    econstructor; eassumption.
 
     Focus 1.
     rewrite Heq in e.
@@ -168,7 +168,7 @@ Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
     rewrite Heq;reflexivity.
 
     Focus 1.
-    econstructor (complete eauto).     
+    econstructor ; (now eauto).     
 
     Focus 1.
     econstructor 9.
@@ -187,13 +187,13 @@ Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
     apply IHILL_proof2;rewrite Heq;reflexivity.
 
     Focus 1.
-    econstructor (complete eauto). 
+    econstructor ; (now eauto). 
 
     Focus 1.
-    constructor (complete auto).
+    constructor ; (now auto).
 
     Focus 1.
-    constructor fail.
+    constructor; fail.
 
     Focus 1.
     constructor 15.

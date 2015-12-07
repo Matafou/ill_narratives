@@ -163,7 +163,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
     Lemma eq_refl : forall φ, eq φ φ.
     Proof.
       intros φ;unfold eq.
-      induction φ;try complete (simpl;split;assumption).
+      induction φ;try now (simpl;split;assumption).
 
       Focus 1.
       apply Vars.eq_refl.

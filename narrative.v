@@ -32,24 +32,24 @@ Definition simpl_narr b e p q :=
 
 Program Fixpoint ν Γ φ (h: Γ ⊢ φ) {struct h}: narrative := 
 match h with
-  | Id _ p => ∅
-  | Impl_R p q x => ν _ _ x
-  | Impl_L Δ Δ' p q r _ _ x x0 =>  simpl_narr (ν Δ p x) (ν (q::Δ') r x0) p q
-  | Times_R Δ Δ' p q heq x x0 => (ν Δ p x) ∣∣ (ν Δ' q x0)
-  | Times_L p q r _ x => ν _ _ x
-  | One_R _  => ∅
-  | One_L p _ x => ν _ _ x
-  | And_R p q x x0 => (ν _ _ x) ⋈ (ν _ _ x0)
-  | And_L_1 p q r _ x => ν _ _ x
-  | And_L_2 p q r _ x => ν _ _ x
-  | Oplus_L p q r _ x x0 => (ν _ _ x) ⋈ (ν _ _ x0)
-  | Oplus_R_1 p q x => ν _ _ x
-  | Oplus_R_2 p q x => ν _ _ x
-  | T_ => ∅
-  | Zero_ p x => ∅
-  | Bang_D p q _ x => ν _ _ x
-  | Bang_C p q _ x => ν _ _ x
-  | Bang_W p q _ x => ν _ _ x
+  | Id _ _ p => ∅
+  | Impl_R _ p q x => ν _ _ x
+  | Impl_L _ Δ Δ' p q r _ _ x x0 =>  simpl_narr (ν Δ p x) (ν (q::Δ') r x0) p q
+  | Times_R _ Δ Δ' p q heq x x0 => (ν Δ p x) ∣∣ (ν Δ' q x0)
+  | Times_L _ p q r _ x => ν _ _ x
+  | One_R _ _  => ∅
+  | One_L _ p _ x => ν _ _ x
+  | And_R _ p q x x0 => (ν _ _ x) ⋈ (ν _ _ x0)
+  | And_L_1 _ p q r _ x => ν _ _ x
+  | And_L_2 _ p q r _ x => ν _ _ x
+  | Oplus_L _ p q r _ x x0 => (ν _ _ x) ⋈ (ν _ _ x0)
+  | Oplus_R_1 _ p q x => ν _ _ x
+  | Oplus_R_2 _ p q x => ν _ _ x
+  | T_ _ => ∅
+  | Zero_ _ p x => ∅
+  | Bang_D _ p q _ x => ν _ _ x
+  | Bang_C _ p q _ x => ν _ _ x
+  | Bang_W _ p q _ x => ν _ _ x
 end.
 
 

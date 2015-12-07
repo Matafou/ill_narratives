@@ -47,7 +47,7 @@ Module Proof_eq.
   Proof.    
     fix 6.
     intros φ Γ Γ' h1 h2 H.
-    case H;intros;try complete (constructor; apply sym;assumption).
+    case H;intros;try now (constructor; apply sym;assumption).
   Qed.
 
   Lemma eq_pre_morph : ∀ φ Γ (h:Γ ⊢ φ) Γ' (heqΓ: Γ == Γ') , eq (ILL_proof_pre_morph φ Γ Γ' heqΓ h) h.

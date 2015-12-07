@@ -214,7 +214,7 @@ Module PaperProofsString.
 
   Lemma Copy_Proof_from_figure_1:
   {D, P & 1, R & 1, D ⊸ (((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)} ⊢ ((S ⊗ D) ⊕ D).
-  Proof with (try complete (try constructor; prove_multiset_eq)).
+  Proof with (try now (try constructor; prove_multiset_eq)).
       impl_l ({D}) ({(P&1) , (R&1) })
         (D) ((((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D))...
     (* search_one_goal ({D, (P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S))), P & 1, R & 1} ⊢ (S ⊗ D) ⊕ D). *)
@@ -245,7 +245,7 @@ Module PaperProofsString.
   (* Same proof as above but with some more automation *)
   Lemma Copy_Proof_from_figure_1_with_weak_search:
   {D, P & 1, R & 1, D ⊸ (((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)} ⊢ ((S ⊗ D) ⊕ D).
-  Proof with (try complete (try constructor; prove_multiset_eq)).
+  Proof with (try now (try constructor; prove_multiset_eq)).
     impl_l  ({D}) ({(P&1) , (R&1) }) (D) ((((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D))...
     search_one_goal ({D, (P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S))), P & 1, R & 1} ⊢ (S ⊗ D) ⊕ D).
     oplus_l (P ⊸ S) (R ⊸ (1 ⊕ (P ⊸ S))).
@@ -266,7 +266,7 @@ Module PaperProofsString.
 
   Lemma Copy_Proof_from_figure_1_with_stronger_search:
     {D, P & 1, R & 1, D ⊸ (((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)} ⊢ ((S ⊗ D) ⊕ D).
-  Proof with try complete (finish_proof_strong || prove_multiset_eq).
+  Proof with try now (finish_proof_strong || prove_multiset_eq).
     search_one_goal_strong ({D, (P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S))), P & 1, R & 1} ⊢ (S ⊗ D) ⊕ D).
     oplus_l (P ⊸ S) (R ⊸ (1 ⊕ (P ⊸ S))).
     
@@ -319,7 +319,7 @@ Section figure_5.
 
   Lemma figure_5 : 
     {H,L,G,D₂,G⊸!(H⊸(H⊗M)),(L⊗(D₂⊗H))⊸(L⊗(D₀⊗((L⊗D₂)⊸D)))}∪λ∪μ⊢D.
-  Proof with try complete (finish_proof_strong || prove_multiset_eq).
+  Proof with try now (finish_proof_strong || prove_multiset_eq).
       search_one_goal_strong ({H,L,D₂,!(H⊸(H⊗M)),(L⊗(D₂⊗H))⊸(L⊗(D₀⊗((L⊗D₂)⊸D)))}∪λ∪μ⊢D).
       bang_c (H⊸(H⊗M)).
       bang_d ((H⊸(H⊗M))).

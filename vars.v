@@ -1,4 +1,4 @@
-Require Import OrderedType.
+Require Import OrderedType Omega.
 Require Import String.
 Require Import Utf8_core.
 
@@ -91,7 +91,7 @@ Module VarsString <: OrderedType with Definition t := String.string.
       destruct b1;destruct b2;
       destruct (Ascii.N_of_digits l0); 
         destruct (Ascii.N_of_digits l3);
-          try complete       
+          try now       
             (vm_compute;tauto).
       vm_compute;discriminate.
       zify;omega.
@@ -122,7 +122,7 @@ Module VarsString <: OrderedType with Definition t := String.string.
       destruct b1;destruct b2;
       destruct (Ascii.N_of_digits l0); 
         destruct (Ascii.N_of_digits l3);
-          try complete       
+          try now      
             (vm_compute;tauto).
       zify;omega.
       zify;omega.
