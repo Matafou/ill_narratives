@@ -51,7 +51,7 @@ Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
      règle. *)
   Definition env := FormulaMultiSet.t.
 
-  Inductive ILL_proof Γ : formula → Type :=
+  Inductive ILL_proof Γ : formula → Prop :=
     Id : ∀ p, Γ == {p} -> Γ ⊢ p
 (*   | Cut : ∀ Γ Δ p q, Γ ⊢ p → p::Δ ⊢ q → Δ ∪ Γ ⊢ q  *)
   | Impl_R : ∀ p q, p::Γ ⊢ q → Γ ⊢ p ⊸ q
@@ -129,90 +129,73 @@ Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
 
     induction H;intros Γ' Heq.
 
-    Focus 1.
-    constructor 1.
-    rewrite <- Heq;assumption.
+    - constructor 1.
+      rewrite <- Heq;assumption.
 
-    Focus 1.
-    constructor 2.
-    apply IHILL_proof.
-    rewrite Heq;reflexivity.
+    - constructor 2.
+      apply IHILL_proof.
+      rewrite Heq;reflexivity.
 
-    Focus 1.
-    repeat rewrite Heq in *.
-(*     rewrite Heq in H. *)
-(*     rewrite Heq in H0. *)
-    econstructor; (now eauto).
+    - repeat rewrite Heq in *.
+      (*     rewrite Heq in H. *)
+      (*     rewrite Heq in H0. *)
+      econstructor; (now eauto).
 
-    Focus 1.
-    rewrite Heq in *.
-    econstructor; eassumption.
+    - rewrite Heq in *.
+      econstructor; eassumption.
 
-    Focus 1.
-    rewrite Heq in e.
-    econstructor 5. 
-    eexact e.
-    apply IHILL_proof.
-    rewrite Heq.
-    reflexivity.
+    - rewrite ?Heq in H.
+      econstructor 5. 
+      + eexact H.
+      + apply IHILL_proof.
+        rewrite Heq.
+        reflexivity.
 
-    Focus 1. 
-    constructor 6.
-    rewrite <-Heq;assumption.
+    - constructor 6.
+      rewrite <-Heq;assumption.
 
-    Focus 1.
-    rewrite Heq in e.
-    econstructor 7.
-    eassumption.
-    apply IHILL_proof.
-    rewrite Heq;reflexivity.
+    - rewrite Heq in H.
+      econstructor 7.
+      + eassumption.
+      + apply IHILL_proof.
+        rewrite Heq;reflexivity.
 
-    Focus 1.
-    econstructor ; (now eauto).     
+    - econstructor ; (now eauto).     
 
-    Focus 1.
-    econstructor 9.
-    rewrite Heq in e;eexact e.
-    apply IHILL_proof. rewrite Heq;reflexivity.
+    - econstructor 9.
+      + rewrite Heq in H;eexact H.
+      + apply IHILL_proof.
+        rewrite Heq;reflexivity.
 
-    Focus 1.
-    econstructor 10.
-    rewrite Heq in e;eexact e.
-    apply IHILL_proof. rewrite Heq;reflexivity.
+    - econstructor 10.
+      + rewrite Heq in H;eexact H.
+      + apply IHILL_proof. rewrite Heq;reflexivity.
 
-    Focus 1.
-    econstructor 11.
-    rewrite Heq in e;eexact e.
-    apply IHILL_proof1;rewrite Heq;reflexivity.
-    apply IHILL_proof2;rewrite Heq;reflexivity.
+    - econstructor 11.
+      + rewrite Heq in H;eexact H.
+      + apply IHILL_proof1;rewrite Heq;reflexivity.
+      + apply IHILL_proof2;rewrite Heq;reflexivity.
 
-    Focus 1.
-    econstructor ; (now eauto). 
+    - econstructor ; (now eauto). 
 
-    Focus 1.
-    constructor ; (now auto).
+    - constructor ; (now auto).
 
-    Focus 1.
-    constructor; fail.
+    - constructor; fail.
 
-    Focus 1.
-    constructor 15.
-    rewrite <- Heq;assumption.
+    - constructor 15.
+      rewrite <- Heq;assumption.
 
-    Focus 1.
-    econstructor 16.
-    rewrite Heq in e;eexact e.
-    apply IHILL_proof;rewrite Heq;reflexivity.
+    - econstructor 16.
+      + rewrite Heq in H;eexact H.
+      + apply IHILL_proof;rewrite Heq;reflexivity.
 
-    Focus 1.
-    econstructor 17.
-    rewrite Heq in e;eexact e.
-    apply IHILL_proof;rewrite Heq;reflexivity.
+    - econstructor 17.
+      + rewrite Heq in H;eexact H.
+      + apply IHILL_proof;rewrite Heq;reflexivity.
 
-    Focus 1.
-    econstructor 18.
-    rewrite Heq in e;eexact e.
-    apply IHILL_proof;rewrite Heq;reflexivity.
+    - econstructor 18.
+      + rewrite Heq in H;eexact H.
+      + apply IHILL_proof;rewrite Heq;reflexivity.
   Defined. 
   
 

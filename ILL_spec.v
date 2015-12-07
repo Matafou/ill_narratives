@@ -47,7 +47,7 @@ Module Type ILL_sig(Vars : OrderedType).
      règle. *)
   Definition env := FormulaMultiSet.t.
 
-  Inductive ILL_proof Γ: formula → Type :=
+  Inductive ILL_proof Γ: formula → Prop :=
     Id : ∀ p, Γ == {p} -> Γ ⊢ p
 (*   | Cut : ∀ Δ p q, Γ ⊢ p → p::Δ ⊢ q → Δ ∪ Γ ⊢ q  *)
   | Impl_R : ∀ p q, p::Γ ⊢ q → Γ ⊢ p ⊸ q

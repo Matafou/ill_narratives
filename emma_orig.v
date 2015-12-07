@@ -1,5 +1,5 @@
 Require Import Utf8_core.
-Require ILLVarInt. (* Don't want import it. *)
+Require ILLVarInt. (* Don't want to import it. *)
 Import ILLVarInt.MILL. (* only this *)
 Import ILLVarInt.Tacs. (* only this *)
 Import FormulaMultiSet. (* and this *)
@@ -27,7 +27,7 @@ Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
   apply Oplus_R_2...
 Defined.
 
-(* EXAMPLE OF IMPOSSIBLE INTERNAL CHOICE
+(* EXAMPLE OF IMPOSSIBLE INTERNAL CHOICE *)
 Lemma originelle :              
   {P&1, R, G, B&1, !(S⊸A), (E⊸A)&1, (P⊸M)&1,(R⊸1)&(R⊸E), (G⊸1)⊕(G⊸S), 1⊕((B⊸S)&(B⊸1))  } ⊢ A ⊕ M .
 Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
@@ -40,8 +40,8 @@ Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
   bang_d (S ⊸ A).
   weak_impl_l S A...
   and_l_1 (E ⊸ A) 1.
-  weak_impl_l E A... (* THERE IS TWO A *)
-*)
+  weak_impl_l E A... (* THERE ARE TWO A *)
+Abort.
 
 Lemma originelle :              
   {P&1, R, G, B&1, !(S⊸A), (E⊸A)&1, (P⊸M)&1,(R⊸1)&(R⊸E), (G⊸1)⊕(G⊸S), 1⊕((B⊸S)&(B⊸1))  } ⊢ A ⊕ M .
@@ -84,15 +84,15 @@ Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
     weak_impl_l (R) 1...
     one_l. (* +L in the document but actually 1L *)
     oplus_l 1 ((B ⊸ S) & (B ⊸ 1)).
-    (* PARTIE GAUCHE DE LA BRANCHE DE DROITE *)
-    and_l_2 (P) 1.
-    and_l_2 (B) 1.
-    and_l_2 (E ⊸ A)  1.
-    and_l_2 (P ⊸ M) 1.  
-    repeat one_l. 
-    bang_d (S ⊸ A)... (* !D instead of WL *)
-    weak_impl_l (S) (A)...
-    apply Oplus_R_1...
+    + (* Right left *)
+      and_l_2 (P) 1.
+      and_l_2 (B) 1.
+      and_l_2 (E ⊸ A)  1.
+      and_l_2 (P ⊸ M) 1.  
+      repeat one_l. 
+      bang_d (S ⊸ A)... (* !D instead of WL *)
+      weak_impl_l (S) (A)...
+      apply Oplus_R_1...
     + (* Right right *)
       and_l_2 (B ⊸ S) (B ⊸ 1).
       and_l_1 (B) 1.
@@ -181,12 +181,12 @@ Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
     one_l.
     oplus_l 1 ((B ⊸ S) & (B ⊸ 1)).
     + search_goal 10 ({S, !(S ⊸ A)} ⊢ A ⊕ M).
-      bang_d (S ⊸ A)... (* !D au lieu de WL *)
+      bang_d (S ⊸ A)... (* !D instead of WL *)
       finish_proof_strong.
     + and_l_2 (B ⊸ S) (B ⊸ 1).
       and_l_1 (B) 1.
       Time search_goal 10 ({S, !(S ⊸ A)} ⊢ A ⊕ M).
-      bang_d (S ⊸ A)... (* !D au lieu de WL *)
+      bang_d (S ⊸ A)... (* !D instead of WL *)
       finish_proof_strong.
   Qed.
 
