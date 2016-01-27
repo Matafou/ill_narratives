@@ -14,58 +14,58 @@ Open Scope Emma.
 
 Inductive boolP : Prop := trueP:boolP | falseP:boolP.
 
-Program Fixpoint exists_AtheseA_on_formula 
+Program Fixpoint exists_AtheseA_on_formula
   (cont: forall (e1:env) (f1:formula) (h1: e1 ⊢ f1),boolP)
-  (φl φr:formula)  (e:env) (f:formula) (h: e ⊢ f) {struct h}: boolP := 
+  (φl φr:formula)  (e:env) (f:formula) (h: e ⊢ f) {struct h}: boolP :=
 match h with
-  | Oplus_R_1 Γ p q x =>
+  | Oplus_R_1 _ p q x =>
     if FormulaOrdered.eq_dec p φl
-      then if FormulaOrdered.eq_dec q φr 
+      then if FormulaOrdered.eq_dec q φr
         then cont _ _  x
         else exists_AtheseA_on_formula cont φl φr _ _ x
       else exists_AtheseA_on_formula cont φl φr _ _ x
-  | Oplus_R_2 Γ q p x =>
+  | Oplus_R_2 _ q p x =>
     if FormulaOrdered.eq_dec p φl
-      then if FormulaOrdered.eq_dec q φr 
+      then if FormulaOrdered.eq_dec q φr
         then cont _ _  x
         else exists_AtheseA_on_formula cont φl φr _ _ x
       else exists_AtheseA_on_formula cont φl φr _ _ x
   | Id _ _ p => falseP
-  | Impl_R Γ p q x => exists_AtheseA_on_formula cont φl φr _ _ x
-  | Impl_L Γ Δ Δ' p q r _ _ x x0 => if exists_AtheseA_on_formula cont φl φr _ _ x then trueP else exists_AtheseA_on_formula cont φl φr _ _ x0
-  | Times_R Γ Δ p q _ _ x x0 => if exists_AtheseA_on_formula cont φl φr _ _ x then trueP else exists_AtheseA_on_formula cont φl φr _ _ x0
-  | Times_L Γ p q r _ x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | Impl_R _ p q x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | Impl_L _ Δ Δ' p q r _ _ x x0 => if exists_AtheseA_on_formula cont φl φr _ _ x then trueP else exists_AtheseA_on_formula cont φl φr _ _ x0
+  | Times_R _ Δ p q _ _ x x0 => if exists_AtheseA_on_formula cont φl φr _ _ x then trueP else exists_AtheseA_on_formula cont φl φr _ _ x0
+  | Times_L _ p q r _ x => exists_AtheseA_on_formula cont φl φr _ _ x
   | One_R _ _ => falseP
-  | One_L Γ p _ x => exists_AtheseA_on_formula cont φl φr _ _ x
-  | And_R Γ p q x x0 => if exists_AtheseA_on_formula cont φl φr _ _ x then trueP else exists_AtheseA_on_formula cont φl φr _ _ x0
-  | And_L_1 Γ p q r _ x => exists_AtheseA_on_formula cont φl φr _ _ x
-  | And_L_2 Γ p q r _ x => exists_AtheseA_on_formula cont φl φr _ _ x
-  | Oplus_L Γ p q r _ x x0 => if exists_AtheseA_on_formula cont φl φr _ _ x then trueP else exists_AtheseA_on_formula cont φl φr _ _ x0
-  | T_ Γ => falseP
-  | Zero_ Γ p x => falseP
-  | Bang_D Γ p q _ x => exists_AtheseA_on_formula cont φl φr _ _ x
-  | Bang_C Γ p q _ x => exists_AtheseA_on_formula cont φl φr _ _ x
-  | Bang_W Γ p q _ x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | One_L _ p _ x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | And_R _ p q x x0 => if exists_AtheseA_on_formula cont φl φr _ _ x then trueP else exists_AtheseA_on_formula cont φl φr _ _ x0
+  | And_L_1 _ p q r _ x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | And_L_2 _ p q r _ x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | Oplus_L _ p q r _ x x0 => if exists_AtheseA_on_formula cont φl φr _ _ x then trueP else exists_AtheseA_on_formula cont φl φr _ _ x0
+  | T_ _ => falseP
+  | Zero_ _ p x => falseP
+  | Bang_D _ p q _ x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | Bang_C _ p q _ x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | Bang_W _ p q _ x => exists_AtheseA_on_formula cont φl φr _ _ x
 end.
 
 
 Eval vm_compute in exists_AtheseA_on_formula (fun _ _ _ => trueP) A M _ _ emma_orig.originelle.
 Eval vm_compute in exists_AtheseA_on_formula (fun _ _ _ => trueP) A M _ _ emma_orig.simpl_ex.
 
-Lemma exists_AtheseA_on_formula_proof_eq_compat : 
-  ∀ f1 f2 Γ Γ' φ (h1:Γ⊢φ) (h2:Γ'⊢φ), 
+Lemma exists_AtheseA_on_formula_proof_eq_compat :
+  ∀ f1 f2 Γ Γ' φ (h1:Γ⊢φ) (h2:Γ'⊢φ),
   Proof_eq.eq h1 h2 ->
 exists_AtheseA_on_formula (fun _ _ _ => trueP) f1 f2 _ _ h1 = exists_AtheseA_on_formula (fun _ _ _ => trueP) f1 f2 _ _ h2.
   Proof.
     intros f1 f2 Γ Γ' φ h1 h2 H.
     induction H;simpl.
 
-    Focus.    
+    Focus.
     reflexivity.
 
     Focus.
-    auto.    
-  
+    auto.
+
     Focus.
     rewrite IHeq1;rewrite IHeq2;reflexivity.
 
@@ -115,8 +115,8 @@ exists_AtheseA_on_formula (fun _ _ _ => trueP) f1 f2 _ _ h1 = exists_AtheseA_on_
     rewrite IHeq;reflexivity.
   Qed.
 
-Lemma exists_AtheseA_on_formula_proof_eq_pre_morph_compat : 
-  ∀ f1 f2 Γ Γ' φ (h1:Γ⊢φ) (h2:Γ==Γ'), 
+Lemma exists_AtheseA_on_formula_proof_eq_pre_morph_compat :
+  ∀ f1 f2 Γ Γ' φ (h1:Γ⊢φ) (h2:Γ==Γ'),
   exists_AtheseA_on_formula (fun _ _ _ => trueP) f1 f2 _ _ h1 = exists_AtheseA_on_formula (fun _ _ _ => trueP) f1 f2 _ _ (ILL_proof_pre_morph φ Γ Γ' h2 h1).
 Proof.
   intros f1 f2 Γ Γ' φ h1 h2.
@@ -149,7 +149,7 @@ Definition all_proofs_of env gamma := (forall (p:env⊢gamma), exists_AtheseA_on
 Definition no_proof_for env gamma := (forall (p:env⊢gamma), False).
 Hint Unfold all_proofs_of no_proof_for : proof.
 
-Lemma all_proofs_of_pre_morph : forall φ Γ Γ',  
+Lemma all_proofs_of_pre_morph : forall φ Γ Γ',
   all_proofs_of Γ φ -> eq_bool Γ Γ' = true -> all_proofs_of Γ' φ.
 Proof.
   unfold all_proofs_of.
@@ -164,11 +164,11 @@ Qed.
 Hint Resolve all_proofs_of_pre_morph : proof.
 
 
-Lemma all_proofs_of_pre_morph' : 
-  forall φ Γ Γ', all_proofs_of Γ φ -> eq_bool Γ Γ' = true -> 
+Lemma all_proofs_of_pre_morph' :
+  forall φ Γ Γ', all_proofs_of Γ φ -> eq_bool Γ Γ' = true ->
     forall (p:Γ'⊢φ), exists_AtheseA_on_formula (fun _ _ _ => trueP) A M _ _ p =trueP.
 Proof.
-  intros φ Γ Γ' H H0 p.  
+  intros φ Γ Γ' H H0 p.
   eapply all_proofs_of_pre_morph;eassumption.
 Qed.
 Hint Resolve all_proofs_of_pre_morph' : proof.
@@ -186,21 +186,23 @@ Qed.
 Hint Extern 0 ( _ ==  _ ) => apply eq_bool_correct;vm_compute;reflexivity : proof.
 
 
-Ltac clean p := 
+Tactic Notation "complete" tactic1(t) := t; fail.
+
+Ltac clean p :=
   try complete eauto 2 with proof;
     (dependent simple inversion p||inversion p);clear p;subst;try discriminate;simpl.
 
 
-Ltac decompose_add := 
-    repeat (match goal with 
-            | H : _ ∈ (_ :: _) |- _  => 
+Ltac decompose_add :=
+    repeat (match goal with
+            | H : _ ∈ (_ :: _) |- _  =>
               destruct (mem_destruct _ _ _ H);clear H
-            | H : _ ∈ ∅ |- _ => 
+            | H : _ ∈ ∅ |- _ =>
               rewrite empty_no_mem in H;discriminate
             | H : ILLVarInt.MILL.eq _ _ |- _ => apply eq_is_eq in H;subst
           end).
 
-Ltac var_not_in_env_tac_simple n' H := 
+Ltac var_not_in_env_tac_simple n' H :=
 elim unusable_var_in_env with (n:=n') (1:=H);
 [
   vm_compute;reflexivity |
@@ -211,21 +213,21 @@ elim unusable_var_in_env with (n:=n') (1:=H);
 ]
 .
 
-Ltac var_not_in_env_tac_aux H env := 
-  match env with 
+Ltac var_not_in_env_tac_aux H env :=
+  match env with
     | Proposition ?n::?env' =>
-      (complete (var_not_in_env_tac_simple n H)) || 
+      (complete (var_not_in_env_tac_simple n H)) ||
         var_not_in_env_tac_aux H env'
     | _ :: ?env' =>  var_not_in_env_tac_aux H env'
   end.
 
-Ltac var_not_in_env_tac H := 
-  match type of H with 
-    | ?env ⊢ _ => 
+Ltac var_not_in_env_tac H :=
+  match type of H with
+    | ?env ⊢ _ =>
       var_not_in_env_tac_aux H env
   end.
-Ltac is_var_env gamma := 
-  match gamma with 
+Ltac is_var_env gamma :=
+  match gamma with
     | empty => fail 1
     | _ :: _ => fail 1
     | _ \ _ => fail 1
@@ -233,25 +235,25 @@ Ltac is_var_env gamma :=
     | _ => idtac
   end.
 
-Ltac finish := 
+Ltac finish :=
   simpl;try reflexivity;
     try discriminate;
     try complete auto with proof;
     try autorewrite with proof;
       try complete (apply False_ind;auto with proof);
-      match goal with 
-        |- (if ?e then trueP else trueP ) = trueP => 
+      match goal with
+        |- (if ?e then trueP else trueP ) = trueP =>
           case e;reflexivity
-        | i:?e⊢Proposition ?n' |- _ => 
+        | i:?e⊢Proposition ?n' |- _ =>
           elim var_in_env with (n:=n') (3:=i);vm_compute;reflexivity
         | H: ?env⊢?g |- _ =>
           complete var_not_in_env_tac H
-        | H : ?s == ?t |- _ => 
+        | H : ?s == ?t |- _ =>
           (complete (apply eq_bool_complete in H;vm_compute in H;
             discriminate))|| (progress repeat (rewrite H in * ))
       end.
 
-Ltac tutu := 
+Ltac tutu :=
   simpl;try reflexivity;
     try discriminate;
       (* try complete auto with proof; *)
@@ -259,26 +261,26 @@ Ltac tutu :=
           match goal with
             | H : ?t = ?t |- _ => clear H
             | H : ?t == ?t |- _ => clear H
-            | H:_ :: _ == _ ∪ _ |- _ => 
+            | H:_ :: _ == _ ∪ _ |- _ =>
               symmetry in H
-            | H: _ ∪ _ == _ :: _ |- _ => 
+            | H: _ ∪ _ == _ :: _ |- _ =>
               let delta := fresh "Δ" in
-                let h1 := fresh "H" in 
-                  let h2 := fresh "H" in 
-                    destruct (union_decompose _ _ _ _ H) 
+                let h1 := fresh "H" in
+                  let h2 := fresh "H" in
+                    destruct (union_decompose _ _ _ _ H)
                       as [[delta [h1 h2]]|[delta [h1 h2]]];clear H
-            | H: empty == _ ∪ _ |- _ => 
+            | H: empty == _ ∪ _ |- _ =>
               symmetry in H
-            | H: _ ∪ _ == empty |- _ => 
-              let h1 := fresh "H" in 
-                let h2 := fresh "H" in 
+            | H: _ ∪ _ == empty |- _ =>
+              let h1 := fresh "H" in
+                let h2 := fresh "H" in
                   destruct (union_empty_decompose _ _  H) as [h1 h2];
                     clear H
-            | H : ?t == _ |- _ => 
+            | H : ?t == _ |- _ =>
               is_var_env t;
-              match goal with 
-                | H': context [t] |- _ => 
-                  match H' with 
+              match goal with
+                | H': context [t] |- _ =>
+                  match H' with
                     | H => fail 1
                     | _ => fail 2
                   end
@@ -287,49 +289,49 @@ Ltac tutu :=
             | H: ILLVarInt.MILL.eq _ _ |- _ => apply eq_is_eq in H; try (injection H;clear H;intros;subst)
 
             | H: _ ∈ _ |- _ => complete (vm_compute in H;discriminate)
-            | H: _ ∈ (add _ _) |- _ =>   
+            | H: _ ∈ (add _ _) |- _ =>
               destruct (mem_destruct _ _ _ H);clear H
             (* | H : ?s == ?t |- _ =>  *)
             (*   (complete (apply eq_bool_complete in H;vm_compute in H; *)
             (*     discriminate))|| (progress repeat (rewrite H in * )) *)
-            | H : ?s == ?t |- _ => 
+            | H : ?s == ?t |- _ =>
               (progress repeat (rewrite H in * ))
-            | H: context C [ remove ?f ?env ] |- _ => 
-              match env with 
-                context C' [ add f ?env' ] => 
-                let e := context C' [ env' ] in 
+            | H: context C [ remove ?f ?env ] |- _ =>
+              match env with
+                context C' [ add f ?env' ] =>
+                let e := context C' [ env' ] in
                   setoid_replace (remove f env) with e in H by (apply eq_bool_correct;vm_compute;reflexivity)
               end
-            | H:(?x ⊸ ?y) = _  |- _ => 
+            | H:(?x ⊸ ?y) = _  |- _ =>
               try discriminate H;injection H;clear H;intros;subst
-            | H: (_ ⊕ _) = _  |- _ => 
+            | H: (_ ⊕ _) = _  |- _ =>
               try discriminate H;injection H;clear H;intros;subst
-            | H:(_ ⊗ _) = _ |- _  => 
+            | H:(_ ⊗ _) = _ |- _  =>
               try discriminate H;injection H;clear H;intros;subst
-            | H: _  & _ = _  |- _  => 
+            | H: _  & _ = _  |- _  =>
               try discriminate H;injection H;clear H;intros;subst
-            | H: _ = (?x ⊸ ?y) |- _ => 
+            | H: _ = (?x ⊸ ?y) |- _ =>
               try discriminate H;injection H;clear H;intros;subst
-            | H: _ = (_ ⊕ _) |- _ => 
+            | H: _ = (_ ⊕ _) |- _ =>
               try discriminate H;injection H;clear H;intros;subst
-            | H: _ = (_ ⊗ _) |- _  => 
+            | H: _ = (_ ⊗ _) |- _  =>
               try discriminate H;injection H;clear H;intros;subst
-            | H: _ = _  & _ |- _  => 
+            | H: _ = _  & _ |- _  =>
               try discriminate H;injection H;clear H;intros;subst
-            | H: ?delta ⊢ _, H' : ?delta == ∅ |- _ => 
+            | H: ?delta ⊢ _, H' : ?delta == ∅ |- _ =>
               apply False_ind;rewrite H' in H;clear - H;clean H;finish
             | H: ?env⊢?g |- _ =>
               (* try complete var_not_in_env_tac H;  *)
-                match env with 
-                  | context C' [?env' \ ?f] => 
-                    match env' with 
-                      | context C [add f ?env''] => 
-                        let e' := context C [ env'' ] in 
-                          let e := context C' [ e' ] in 
+                match env with
+                  | context C' [?env' \ ?f] =>
+                    match env' with
+                      | context C [add f ?env''] =>
+                        let e' := context C [ env'' ] in
+                          let e := context C' [ e' ] in
                             assert (heq: e == env) by (apply eq_bool_correct;vm_compute;reflexivity);
                               symmetry in heq;
-                                let h := fresh "H" in 
-                                  let i' := fresh "i" in 
+                                let h := fresh "H" in
+                                  let i' := fresh "i" in
                                     assert (h:(exists i':ILL_proof e g, Proof_eq.eq H i')) by (exists (ILL_proof_pre_morph _ _ _ heq H);
                                       apply Proof_eq.sym;
                                     apply Proof_eq.eq_pre_morph);
@@ -338,19 +340,19 @@ Ltac tutu :=
               clear H h heq
 end
 end
-            | H: ?t == ?t', i: ?env⊢?f |- _ => 
-              match env with 
-                | context [ t ] => 
-                  let f_env := 
+            | H: ?t == ?t', i: ?env⊢?f |- _ =>
+              match env with
+                | context [ t ] =>
+                  let f_env :=
                     match eval pattern t in env with
                       | ?f _ => f
                     end
                     in
-                    let env'0 := constr:(f_env t')  in 
-                      let env' := eval cbv beta iota in env'0 in 
-                        let h := fresh "H" in 
-                          let i' := fresh "i" in 
-                            let heq := fresh "heq" in 
+                    let env'0 := constr:(f_env t')  in
+                      let env' := eval cbv beta iota in env'0 in
+                        let h := fresh "H" in
+                          let i' := fresh "i" in
+                            let heq := fresh "heq" in
                               assert (h:exists i': env'⊢f, Proof_eq.eq i i');[
                                 assert (heq:env'==env) by (rewrite H;reflexivity);
                                   symmetry in heq;
@@ -368,7 +370,7 @@ end
 
 Ltac one_step p :=   clean p; (repeat tutu);try finish;auto with proof;eauto 3 with proof.
 
-Ltac unusable_implies_tac n' f H := 
+Ltac unusable_implies_tac n' f H :=
   apply unusable_implies with (1:=H) (n:=n') (φ:=f);
     [
       vm_compute;reflexivity |
@@ -482,9 +484,9 @@ Hint Resolve aux_26 : proof.
 Lemma aux_27 : no_proof_for ({1, P ⊸ M, A, P}) (A ⊕ M).
 Proof.
   intros p; one_step p;eauto with proof.
-(* 
+(*
    {P ⊸ M, A, P} ⊢ A ⊕ M
-   {1, P ⊸ M, A, P} ⊢ A 
+   {1, P ⊸ M, A, P} ⊢ A
 *)
 Qed.
 Hint Resolve aux_27 : proof.
@@ -545,11 +547,11 @@ Proof.
   intro p;unusable_implies_tac 7%nat A p.
 Qed.
 Hint Resolve aux_35 : proof.
- 
+
 Lemma aux_36 : no_proof_for ({A, P, (E ⊸ A) & 1, (P ⊸ M) & 1}) A.
 Proof.
   intros p; one_step p;eauto with proof.
-(* 
+(*
 {E ⊸ A, A, P, (P ⊸ M) & 1} ⊢ A
 *)
 Qed.
@@ -586,7 +588,7 @@ Hint Resolve aux_43 : proof.
 Lemma aux_44 : no_proof_for ({M, V ⊸ A, V}) (A ⊕ M).
 Proof.
   intros p; one_step p;eauto with proof.
-(* 
+(*
    {M, V ⊸ A, V} ⊢ M
 *)
 Qed.
@@ -624,7 +626,7 @@ Proof.
 (*
  {E ⊸ A, M, V ⊸ A, V} ⊢ A ⊕ M
  {1, M, V ⊸ A, V} ⊢ A ⊕ M
- {M, V ⊸ A, (E ⊸ A) & 1, V} ⊢ M 
+ {M, V ⊸ A, (E ⊸ A) & 1, V} ⊢ M
 *)
 Qed.
 Hint Resolve aux_50 : proof.
@@ -679,9 +681,9 @@ Lemma aux_57 : no_proof_for  ({1, P ⊸ M, V ⊸ A, P, V}) (A ⊕ M).
 Proof.
   intros p; one_step p;eauto with proof.
 (*
-{1, V ⊸ A, P, V} ⊢ P 
+{1, V ⊸ A, P, V} ⊢ P
 {P ⊸ M, V ⊸ A, P, V} ⊢ A ⊕ M
-{1, P ⊸ M, V ⊸ A, P, V} ⊢ A 
+{1, P ⊸ M, V ⊸ A, P, V} ⊢ A
 {1, P ⊸ M, V ⊸ A, P, V} ⊢ M
 *)
 Qed.
@@ -787,7 +789,7 @@ Lemma aux_70 : no_proof_for ({V ⊸ A, P, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) A.
 Proof.
   intros p; one_step p;eauto with proof.
 (*
-   {E ⊸ A, V ⊸ A, P, (P ⊸ M) & 1, V} ⊢ A     
+   {E ⊸ A, V ⊸ A, P, (P ⊸ M) & 1, V} ⊢ A
 *)
 Qed.
 Hint Resolve aux_70 : proof.
@@ -892,7 +894,7 @@ Lemma aux_86 : no_proof_for ({M, (V ⊸ A) & 1, (E ⊸ A) & 1, V}) (A ⊕ M).
 Proof.
   intros p; one_step p;eauto with proof.
 (*
-{E ⊸ A, M, (V ⊸ A) & 1, V} ⊢ A ⊕M 
+{E ⊸ A, M, (V ⊸ A) & 1, V} ⊢ A ⊕M
 {1, M, (V ⊸ A) & 1, V} ⊢ A ⊕ M
 {M, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ M
 *)
@@ -1077,7 +1079,7 @@ Proof.
 Qed.
 Hint Resolve aux_201 : proof.
 
-Lemma aux_202 : no_proof_for ({E ⊸ A, A, (P ⊸ M) & 1}) (A ⊕ M). 
+Lemma aux_202 : no_proof_for ({E ⊸ A, A, (P ⊸ M) & 1}) (A ⊕ M).
 Proof.
   intro p;unusable_implies_tac 7%nat A p.
 Qed.
@@ -1098,7 +1100,7 @@ Hint Resolve aux_204 : proof.
 Lemma aux_205 : all_proofs_of ({1, A, (P ⊸ M) & 1}) (A ⊕ M).
 Proof.
   intros p; one_step p;eauto with proof.
-(* 
+(*
 {P ⊸ M, 1, A} ⊢ A ⊕ M
  *)
 Qed.
@@ -1114,7 +1116,7 @@ Hint Resolve aux_206 : proof.
 Lemma aux_207 : all_proofs_of ({A, (E ⊸ A) & 1}) (A ⊕ M).
 Proof.
   intros p; one_step p;eauto with proof.
-(* 
+(*
    {E ⊸ A, A} ⊢ A ⊕ M
 *)
 Qed.
@@ -1130,8 +1132,8 @@ Hint Resolve aux_208 : proof.
 Lemma aux_209 : all_proofs_of ({1, A, (E ⊸ A) & 1}) (A ⊕ M).
 Proof.
   intros p; one_step p;eauto with proof.
-(* 
-   {A, (E ⊸ A) & 1} ⊢ A ⊕ M + 
+(*
+   {A, (E ⊸ A) & 1} ⊢ A ⊕ M +
    {E ⊸ A, 1, A} ⊢ A ⊕ M - e
 
 *)
@@ -1145,7 +1147,7 @@ Proof.
 (*
 {E ⊸ A, A, (P ⊸ M) & 1} ⊢ A ⊕ M - e
 {P ⊸ M, A, (E ⊸ A) & 1} ⊢ A ⊕ M - e
-{1, A, (P ⊸ M) & 1} ⊢ A ⊕ M  + 
+{1, A, (P ⊸ M) & 1} ⊢ A ⊕ M  +
 {1, A, (E ⊸ A) & 1} ⊢ A ⊕ M  +
 *)
 Qed.
@@ -1182,7 +1184,7 @@ Proof.
 (*
 {1, P ⊸ M, A} ⊢ A
 *)
-Qed. 
+Qed.
 Hint Resolve aux_215 : proof.
 
 Lemma aux_216 : no_proof_for ({P ⊸ M, A, P & 1}) (A ⊕ M).
@@ -1230,9 +1232,9 @@ Lemma aux_221 : all_proofs_of ({P ⊸ M, A, P & 1, (E ⊸ A) & 1}) (A ⊕ M).
 Proof.
   intros p; one_step p;eauto with proof.
 (*
-{E ⊸ A, P ⊸ M, A, P & 1} ⊢ A ⊕ M  - e 
+{E ⊸ A, P ⊸ M, A, P & 1} ⊢ A ⊕ M  - e
 {1, P ⊸ M, A, (E ⊸ A) & 1} ⊢ A ⊕ M - e
-{1, P ⊸ M, A, P & 1} ⊢ A ⊕ M - 
+{1, P ⊸ M, A, P & 1} ⊢ A ⊕ M -
 *)
 Qed.
 Hint Resolve aux_221 : proof.
@@ -1317,7 +1319,7 @@ Lemma aux_231 : all_proofs_of ({1, A, P & 1, (P ⊸ M) & 1}) (A ⊕ M).
 Proof.
   intros p; one_step p;eauto with proof.
 (*
-{A, P & 1, (P ⊸ M) & 1} ⊢ A ⊕ M + 
+{A, P & 1, (P ⊸ M) & 1} ⊢ A ⊕ M +
 {1, 1, A, P & 1} ⊢ A ⊕ M +
 *)
 Qed.
@@ -1350,7 +1352,7 @@ Lemma aux_235 : all_proofs_of ({1, A, P & 1, (E ⊸ A) & 1}) (A ⊕ M).
 Proof.
   intros p; one_step p;eauto with proof.
 (*
- {A, P & 1, (E ⊸ A) & 1} ⊢ A ⊕ M + 
+ {A, P & 1, (E ⊸ A) & 1} ⊢ A ⊕ M +
  {E ⊸ A, 1, A, P & 1} ⊢ A ⊕ M - e
 *)
 Qed.
@@ -1360,12 +1362,12 @@ Hint Rewrite aux_235 : proof.
 Lemma aux_236 : all_proofs_of ({A, P & 1, (E ⊸ A) & 1, (P ⊸ M) & 1}) (A ⊕ M).
 Proof.
   intros p; one_step p;eauto with proof.
-(* 
+(*
 {E ⊸ A, A, P & 1, (P ⊸ M) & 1} ⊢ A ⊕ M       - e
-{P ⊸ M, A, P & 1, (E ⊸ A) & 1} ⊢ A ⊕ M       + 
+{P ⊸ M, A, P & 1, (E ⊸ A) & 1} ⊢ A ⊕ M       +
 {1, A, (E ⊸ A) & 1, (P ⊸ M) & 1} ⊢ A ⊕ M     +
 {1, A, P & 1, (P ⊸ M) & 1} ⊢ A ⊕ M           +
-{1, A, P & 1, (E ⊸ A) & 1} ⊢ A ⊕ M           + 
+{1, A, P & 1, (E ⊸ A) & 1} ⊢ A ⊕ M           +
 *)
 Qed.
 Hint Resolve aux_236 : proof.
@@ -1426,8 +1428,8 @@ Lemma aux_245 : no_proof_for ({1, P ⊸ M, P & 1, V}) V.
 Proof.
   intro p;one_step p;eauto with proof.
 (*
-{P ⊸ M, P & 1, V} ⊢ V        
-{1, 1, P ⊸ M, V} ⊢ V         e 
+{P ⊸ M, P & 1, V} ⊢ V
+{1, 1, P ⊸ M, V} ⊢ V         e
 *)
 Qed.
 Hint Resolve aux_245 : proof.
@@ -1435,7 +1437,7 @@ Hint Resolve aux_245 : proof.
 Lemma aux_246 : no_proof_for ({P ⊸ M, P & 1, (E ⊸ A) & 1, V}) V.
 Proof.
   intros p; one_step p;eauto with proof.
-(* 
+(*
 {E ⊸ A, P ⊸ M, P & 1, V} ⊢ V     e
 {1, P ⊸ M, (E ⊸ A) & 1, V} ⊢ V   e
 {1, P ⊸ M, P & 1, V} ⊢ V          e
@@ -1562,7 +1564,7 @@ Proof.
   intros p; one_step p;eauto with proof.
 (*
 {E ⊸ A, P ⊸ M, V ⊸ A, V} ⊢ A ⊕ M  e
-{1, P ⊸ M, V ⊸ A, V} ⊢ A ⊕ M 
+{1, P ⊸ M, V ⊸ A, V} ⊢ A ⊕ M
 {P ⊸ M, V ⊸ A, (E ⊸ A) & 1, V} ⊢ A  e
 {P ⊸ M, V ⊸ A, (E ⊸ A) & 1, V} ⊢ M  e
 *)
@@ -1629,7 +1631,7 @@ Proof.
 (*
 *{1, V ⊸ A, P & 1, V} ⊢ P   e
 {P ⊸ M, V ⊸ A, P & 1, V} ⊢ A ⊕ M
-{1, P ⊸ M, V ⊸ A, P & 1, V} ⊢ A 
+{1, P ⊸ M, V ⊸ A, P & 1, V} ⊢ A
 {1, P ⊸ M, V ⊸ A, P & 1, V} ⊢ M  e
 *)
 Qed.
@@ -1640,7 +1642,7 @@ Proof.
   intros p; one_step p;eauto with proof.
 (*
 {V ⊸ A, P & 1, (E ⊸ A) & 1, V} ⊢ P              e
-{V ⊸ A, P & 1, V} ⊢ P                           e 
+{V ⊸ A, P & 1, V} ⊢ P                           e
 {P ⊸ M, P & 1, (E ⊸ A) & 1, V} ⊢ V
 {P ⊸ M, P & 1, V} ⊢ V
 {P ⊸ M, V} ⊢ V                                  e
@@ -1662,13 +1664,13 @@ Proof.
 (*
 {A, (P ⊸ M) & 1} ⊢ A ⊕ M                      +
 {A, (E ⊸ A) & 1, (P ⊸ M) & 1} ⊢ A ⊕ M           +
-{A, (E ⊸ A) & 1} ⊢ A ⊕ M                        + 
+{A, (E ⊸ A) & 1} ⊢ A ⊕ M                        +
 {A, P & 1, (E ⊸ A) & 1, (P ⊸ M) & 1} ⊢ A ⊕ M    +
 {A, P & 1, (E ⊸ A) & 1} ⊢ A ⊕ M                  +
 {A, P & 1} ⊢ A ⊕ M                               +
 {A, P & 1, (P ⊸ M) & 1} ⊢ A ⊕ M                  +
 {E ⊸ A, V ⊸ A, P & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M   - e
-*{P ⊸ M, V ⊸ A, P & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M   - 
+*{P ⊸ M, V ⊸ A, P & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M   -
 {1, V ⊸ A, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M +
 {1, V ⊸ A, P & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M       +
 {1, V ⊸ A, P & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M       +
@@ -1676,7 +1678,7 @@ Proof.
 *)
 Qed.
 Hint Resolve aux_112 : proof.
-Hint Rewrite aux_112 : proof. 
+Hint Rewrite aux_112 : proof.
 *)
 
 Lemma aux_1 : all_proofs_of ({A}) (A ⊕ M).
@@ -1840,9 +1842,9 @@ Hint Resolve aux_26 : proof.
 Lemma aux_27 : no_proof_for ({1, P ⊸ M, A, P}) (A ⊕ M).
 Proof.
   intros p; one_step p.
-(* 
+(*
    {P ⊸ M, A, P} ⊢ A ⊕ M
-   {1, P ⊸ M, A, P} ⊢ A 
+   {1, P ⊸ M, A, P} ⊢ A
 *)
 Qed.
 Hint Resolve aux_27 : proof.
@@ -1876,7 +1878,7 @@ Hint Resolve aux_31 : proof.
 Lemma aux_32 : no_proof_for ({A, P, (P ⊸ M) & 1}) (A ⊕ M).
 Proof.
   intros p; one_step p.
-(* 
+(*
    ({A, P, (P ⊸ M) & 1}) A
 *)
 Qed.
@@ -1909,7 +1911,7 @@ Proof.
   intros p; one_step p.
 (*
 {E ⊸ A, A, P, (P ⊸ M) & 1} ⊢ A ⊕ M
-{P ⊸ M, A, P, (E ⊸ A) & 1} ⊢ A ⊕ M  
+{P ⊸ M, A, P, (E ⊸ A) & 1} ⊢ A ⊕ M
 {1, A, P, (P ⊸ M) & 1} ⊢ A ⊕ M
 {A, P, (E ⊸ A) & 1, (P ⊸ M) & 1} ⊢ A
 *)
@@ -1940,7 +1942,7 @@ Hint Resolve aux_43 : proof.
 Lemma aux_44 : no_proof_for ({M, V ⊸ A, V}) (A ⊕ M).
 Proof.
   intros p; one_step p.
-(* 
+(*
    {M, V ⊸ A, V} ⊢ M
 *)
 Qed.
@@ -1982,7 +1984,7 @@ Proof.
 (*
  {E ⊸ A, M, V ⊸ A, V} ⊢ A ⊕ M
  {1, M, V ⊸ A, V} ⊢ A ⊕ M
- {M, V ⊸ A, (E ⊸ A) & 1, V} ⊢ M 
+ {M, V ⊸ A, (E ⊸ A) & 1, V} ⊢ M
 *)
 Qed.
 Hint Resolve aux_50 : proof.
@@ -2059,9 +2061,9 @@ Lemma aux_57 : no_proof_for  ({1, P ⊸ M, V ⊸ A, P, V}) (A ⊕ M).
 Proof.
   intros p; one_step p.
 (*
-{1, V ⊸ A, P, V} ⊢ P 
+{1, V ⊸ A, P, V} ⊢ P
 {P ⊸ M, V ⊸ A, P, V} ⊢ A ⊕ M
-{1, P ⊸ M, V ⊸ A, P, V} ⊢ A 
+{1, P ⊸ M, V ⊸ A, P, V} ⊢ A
 {1, P ⊸ M, V ⊸ A, P, V} ⊢ M
 {1, P ⊸ M, P, V} ⊢ V
 *)
@@ -2191,15 +2193,15 @@ Lemma aux_73 : no_proof_for ({V ⊸ A, P, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) (A �
 Proof.
   intros p; one_step p.
 (*
-{P, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ V           
-{P, (P ⊸ M) & 1, V} ⊢ V                       
+{P, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ V
+{P, (P ⊸ M) & 1, V} ⊢ V
 {A, P, (E ⊸ A) & 1, (P ⊸ M) & 1} ⊢ A ⊕ M
 {A, P, (P ⊸ M) & 1} ⊢ A ⊕ M
 {P ⊸ M, V ⊸ A, P, (E ⊸ A) & 1, V} ⊢ A ⊕ M
 {E ⊸ A, V ⊸ A, P, (P ⊸ M) & 1, V} ⊢ A ⊕ M
 {1, V ⊸ A, P, (P ⊸ M) & 1, V} ⊢ A ⊕ M
 {V ⊸ A, P, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A
-{V ⊸ A, P, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ M    e 
+{V ⊸ A, P, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ M    e
 *)
 Qed.
 Hint Resolve aux_73 : proof.
@@ -2269,7 +2271,7 @@ Lemma aux_86 : no_proof_for ({M, (V ⊸ A) & 1, (E ⊸ A) & 1, V}) (A ⊕ M).
 Proof.
   intros p; one_step p.
 (*
-{E ⊸ A, M, (V ⊸ A) & 1, V} ⊢ A ⊕M 
+{E ⊸ A, M, (V ⊸ A) & 1, V} ⊢ A ⊕M
 {1, M, (V ⊸ A) & 1, V} ⊢ A ⊕ M
 {M, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ M
 *)
@@ -2456,7 +2458,7 @@ Qed.
 Hint Resolve aux_201 : proof.
 Hint Rewrite aux_201 : proof.
 
-Lemma aux_202 : no_proof_for ({E ⊸ A, A, (P ⊸ M) & 1}) (A ⊕ M). 
+Lemma aux_202 : no_proof_for ({E ⊸ A, A, (P ⊸ M) & 1}) (A ⊕ M).
 Proof.
   intro p;unusable_implies_tac 7%nat A p.
 Qed.
@@ -2477,7 +2479,7 @@ Hint Resolve aux_204 : proof.
 Lemma aux_205 : all_proofs_of ({1, A, (P ⊸ M) & 1}) (A ⊕ M).
 Proof.
   intros p; one_step p.
-(* 
+(*
 {P ⊸ M, 1, A} ⊢ A ⊕ M
  *)
 Qed.
@@ -2493,7 +2495,7 @@ Hint Resolve aux_206 : proof.
 Lemma aux_207 : all_proofs_of ({A, (E ⊸ A) & 1}) (A ⊕ M).
 Proof.
   intros p; one_step p.
-(* 
+(*
    {E ⊸ A, A} ⊢ A ⊕ M
 *)
 Qed.
@@ -2509,8 +2511,8 @@ Hint Resolve aux_208 : proof.
 Lemma aux_209 : all_proofs_of ({1, A, (E ⊸ A) & 1}) (A ⊕ M).
 Proof.
   intros p; one_step p.
-(* 
-   {A, (E ⊸ A) & 1} ⊢ A ⊕ M + 
+(*
+   {A, (E ⊸ A) & 1} ⊢ A ⊕ M +
    {E ⊸ A, 1, A} ⊢ A ⊕ M - e
 *)
 Qed.
@@ -2523,7 +2525,7 @@ Proof.
 (*
 {E ⊸ A, A, (P ⊸ M) & 1} ⊢ A ⊕ M - e
 {P ⊸ M, A, (E ⊸ A) & 1} ⊢ A ⊕ M - e
-{1, A, (P ⊸ M) & 1} ⊢ A ⊕ M  + 
+{1, A, (P ⊸ M) & 1} ⊢ A ⊕ M  +
 {1, A, (E ⊸ A) & 1} ⊢ A ⊕ M  +
 *)
 Qed.
@@ -2560,7 +2562,7 @@ Proof.
 (*
 {1, P ⊸ M, A} ⊢ A
 *)
-Qed. 
+Qed.
 Hint Resolve aux_215 : proof.
 
 Lemma aux_216 : no_proof_for ({P ⊸ M, A, P & 1}) (A ⊕ M).
@@ -2609,9 +2611,9 @@ Lemma aux_221 : all_proofs_of ({P ⊸ M, A, P & 1, (E ⊸ A) & 1}) (A ⊕ M).
 Proof.
   intros p; one_step p;try complete (elim aux_30;eauto with proof).
 (*
-{E ⊸ A, P ⊸ M, A, P & 1} ⊢ A ⊕ M  - e 
+{E ⊸ A, P ⊸ M, A, P & 1} ⊢ A ⊕ M  - e
 {1, P ⊸ M, A, (E ⊸ A) & 1} ⊢ A ⊕ M - e
-{1, P ⊸ M, A, P & 1} ⊢ A ⊕ M - 
+{1, P ⊸ M, A, P & 1} ⊢ A ⊕ M -
 *)
 Qed.
 Hint Resolve aux_221 : proof.
@@ -2697,11 +2699,11 @@ Hint Rewrite aux_230 : proof.
 
 Lemma aux_231 : all_proofs_of ({1, A, P & 1, (P ⊸ M) & 1}) (A ⊕ M).
 Proof.
-  intros p; one_step p; 
+  intros p; one_step p;
     try complete (elim aux_34;eauto with proof);
       try complete (elim aux_220;eauto with proof).
 (*
-{A, P & 1, (P ⊸ M) & 1} ⊢ A ⊕ M + 
+{A, P & 1, (P ⊸ M) & 1} ⊢ A ⊕ M +
 {1, 1, A, P & 1} ⊢ A ⊕ M +
 *)
 Qed.
@@ -2734,7 +2736,7 @@ Lemma aux_235 : all_proofs_of ({1, A, P & 1, (E ⊸ A) & 1}) (A ⊕ M).
 Proof.
   intros p; one_step p.
 (*
- {A, P & 1, (E ⊸ A) & 1} ⊢ A ⊕ M + 
+ {A, P & 1, (E ⊸ A) & 1} ⊢ A ⊕ M +
  {E ⊸ A, 1, A, P & 1} ⊢ A ⊕ M - e
 *)
 Qed.
@@ -2744,9 +2746,9 @@ Hint Rewrite aux_235 : proof.
 Lemma aux_236 : all_proofs_of ({A, P & 1, (E ⊸ A) & 1, (P ⊸ M) & 1}) (A ⊕ M).
 Proof.
   intros p; one_step p;try complete (elim aux_37;eauto with proof).
-(* 
+(*
 {E ⊸ A, A, P & 1, (P ⊸ M) & 1} ⊢ A ⊕ M       - e
-{P ⊸ M, A, P & 1, (E ⊸ A) & 1} ⊢ A ⊕ M       + 
+{P ⊸ M, A, P & 1, (E ⊸ A) & 1} ⊢ A ⊕ M       +
 {1, A, (E ⊸ A) & 1, (P ⊸ M) & 1} ⊢ A ⊕ M     +
 {1, A, P & 1, (P ⊸ M) & 1} ⊢ A ⊕ M           +
 *)
@@ -2809,8 +2811,8 @@ Lemma aux_245 : no_proof_for ({1, P ⊸ M, P & 1, V}) V.
 Proof.
   intro p;one_step p.
 (*
-{P ⊸ M, P & 1, V} ⊢ V        
-{1, 1, P ⊸ M, V} ⊢ V         e 
+{P ⊸ M, P & 1, V} ⊢ V
+{1, 1, P ⊸ M, V} ⊢ V         e
 *)
 Qed.
 Hint Resolve aux_245 : proof.
@@ -2818,10 +2820,10 @@ Hint Resolve aux_245 : proof.
 Lemma aux_246 : no_proof_for ({P ⊸ M, P & 1, (E ⊸ A) & 1, V}) V.
 Proof.
   intros p; one_step p.
-(* 
+(*
 {E ⊸ A, P ⊸ M, P & 1, V} ⊢ V     e
 {1, P ⊸ M, (E ⊸ A) & 1, V} ⊢ V   e
-{1, P ⊸ M, P & 1, V} ⊢ V          
+{1, P ⊸ M, P & 1, V} ⊢ V
 *)
 Qed.
 Hint Resolve aux_246 : proof.
@@ -2944,7 +2946,7 @@ Proof.
   intros p; one_step p.
 (*
 {E ⊸ A, P ⊸ M, V ⊸ A, V} ⊢ A ⊕ M  e
-{1, P ⊸ M, V ⊸ A, V} ⊢ A ⊕ M 
+{1, P ⊸ M, V ⊸ A, V} ⊢ A ⊕ M
 {P ⊸ M, V ⊸ A, (E ⊸ A) & 1, V} ⊢ A  e
 {P ⊸ M, V ⊸ A, (E ⊸ A) & 1, V} ⊢ M  e
 *)
@@ -3036,7 +3038,7 @@ Lemma aux_305 : no_proof_for ({P ⊸ M, V ⊸ A, P & 1, V}) (A ⊕ M).
 Proof.
   intros p; one_step p.
 (*
-{P ⊸ M, V ⊸ A, P & 1, V} ⊢ A    
+{P ⊸ M, V ⊸ A, P & 1, V} ⊢ A
 {P ⊸ M, V ⊸ A, P & 1, V} ⊢ M    e
 *)
 Qed.
@@ -3060,7 +3062,7 @@ Proof.
 (*
 {1, V ⊸ A, P & 1, V} ⊢ P   e
 {P ⊸ M, V ⊸ A, P & 1, V} ⊢ A ⊕ M
-{1, P ⊸ M, V ⊸ A, P & 1, V} ⊢ A 
+{1, P ⊸ M, V ⊸ A, P & 1, V} ⊢ A
 {1, P ⊸ M, V ⊸ A, P & 1, V} ⊢ M  e
 *)
 Qed.
@@ -3082,7 +3084,7 @@ Lemma aux_309 : no_proof_for ({P ⊸ M, V ⊸ A, P & 1, (E ⊸ A) & 1, V}) A.
 Proof.
   intros p; one_step p.
 (*
-{A, P ⊸ M, (E ⊸ A) & 1} ⊢ A e 
+{A, P ⊸ M, (E ⊸ A) & 1} ⊢ A e
 {E ⊸ A, P ⊸ M, V ⊸ A, P & 1, V} ⊢ A e
 *)
 Qed.
@@ -3093,13 +3095,13 @@ Proof.
   intros p; unusable_var_strong_tac 5%nat 6%nat p.
 Qed.
 Hint Resolve aux_312 : proof.
-     
+
 Lemma aux_300 : no_proof_for ({P ⊸ M, V ⊸ A, P & 1, (E ⊸ A) & 1, V}) (A ⊕ M).
 Proof.
   intros p; one_step p.
 (*
 {V ⊸ A, P & 1, (E ⊸ A) & 1, V} ⊢ P              e
-{V ⊸ A, P & 1, V} ⊢ P                           e 
+{V ⊸ A, P & 1, V} ⊢ P                           e
 {P ⊸ M, P & 1, (E ⊸ A) & 1, V} ⊢ V
 {P ⊸ M, P & 1, V} ⊢ V
 {P ⊸ M, V} ⊢ V                                  e
@@ -3108,7 +3110,7 @@ Proof.
 {E ⊸ A, P ⊸ M, V ⊸ A, P & 1, V} ⊢ A ⊕ M        e
 {1, P ⊸ M, V ⊸ A, (E ⊸ A) & 1, V} ⊢ A ⊕ M
 {1, P ⊸ M, V ⊸ A, P & 1, V} ⊢ A ⊕ M
-{P ⊸ M, V ⊸ A, P & 1, (E ⊸ A) & 1, V} ⊢ A      
+{P ⊸ M, V ⊸ A, P & 1, (E ⊸ A) & 1, V} ⊢ A
 {P ⊸ M, V ⊸ A, P & 1, (E ⊸ A) & 1, V} ⊢ M      e
 *)
 Qed.
@@ -3123,14 +3125,14 @@ Hint Rewrite aux_313 : proof.
 
 Lemma aux_314 : all_proofs_of ({A, 1, (E ⊸ A) & 1}) (A ⊕ M).
 Proof.
-  intros p; one_step p. 
+  intros p; one_step p.
 Qed.
 Hint Resolve aux_314 : proof.
 Hint Rewrite aux_314 : proof.
 
 Lemma aux_315 : all_proofs_of ({A, 1, (P ⊸ M) & 1}) (A ⊕ M).
 Proof.
-  intros p; one_step p. 
+  intros p; one_step p.
 Qed.
 Hint Resolve aux_315 : proof.
 Hint Rewrite aux_315 : proof.
@@ -3149,7 +3151,7 @@ Hint Resolve aux_317 : proof.
 
 Lemma aux_318 : all_proofs_of ({V ⊸ A, (P ⊸ M) & 1, V}) (A ⊕ M).
 Proof.
-  intros p; one_step p. 
+  intros p; one_step p.
 (*
 {V ⊸ A, (P ⊸ M) & 1, V} ⊢ M
 *)
@@ -3183,7 +3185,7 @@ Hint Resolve aux_321 : proof.
 
 Lemma aux_322 : all_proofs_of ({V ⊸ A, (E ⊸ A) & 1, V}) (A ⊕ M).
 Proof.
-  intros p; one_step p. 
+  intros p; one_step p.
 (*
 {E ⊸ A, V ⊸ A, V} ⊢ A ⊕ M  e
 *)
@@ -3199,7 +3201,7 @@ Hint Resolve aux_323 : proof.
 
 Lemma aux_324 : all_proofs_of ({1, V ⊸ A, (E ⊸ A) & 1, V}) (A ⊕ M).
 Proof.
-  intros p; one_step p. 
+  intros p; one_step p.
 (*
 {V ⊸ A, (E ⊸ A) & 1, V} ⊢ A ⊕ M       +
 {E ⊸ A, 1, V ⊸ A, V} ⊢ A ⊕ M          - e
@@ -3216,12 +3218,12 @@ Hint Resolve aux_325 : proof.
 
 Lemma aux_326 : all_proofs_of ({V ⊸ A, (E ⊸ A) & 1, (P ⊸ M) & 1, V}) (A ⊕ M).
 Proof.
-  intros p; one_step p. 
+  intros p; one_step p.
 (*
 {E ⊸ A, V ⊸ A, (P ⊸ M) & 1, V} ⊢ A ⊕ M     - e
 {1, V ⊸ A, (P ⊸ M) & 1, V} ⊢ A ⊕ M         +
 {1, V ⊸ A, (E ⊸ A) & 1, V} ⊢ A ⊕ M         +
-{V ⊸ A, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ M  - e 
+{V ⊸ A, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ M  - e
 *)
 Qed.
 Hint Resolve aux_326 : proof.
@@ -3236,7 +3238,7 @@ Hint Resolve aux_327 : proof.
 
 Lemma aux_328 : all_proofs_of ({A, 1, 1, (P ⊸ M) & 1}) (A ⊕ M).
 Proof.
-  intros p; one_step p. 
+  intros p; one_step p.
 Qed.
 Hint Resolve aux_328 : proof.
 Hint Rewrite aux_328 : proof.
@@ -3249,10 +3251,10 @@ Hint Resolve aux_329 : proof.
 
 Lemma aux_330 : all_proofs_of ({1, 1, V ⊸ A, (P ⊸ M) & 1, V}) (A ⊕ M).
 Proof.
-  intros p; one_step p;elim aux_267;eauto with proof. 
+  intros p; one_step p;elim aux_267;eauto with proof.
 (*
 {A, 1, 1, (P ⊸ M) & 1} ⊢ A ⊕ M       +
-{1, 1, V ⊸ A, (P ⊸ M) & 1, V} ⊢ M   e - 
+{1, 1, V ⊸ A, (P ⊸ M) & 1, V} ⊢ M   e -
 *)
 Qed.
 Hint Resolve aux_330 : proof.
@@ -3260,7 +3262,7 @@ Hint Rewrite aux_330 : proof.
 
 Lemma aux_331 : all_proofs_of ({A, 1, 1, (E ⊸ A) & 1}) (A ⊕ M).
 Proof.
-  intros p; one_step p. 
+  intros p; one_step p.
 Qed.
 Hint Resolve aux_331 : proof.
 Hint Rewrite aux_331 : proof.
@@ -3273,7 +3275,7 @@ Hint Resolve aux_332 : proof.
 
 Lemma aux_333 : all_proofs_of ({1, 1, V ⊸ A, (E ⊸ A) & 1, V}) (A ⊕ M).
 Proof.
-  intros p; one_step p. 
+  intros p; one_step p.
 (*
 {A, 1, 1, (E ⊸ A) & 1} ⊢ A ⊕ M       +
 {E ⊸ A, 1, 1, V ⊸ A, V} ⊢ A ⊕ M     - e
@@ -3298,7 +3300,7 @@ Proof.
 {V ⊸ A, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M   +
 {E ⊸ A, 1, V ⊸ A, (P ⊸ M) & 1, V} ⊢ A ⊕ M      - e
 {1, 1, V ⊸ A, (P ⊸ M) & 1, V} ⊢ A ⊕ M          +
-{1, 1, V ⊸ A, (E ⊸ A) & 1, V} ⊢ A ⊕ M          + 
+{1, 1, V ⊸ A, (E ⊸ A) & 1, V} ⊢ A ⊕ M          +
 {1, V ⊸ A, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ M   - e
 *)
 Qed.
@@ -3307,28 +3309,28 @@ Hint Rewrite aux_335 : proof.
 
 Lemma aux_336 : all_proofs_of ({A, 1, P & 1, (P ⊸ M) & 1}) (A ⊕ M).
 Proof.
-  intros p; one_step p. 
+  intros p; one_step p.
 Qed.
 Hint Resolve aux_336 : proof.
 Hint Rewrite aux_336 : proof.
 
 Lemma aux_337 : all_proofs_of ({A, 1, P & 1}) (A ⊕ M).
 Proof.
-  intros p; one_step p. 
+  intros p; one_step p.
 Qed.
 Hint Resolve aux_337 : proof.
 Hint Rewrite aux_337 : proof.
 
 Lemma aux_338 : all_proofs_of ({V ⊸ A, P & 1, V}) (A ⊕ M).
 Proof.
-  intros p; one_step p. 
+  intros p; one_step p.
 Qed.
 Hint Resolve aux_338 : proof.
 Hint Rewrite aux_338 : proof.
 
 Lemma aux_339 : all_proofs_of ({1, V ⊸ A, P & 1, V}) (A ⊕ M).
 Proof.
-  intros p; one_step p. 
+  intros p; one_step p.
 (*
 *{V ⊸ A, P & 1, V} ⊢ A ⊕ M
 *)
@@ -3356,14 +3358,14 @@ Hint Rewrite aux_341 : proof.
 
 Lemma aux_343 : all_proofs_of ({A, 1, 1, P & 1}) (A ⊕ M).
 Proof.
-  intros p; one_step p. 
+  intros p; one_step p.
 Qed.
 Hint Resolve aux_343 : proof.
 Hint Rewrite aux_343 : proof.
 
 Lemma aux_342 : all_proofs_of ({1, 1, V ⊸ A, P & 1, V}) (A ⊕ M).
 Proof.
-  intros p; one_step p. 
+  intros p; one_step p.
 (*
 {A, 1, 1, P & 1} ⊢ A ⊕ M
 *)
@@ -3393,7 +3395,7 @@ Hint Rewrite aux_345 : proof.
 
 Lemma aux_346 : all_proofs_of ({A, 1, P & 1, (E ⊸ A) & 1}) (A ⊕ M).
 Proof.
-  intros p; one_step p. 
+  intros p; one_step p.
 Qed.
 Hint Resolve aux_346 : proof.
 Hint Rewrite aux_346 : proof.
@@ -3406,7 +3408,7 @@ Hint Resolve aux_347 : proof.
 
 Lemma aux_348 : all_proofs_of ({V ⊸ A, P & 1, (E ⊸ A) & 1, V}) (A ⊕ M).
 Proof.
-  intros p; one_step p. 
+  intros p; one_step p.
 (*
    {E ⊸ A, V ⊸ A, P & 1, V} ⊢ A ⊕ M    e
 *)
@@ -3423,7 +3425,7 @@ Hint Resolve aux_353 : proof.
 
 Lemma aux_349 : all_proofs_of ({1, V ⊸ A, P & 1, (E ⊸ A) & 1, V}) (A ⊕ M).
 Proof.
-  intros p; one_step p. 
+  intros p; one_step p.
 (*
 {A, 1, P & 1, (E ⊸ A) & 1} ⊢ A ⊕ M                 +
  {V ⊸ A, P & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M            +
@@ -3447,13 +3449,13 @@ Proof.
 (*
 {A, (P ⊸ M) & 1} ⊢ A ⊕ M                      +
 {A, (E ⊸ A) & 1, (P ⊸ M) & 1} ⊢ A ⊕ M           +
-{A, (E ⊸ A) & 1} ⊢ A ⊕ M                        + 
+{A, (E ⊸ A) & 1} ⊢ A ⊕ M                        +
 {A, P & 1, (E ⊸ A) & 1, (P ⊸ M) & 1} ⊢ A ⊕ M    +
 {A, P & 1, (E ⊸ A) & 1} ⊢ A ⊕ M                  +
 {A, P & 1} ⊢ A ⊕ M                               +
 {A, P & 1, (P ⊸ M) & 1} ⊢ A ⊕ M                  +
 {E ⊸ A, V ⊸ A, P & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M   - e
-{P ⊸ M, V ⊸ A, P & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M   - 
+{P ⊸ M, V ⊸ A, P & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M   -
 {1, V ⊸ A, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M +
 {1, V ⊸ A, P & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M       +
 {1, V ⊸ A, P & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M       +
@@ -3461,7 +3463,7 @@ Proof.
 *)
 Qed.
 Hint Resolve aux_112 : proof.
-Hint Rewrite aux_112 : proof. 
+Hint Rewrite aux_112 : proof.
 
 Lemma aux_351 : no_proof_for ({E ⊸ A, P & 1, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) (A ⊕ M).
 Proof.
@@ -3536,8 +3538,8 @@ Lemma aux_364 : no_proof_for ({1, P ⊸ M, P & 1, (V ⊸ A) & 1, V}) A.
 Proof.
   intros p;one_step p.
 (*
-{P ⊸ M, P & 1, (V ⊸ A) & 1, V} ⊢ A 
-{1, 1, P ⊸ M, (V ⊸ A) & 1, V} ⊢ A  
+{P ⊸ M, P & 1, (V ⊸ A) & 1, V} ⊢ A
+{1, 1, P ⊸ M, (V ⊸ A) & 1, V} ⊢ A
 *)
 Qed.
 Hint Resolve aux_364 : proof.
@@ -3548,7 +3550,7 @@ Proof.
 (*
 {E ⊸ A, P ⊸ M, P & 1, (V ⊸ A) & 1, V} ⊢ A     e
 {1, P ⊸ M, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ A   e
-{1, P ⊸ M, P & 1, (V ⊸ A) & 1, V} ⊢ A         
+{1, P ⊸ M, P & 1, (V ⊸ A) & 1, V} ⊢ A
 *)
 Qed.
 Hint Resolve aux_365 : proof.
@@ -3557,13 +3559,13 @@ Lemma aux_366 : no_proof_for ({P ⊸ M, P & 1, (V ⊸ A) & 1, (E ⊸ A) & 1, V})
 Proof.
   intros p; unusable_var_strong_tac 5%nat 6%nat p.
 Qed.
-Hint Resolve aux_366 : proof. 
+Hint Resolve aux_366 : proof.
 
 Lemma aux_367 : no_proof_for ({1, P & 1, (V ⊸ A) & 1, V}) P.
 Proof.
   intros p; unusable_var_strong_tac 5%nat 6%nat p.
 Qed.
-Hint Resolve aux_367 : proof. 
+Hint Resolve aux_367 : proof.
 
 Lemma aux_368 : no_proof_for({P ⊸ M, (V ⊸ A) & 1, V}) (A ⊕ M).
 Proof.
@@ -3587,7 +3589,7 @@ Proof.
 Qed.
 Hint Resolve aux_370 : proof.
 
-Lemma aux_371 : no_proof_for ({P ⊸ M, P & 1, (V ⊸ A) & 1, V}) M. 
+Lemma aux_371 : no_proof_for ({P ⊸ M, P & 1, (V ⊸ A) & 1, V}) M.
 Proof.
   intros p; unusable_var_strong_tac 5%nat 6%nat p.
 Qed.
@@ -3620,7 +3622,7 @@ Proof.
   intros p;one_step p.
 (*
 {1, P & 1, (V ⊸ A) & 1, V} ⊢ P            e
-{P ⊸ M, P & 1, (V ⊸ A) & 1, V} ⊢ A ⊕ M    
+{P ⊸ M, P & 1, (V ⊸ A) & 1, V} ⊢ A ⊕ M
 {1, 1, P ⊸ M, (V ⊸ A) & 1, V} ⊢ A ⊕ M    e
 {1, P ⊸ M, P & 1, (V ⊸ A) & 1, V} ⊢ M    e
 *)
@@ -3636,7 +3638,7 @@ Proof.
 {E ⊸ A, P ⊸ M, P & 1, (V ⊸ A) & 1, V} ⊢ A ⊕ M    e
 {1, P ⊸ M, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M  e
 {1, P ⊸ M, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M  e
-{P ⊸ M, P & 1, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ A   
+{P ⊸ M, P & 1, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ A
 {P ⊸ M, P & 1, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ M  e
 {1, P ⊸ M, P & 1, (V ⊸ A) & 1, V} ⊢ A ⊕ M
 *)
@@ -3700,7 +3702,7 @@ Proof.
   intros p;one_step p;elim aux_370;eauto with proof.
 (*
 {(V ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M
-{1, (V ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ M   - e 
+{1, (V ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ M   - e
 *)
 Qed.
 Hint Resolve aux_384 : proof.
@@ -3900,7 +3902,7 @@ Lemma aux_409 : all_proofs_of ({1, P & 1, (V ⊸ A) & 1, (P ⊸ M) & 1, V}) (A �
 Proof.
   intros p;one_step p;try complete (elim aux_106;eauto with proof).
 (*
-{P & 1, (V ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M     + 
+{P & 1, (V ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M     +
 {1, 1, P & 1, (V ⊸ A) & 1, V} ⊢ A ⊕ M            +
 {1, P & 1, (V ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ M      - e
 *)
@@ -3934,8 +3936,8 @@ Lemma aux_413 : all_proofs_of ({1, P & 1, (V ⊸ A) & 1, (E ⊸ A) & 1, V}) (A �
 Proof.
   intros p;one_step p.
 (*
-{P & 1, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M   + 
-{E ⊸ A, 1, P & 1, (V ⊸ A) & 1, V} ⊢ A ⊕ M      - e 
+{P & 1, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M   +
+{E ⊸ A, 1, P & 1, (V ⊸ A) & 1, V} ⊢ A ⊕ M      - e
 *)
 Qed.
 Hint Resolve aux_413 : proof.
@@ -3953,9 +3955,9 @@ Proof.
   intros p;one_step p.
 (*
 {P, (V ⊸ A) & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M    -
-{V ⊸ A, P & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M      + 
-{E ⊸ A, P & 1, (V ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M      e 
-{P ⊸ M, P & 1, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M      - 
+{V ⊸ A, P & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M      +
+{E ⊸ A, P & 1, (V ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M      e
+{P ⊸ M, P & 1, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M      -
 {1, (V ⊸ A) & 1, (E ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M    +
 {1, P & 1, (V ⊸ A) & 1, (P ⊸ M) & 1, V} ⊢ A ⊕ M           +
 {1, P & 1, (V ⊸ A) & 1, (E ⊸ A) & 1, V} ⊢ A ⊕ M          +

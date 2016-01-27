@@ -207,6 +207,14 @@ Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
     symmetry;assumption.
   Qed.
 
+
+  Add Morphism ILL_proof with signature (FormulaMultiSet.eq ==> Logic.eq ==> iff) as ILL_proof_morph_prop.
+  Proof.
+    intros Γ Γ' Heq φ;split;apply ILL_proof_pre_morph.
+    assumption.
+    symmetry;assumption.
+  Qed.
+
 End ILL_Make.
 
 Module ILL_tactics_refl(Vars:OrderedType)(M:ILL_sig(Vars)).

@@ -14,113 +14,113 @@ Require Import JMeq.
 
 Inductive boolP : Prop := trueP | falseP.
 
-Program Fixpoint exists_oplus_on_formula (cont: forall (e1:env) (f1:formula) (h1: e1 ⊢ f1) (e2:env) (f2:formula) (h2: e2 ⊢ f2),boolP) (φl φr:formula)  (e:env) (f:formula) (h: e ⊢ f) {struct h}: boolP := 
+Program Fixpoint exists_oplus_on_formula (cont: forall (e1:env) (f1:formula) (h1: e1 ⊢ f1) (e2:env) (f2:formula) (h2: e2 ⊢ f2),boolP) (φl φr:formula)  (e:env) (f:formula) (h: e ⊢ f) {struct h}: boolP :=
 match h with
   | Id _ _ p => falseP
-  | Impl_R Γ p q x => exists_oplus_on_formula cont φl φr _ _ x
-  | Impl_L Γ Δ Δ' p q r _ _ x x0 => if exists_oplus_on_formula cont φl φr _ _ x then trueP else exists_oplus_on_formula cont φl φr _ _ x0
-  | Times_R Γ Δ p q _ _ x x0 => if exists_oplus_on_formula cont φl φr _ _ x then trueP else exists_oplus_on_formula cont φl φr _ _ x0
-  | Times_L Γ p q r _ x => exists_oplus_on_formula cont φl φr _ _ x
+  | Impl_R _ p q x => exists_oplus_on_formula cont φl φr _ _ x
+  | Impl_L _ Δ Δ' p q r _ _ x x0 => if exists_oplus_on_formula cont φl φr _ _ x then trueP else exists_oplus_on_formula cont φl φr _ _ x0
+  | Times_R _ Δ p q _ _ x x0 => if exists_oplus_on_formula cont φl φr _ _ x then trueP else exists_oplus_on_formula cont φl φr _ _ x0
+  | Times_L _ p q r _ x => exists_oplus_on_formula cont φl φr _ _ x
   | One_R _ _  => falseP
-  | One_L Γ p _ x => exists_oplus_on_formula cont φl φr _ _ x
-  | And_R Γ p q x x0 => if exists_oplus_on_formula cont φl φr _ _ x then trueP else exists_oplus_on_formula cont φl φr _ _ x0
-  | And_L_1 Γ p q r _ x => exists_oplus_on_formula cont φl φr _ _ x
-  | And_L_2 Γ p q r _ x => exists_oplus_on_formula cont φl φr _ _ x
-  | Oplus_L Γ p q r _ x x0 => 
-    if FormulaOrdered.eq_dec p φl 
-      then if FormulaOrdered.eq_dec q φr 
+  | One_L _ p _ x => exists_oplus_on_formula cont φl φr _ _ x
+  | And_R _ p q x x0 => if exists_oplus_on_formula cont φl φr _ _ x then trueP else exists_oplus_on_formula cont φl φr _ _ x0
+  | And_L_1 _ p q r _ x => exists_oplus_on_formula cont φl φr _ _ x
+  | And_L_2 _ p q r _ x => exists_oplus_on_formula cont φl φr _ _ x
+  | Oplus_L _ p q r _ x x0 =>
+    if FormulaOrdered.eq_dec p φl
+      then if FormulaOrdered.eq_dec q φr
         then cont _ _  x _ _ x0
         else if exists_oplus_on_formula cont φl φr _ _ x then trueP else exists_oplus_on_formula cont φl φr _ _ x0
       else if exists_oplus_on_formula cont φl φr _ _ x then trueP else exists_oplus_on_formula cont φl φr _ _ x0
-  | Oplus_R_1 Γ p q x => exists_oplus_on_formula cont φl φr _ _ x
-  | Oplus_R_2 Γ p q x => exists_oplus_on_formula cont φl φr _ _ x
-  | T_ Γ => falseP
-  | Zero_ Γ p x => falseP
-  | Bang_D Γ p q _ x => exists_oplus_on_formula cont φl φr _ _ x
-  | Bang_C Γ p q _ x => exists_oplus_on_formula cont φl φr _ _ x
-  | Bang_W Γ p q _ x => exists_oplus_on_formula cont φl φr _ _ x
+  | Oplus_R_1 _ p q x => exists_oplus_on_formula cont φl φr _ _ x
+  | Oplus_R_2 _ p q x => exists_oplus_on_formula cont φl φr _ _ x
+  | T_ _ => falseP
+  | Zero_ _ p x => falseP
+  | Bang_D _ p q _ x => exists_oplus_on_formula cont φl φr _ _ x
+  | Bang_C _ p q _ x => exists_oplus_on_formula cont φl φr _ _ x
+  | Bang_W _ p q _ x => exists_oplus_on_formula cont φl φr _ _ x
 end.
 
-Program Fixpoint forall_impl_l_on_formula 
-  (cont:forall (e1:env) (f1:formula) (h1: e1 ⊢ f1) (e2:env) (f2:formula) (h2: e2 ⊢ f2), boolP) 
-  (φl φr:formula)  (e:env) (f:formula) (h: e ⊢ f) {struct h}: boolP := 
+Program Fixpoint forall_impl_l_on_formula
+  (cont:forall (e1:env) (f1:formula) (h1: e1 ⊢ f1) (e2:env) (f2:formula) (h2: e2 ⊢ f2), boolP)
+  (φl φr:formula)  (e:env) (f:formula) (h: e ⊢ f) {struct h}: boolP :=
 match h with
   | Id _ _ p => trueP
-  | Impl_R Γ p q x => forall_impl_l_on_formula cont φl φr _ _ x
-  | Impl_L Γ Δ Δ' p q r _ _ x x0 => 
-    if FormulaOrdered.eq_dec p φl 
-      then if FormulaOrdered.eq_dec q φr 
+  | Impl_R _ p q x => forall_impl_l_on_formula cont φl φr _ _ x
+  | Impl_L _ Δ Δ' p q r _ _ x x0 =>
+    if FormulaOrdered.eq_dec p φl
+      then if FormulaOrdered.eq_dec q φr
         then cont _ _ x _ _ x0 (*if (cont _ _  x) then falseP else negb (cont _ _  x0) *)
-        else 
-          if forall_impl_l_on_formula cont φl φr _ _ x 
+        else
+          if forall_impl_l_on_formula cont φl φr _ _ x
             then forall_impl_l_on_formula cont φl φr _ _ x0
-            else falseP 
+            else falseP
       else if forall_impl_l_on_formula cont φl φr _ _ x then forall_impl_l_on_formula cont φl φr _ _ x0 else falseP
-  | Times_R Γ Δ p q _ _ x x0 => if forall_impl_l_on_formula cont φl φr _ _ x then forall_impl_l_on_formula cont φl φr _ _ x0 else falseP 
-  | Times_L Γ p q r _ x => forall_impl_l_on_formula cont φl φr _ _ x
-  | One_R _ _ => trueP 
-  | One_L Γ p _ x => forall_impl_l_on_formula cont φl φr _ _ x
-  | And_R Γ p q x x0 => if forall_impl_l_on_formula cont φl φr _ _ x then forall_impl_l_on_formula cont φl φr _ _ x0 else falseP 
-  | And_L_1 Γ p q r _ x => forall_impl_l_on_formula cont φl φr _ _ x
-  | And_L_2 Γ p q r _ x => forall_impl_l_on_formula cont φl φr _ _ x
-  | Oplus_L Γ p q r _ x x0 => if forall_impl_l_on_formula cont φl φr _ _ x then forall_impl_l_on_formula cont φl φr _ _ x0 else falseP 
-  | Oplus_R_1 Γ p q x => forall_impl_l_on_formula cont φl φr _ _ x
-  | Oplus_R_2 Γ p q x => forall_impl_l_on_formula cont φl φr _ _ x
-  | T_ Γ => trueP
-  | Zero_ Γ p x => trueP 
-  | Bang_D Γ p q _ x => forall_impl_l_on_formula cont φl φr _ _ x
-  | Bang_C Γ p q _ x => forall_impl_l_on_formula cont φl φr _ _ x
-  | Bang_W Γ p q _ x => forall_impl_l_on_formula cont φl φr _ _ x
+  | Times_R _ Δ p q _ _ x x0 => if forall_impl_l_on_formula cont φl φr _ _ x then forall_impl_l_on_formula cont φl φr _ _ x0 else falseP
+  | Times_L _ p q r _ x => forall_impl_l_on_formula cont φl φr _ _ x
+  | One_R _ _ => trueP
+  | One_L _ p _ x => forall_impl_l_on_formula cont φl φr _ _ x
+  | And_R _ p q x x0 => if forall_impl_l_on_formula cont φl φr _ _ x then forall_impl_l_on_formula cont φl φr _ _ x0 else falseP
+  | And_L_1 _ p q r _ x => forall_impl_l_on_formula cont φl φr _ _ x
+  | And_L_2 _ p q r _ x => forall_impl_l_on_formula cont φl φr _ _ x
+  | Oplus_L _ p q r _ x x0 => if forall_impl_l_on_formula cont φl φr _ _ x then forall_impl_l_on_formula cont φl φr _ _ x0 else falseP
+  | Oplus_R_1 _ p q x => forall_impl_l_on_formula cont φl φr _ _ x
+  | Oplus_R_2 _ p q x => forall_impl_l_on_formula cont φl φr _ _ x
+  | T_ _ => trueP
+  | Zero_ _ p x => trueP
+  | Bang_D _ p q _ x => forall_impl_l_on_formula cont φl φr _ _ x
+  | Bang_C _ p q _ x => forall_impl_l_on_formula cont φl φr _ _ x
+  | Bang_W _ p q _ x => forall_impl_l_on_formula cont φl φr _ _ x
 end.
 Definition orP (b1 b2:boolP) := if b1 then trueP else b2.
 Definition negP (b:boolP) := if b then falseP else trueP.
 
-Definition not_exists_oplus_on_formula lhs rhs (e1:env) (f1:formula) (h1: e1 ⊢ f1) (e2:env) (f2:formula) (h2: e2 ⊢ f2) := 
+Definition not_exists_oplus_on_formula lhs rhs (e1:env) (f1:formula) (h1: e1 ⊢ f1) (e2:env) (f2:formula) (h2: e2 ⊢ f2) :=
   negP (orP (exists_oplus_on_formula (fun _ _ _ _ _ _ => trueP) lhs rhs _ _ h1) (exists_oplus_on_formula (fun _ _ _ _ _ _ => trueP) lhs rhs _ _ h2)).
 
 Eval vm_compute in (forall_impl_l_on_formula (not_exists_oplus_on_formula (G⊸1) (G⊸V)) R E _ _ originelle).
 Eval vm_compute in (forall_impl_l_on_formula (not_exists_oplus_on_formula 1 ((B ⊸ V) & (B ⊸ 1))) G 1 _ _ originelle).
 
-Program Fixpoint exists_AtheseA_on_formula 
+Program Fixpoint exists_AtheseA_on_formula
   (cont: forall (e1:env) (f1:formula) (h1: e1 ⊢ f1),boolP)
-  (φl φr:formula)  (e:env) (f:formula) (h: e ⊢ f) {struct h}: boolP := 
+  (φl φr:formula)  (e:env) (f:formula) (h: e ⊢ f) {struct h}: boolP :=
 match h with
-  | Oplus_R_1 Γ p q x =>
+  | Oplus_R_1 _ p q x =>
     if FormulaOrdered.eq_dec p φl
-      then if FormulaOrdered.eq_dec q φr 
+      then if FormulaOrdered.eq_dec q φr
         then cont _ _  x
         else exists_AtheseA_on_formula cont φl φr _ _ x
       else exists_AtheseA_on_formula cont φl φr _ _ x
-  | Oplus_R_2 Γ q p x =>
+  | Oplus_R_2 _ q p x =>
     if FormulaOrdered.eq_dec p φl
-      then if FormulaOrdered.eq_dec q φr 
+      then if FormulaOrdered.eq_dec q φr
         then cont _ _  x
         else exists_AtheseA_on_formula cont φl φr _ _ x
       else exists_AtheseA_on_formula cont φl φr _ _ x
   | Id _ _ p => falseP
-  | Impl_R Γ p q x => exists_AtheseA_on_formula cont φl φr _ _ x
-  | Impl_L Γ Δ Δ' p q r _ _ x x0 => exists_AtheseA_on_formula cont φl φr _ _ x0
-  | Times_R Γ Δ p q _ _ x x0 => if exists_AtheseA_on_formula cont φl φr _ _ x then trueP else exists_AtheseA_on_formula cont φl φr _ _ x0
-  | Times_L Γ p q r _ x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | Impl_R _ p q x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | Impl_L _ Δ Δ' p q r _ _ x x0 => exists_AtheseA_on_formula cont φl φr _ _ x0
+  | Times_R _ Δ p q _ _ x x0 => if exists_AtheseA_on_formula cont φl φr _ _ x then trueP else exists_AtheseA_on_formula cont φl φr _ _ x0
+  | Times_L _ p q r _ x => exists_AtheseA_on_formula cont φl φr _ _ x
   | One_R _ _ => falseP
-  | One_L Γ p _ x => exists_AtheseA_on_formula cont φl φr _ _ x
-  | And_R Γ p q x x0 => if exists_AtheseA_on_formula cont φl φr _ _ x then trueP else exists_AtheseA_on_formula cont φl φr _ _ x0
-  | And_L_1 Γ p q r _ x => exists_AtheseA_on_formula cont φl φr _ _ x
-  | And_L_2 Γ p q r _ x => exists_AtheseA_on_formula cont φl φr _ _ x
-  | Oplus_L Γ p q r _ x x0 => if exists_AtheseA_on_formula cont φl φr _ _ x then trueP else exists_AtheseA_on_formula cont φl φr _ _ x0
-  | T_ Γ => falseP
-  | Zero_ Γ p x => falseP
-  | Bang_D Γ p q _ x => exists_AtheseA_on_formula cont φl φr _ _ x
-  | Bang_C Γ p q _ x => exists_AtheseA_on_formula cont φl φr _ _ x
-  | Bang_W Γ p q _ x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | One_L _ p _ x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | And_R _ p q x x0 => if exists_AtheseA_on_formula cont φl φr _ _ x then trueP else exists_AtheseA_on_formula cont φl φr _ _ x0
+  | And_L_1 _ p q r _ x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | And_L_2 _ p q r _ x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | Oplus_L _ p q r _ x x0 => if exists_AtheseA_on_formula cont φl φr _ _ x then trueP else exists_AtheseA_on_formula cont φl φr _ _ x0
+  | T_ _ => falseP
+  | Zero_ _ p x => falseP
+  | Bang_D _ p q _ x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | Bang_C _ p q _ x => exists_AtheseA_on_formula cont φl φr _ _ x
+  | Bang_W _ p q _ x => exists_AtheseA_on_formula cont φl φr _ _ x
 end.
 
 
 Eval vm_compute in exists_AtheseA_on_formula (fun _ _ _ => trueP) A M _ _ originelle.
 Eval vm_compute in exists_AtheseA_on_formula (fun _ _ _ => trueP) A M _ _ simpl_ex.
 
-Lemma exists_AtheseA_on_formula_proof_eq_compat : 
-  ∀ f1 f2 Γ Γ' φ (h1:Γ⊢φ) (h2:Γ'⊢φ), 
+Lemma exists_AtheseA_on_formula_proof_eq_compat :
+  ∀ f1 f2 Γ Γ' φ (h1:Γ⊢φ) (h2:Γ'⊢φ),
   Proof_eq.eq h1 h2 ->
     exists_AtheseA_on_formula (fun _ _ _ => trueP) f1 f2 _ _ h1
     = exists_AtheseA_on_formula (fun _ _ _ => trueP) f1 f2 _ _ h2.
@@ -128,12 +128,12 @@ Proof.
   intros f1 f2 Γ Γ' φ h1 h2 H.
   induction H;simpl.
 
-  Focus.    
+  Focus.
   reflexivity.
 
   Focus.
-  auto.    
-  
+  auto.
+
   apply IHeq2.
 
   Focus.
@@ -182,8 +182,8 @@ Proof.
   rewrite IHeq;reflexivity.
 Qed.
 
-Lemma exists_AtheseA_on_formula_proof_eq_pre_morph_compat : 
-  ∀ f1 f2 Γ Γ' φ (h1:Γ⊢φ) (h2:Γ==Γ'), 
+Lemma exists_AtheseA_on_formula_proof_eq_pre_morph_compat :
+  ∀ f1 f2 Γ Γ' φ (h1:Γ⊢φ) (h2:Γ==Γ'),
   exists_AtheseA_on_formula (fun _ _ _ => trueP) f1 f2 _ _ h1
   = exists_AtheseA_on_formula (fun _ _ _ => trueP) f1 f2 _ _ (ILL_proof_pre_morph φ Γ Γ' h2 h1).
 Proof.
@@ -204,7 +204,7 @@ Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
   weak_impl_l B S...
   apply Oplus_R_1...
 
-(* 
+(*
   and_l_2 (B ⊸ S) (B ⊸ R).
   weak_impl_l B R...
   apply Oplus_R_2...
@@ -221,13 +221,13 @@ Eval vm_compute in exists_AtheseA_on_formula (fun _ _ _ => trueP) A M _ _ origin
 Eval vm_compute in exists_AtheseA_on_formula (fun _ _ _ => trueP) S R _ _ originelle.
 Eval vm_compute in (exists_AtheseA_on_formula (fun _ _ _ => trueP) S R _ _ simple).
 Eval vm_compute in (exists_AtheseA_on_formula (fun _ _ _ => trueP) R S _ _ simple).
-  
+
 Definition all_proofs_of env gamma := (forall (p:env⊢gamma), exists_AtheseA_on_formula (fun _ _ _ => trueP) S R _ _ p =trueP).
 
 Definition no_proof_for env gamma := (forall (p:env⊢gamma), False).
 Hint Unfold all_proofs_of no_proof_for : proof.
 
-Lemma all_proofs_of_pre_morph : forall φ Γ Γ',  
+Lemma all_proofs_of_pre_morph : forall φ Γ Γ',
   all_proofs_of Γ φ -> eq_bool Γ Γ' = true -> all_proofs_of Γ' φ.
 Proof.
   unfold all_proofs_of.
@@ -242,11 +242,11 @@ Qed.
 Hint Resolve all_proofs_of_pre_morph : proof.
 
 
-Lemma all_proofs_of_pre_morph' : 
-  forall φ Γ Γ', all_proofs_of Γ φ -> eq_bool Γ Γ' = true -> 
+Lemma all_proofs_of_pre_morph' :
+  forall φ Γ Γ', all_proofs_of Γ φ -> eq_bool Γ Γ' = true ->
     forall (p:Γ'⊢φ), exists_AtheseA_on_formula (fun _ _ _ => trueP) S R _ _ p =trueP.
 Proof.
-  intros φ Γ Γ' H H0 p.  
+  intros φ Γ Γ' H H0 p.
   eapply all_proofs_of_pre_morph;eassumption.
 Qed.
 Hint Resolve all_proofs_of_pre_morph' : proof.
@@ -263,22 +263,23 @@ Qed.
 
 Hint Extern 0 ( _ ==  _ ) => apply eq_bool_correct;vm_compute;reflexivity : proof.
 
+Tactic Notation "complete" tactic1(t) := t; fail.
 
-Ltac clean p := 
-  try complete eauto 2 with proof;
-    (dependent simple inversion p||inversion p);clear p;subst;try discriminate;simpl.
+Ltac clean p :=
+  try (complete eauto 2 with proof);
+  (dependent simple inversion p||inversion p);clear p;subst;try discriminate;simpl.
 
 
-Ltac decompose_add := 
-    repeat (match goal with 
-            | H : _ ∈ (_ :: _) |- _  => 
+Ltac decompose_add :=
+    repeat (match goal with
+            | H : _ ∈ (_ :: _) |- _  =>
               destruct (mem_destruct _ _ _ H);clear H
-            | H : _ ∈ ∅ |- _ => 
+            | H : _ ∈ ∅ |- _ =>
               rewrite empty_no_mem in H;discriminate
             | H : ILLVarInt.MILL.eq _ _ |- _ => apply eq_is_eq in H;subst
           end).
 
-Ltac var_not_in_env_tac_simple n' H := 
+Ltac var_not_in_env_tac_simple n' H :=
 elim unusable_var_in_env with (n:=n') (1:=H);
 [
   vm_compute;reflexivity |
@@ -289,21 +290,21 @@ elim unusable_var_in_env with (n:=n') (1:=H);
 ]
 .
 
-Ltac var_not_in_env_tac_aux H env := 
-  match env with 
+Ltac var_not_in_env_tac_aux H env :=
+  match env with
     | Proposition ?n::?env' =>
-      (complete (var_not_in_env_tac_simple n H)) || 
+      (complete (var_not_in_env_tac_simple n H)) ||
         var_not_in_env_tac_aux H env'
     | _ :: ?env' =>  var_not_in_env_tac_aux H env'
   end.
 
-Ltac var_not_in_env_tac H := 
-  match type of H with 
-    | ?env ⊢ _ => 
+Ltac var_not_in_env_tac H :=
+  match type of H with
+    | ?env ⊢ _ =>
       var_not_in_env_tac_aux H env
   end.
-Ltac is_var_env gamma := 
-  match gamma with 
+Ltac is_var_env gamma :=
+  match gamma with
     | empty => fail 1
     | _ :: _ => fail 1
     | _ \ _ => fail 1
@@ -312,142 +313,139 @@ Ltac is_var_env gamma :=
   end.
 
 
-Ltac finish := 
+Ltac finish :=
   simpl;try reflexivity;
     try discriminate;
-    try complete auto with proof;
+    try (complete auto with proof);
     try autorewrite with proof;
-      try complete (apply False_ind;auto with proof);
-      match goal with 
-        |- (if ?e then trueP else trueP ) = trueP => 
+      try (complete (apply False_ind;auto with proof));
+      match goal with
+        |- (if ?e then trueP else trueP ) = trueP =>
           case e;reflexivity
-        | i:?e⊢Proposition ?n' |- _ => 
+        | i:?e⊢Proposition ?n' |- _ =>
           elim var_in_env with (n:=n') (3:=i);vm_compute;reflexivity
         | H: ?env⊢?g |- _ =>
           complete var_not_in_env_tac H
-        | H : ?s == ?t |- _ => 
+        | H : ?s == ?t |- _ =>
           (complete (apply eq_bool_complete in H;vm_compute in H;
             discriminate))|| (progress repeat (rewrite H in * ))
       end.
 
-Ltac decomp := 
+Ltac decomp :=
   simpl;try reflexivity;
-    try discriminate;
-      (* try complete auto with proof; *)
-        (* try autorewrite with proof; *)
-          match goal with
-            | H : ?t = ?t |- _ => clear H
-            | H : ?t == ?t |- _ => clear H
-            | H:_ :: _ == _ ∪ _ |- _ => 
-              symmetry in H
-            | H: _ ∪ _ == _ :: _ |- _ => 
-              let delta := fresh "Δ" in
-                let h1 := fresh "H" in 
-                  let h2 := fresh "H" in 
-                    destruct (union_decompose _ _ _ _ H) 
-                      as [[delta [h1 h2]]|[delta [h1 h2]]];clear H
-            | H: empty == _ ∪ _ |- _ => 
-              symmetry in H
-            | H: _ ∪ _ == empty |- _ => 
-              let h1 := fresh "H" in 
-                let h2 := fresh "H" in 
-                  destruct (union_empty_decompose _ _  H) as [h1 h2];
-                    clear H
-            | H : ?t == _ |- _ => 
-              is_var_env t;
-              match goal with 
-                | H': context [t] |- _ => 
-                  match H' with 
-                    | H => fail 1
-                    | _ => fail 2
-                  end
-                | _ => clear H
-              end
-            | H: ILLVarInt.MILL.eq _ _ |- _ => apply eq_is_eq in H; try (injection H;clear H;intros;subst)
+  try discriminate;
+  (* try complete auto with proof; *)
+  (* try autorewrite with proof; *)
+  match goal with
+  | H : ?t = ?t |- _ => clear H
+  | H : ?t == ?t |- _ => clear H
+  | H:_ :: _ == _ ∪ _ |- _ =>
+    symmetry in H
+  | H: _ ∪ _ == _ :: _ |- _ =>
+    let delta := fresh "Δ" in
+    let h1 := fresh "H" in
+    let h2 := fresh "H" in
+    destruct (union_decompose _ _ _ _ H)
+      as [[delta [h1 h2]]|[delta [h1 h2]]];clear H
+  | H: empty == _ ∪ _ |- _ =>
+    symmetry in H
+  | H: _ ∪ _ == empty |- _ =>
+    let h1 := fresh "H" in
+    let h2 := fresh "H" in
+    destruct (union_empty_decompose _ _  H) as [h1 h2];
+    clear H
+  | H : ?t == _ |- _ =>
+    is_var_env t;
+    match goal with
+    | H': context [t] |- _ =>
+      match H' with
+      | H => fail 1
+      | _ => fail 2
+      end
+    | _ => clear H
+    end
+  | H: ILLVarInt.MILL.eq _ _ |- _ => apply eq_is_eq in H; try (injection H;clear H;intros;subst)
 
-            | H: _ ∈ _ |- _ => complete (vm_compute in H;discriminate)
-            | H: _ ∈ (add _ _) |- _ =>   
-              destruct (mem_destruct _ _ _ H);clear H
-            (* | H : ?s == ?t |- _ =>  *)
-            (*   (complete (apply eq_bool_complete in H;vm_compute in H; *)
-            (*     discriminate))|| (progress repeat (rewrite H in * )) *)
-            | H : ?s == ?t |- _ => 
-              (progress repeat (rewrite H in * ))
-            | H: context C [ remove ?f ?env ] |- _ => 
-              match env with 
-                context C' [ add f ?env' ] => 
-                let e := context C' [ env' ] in 
-                  setoid_replace (remove f env) with e in H by (apply eq_bool_correct;vm_compute;reflexivity)
-              end
-            | H:(?x ⊸ ?y) = _  |- _ => 
-              try discriminate H;injection H;clear H;intros;subst
-            | H: (_ ⊕ _) = _  |- _ => 
-              try discriminate H;injection H;clear H;intros;subst
-            | H:(_ ⊗ _) = _ |- _  => 
-              try discriminate H;injection H;clear H;intros;subst
-            | H: _  & _ = _  |- _  => 
-              try discriminate H;injection H;clear H;intros;subst
-            | H: _ = (?x ⊸ ?y) |- _ => 
-              try discriminate H;injection H;clear H;intros;subst
-            | H: _ = (_ ⊕ _) |- _ => 
-              try discriminate H;injection H;clear H;intros;subst
-            | H: _ = (_ ⊗ _) |- _  => 
-              try discriminate H;injection H;clear H;intros;subst
-            | H: _ = _  & _ |- _  => 
-              try discriminate H;injection H;clear H;intros;subst
-            | H: ?delta ⊢ _, H' : ?delta == ∅ |- _ => 
-              apply False_ind;rewrite H' in H;clear - H;clean H;finish
-            | H: ?env⊢?g |- _ =>
-              (* try complete var_not_in_env_tac H;  *)
-                match env with 
-                  | context C' [?env' \ ?f] => 
-                    match env' with 
-                      | context C [add f ?env''] => 
-                        let e' := context C [ env'' ] in 
-                          let e := context C' [ e' ] in 
-                            assert (heq: e == env) by (apply eq_bool_correct;vm_compute;reflexivity);
-                              symmetry in heq;
-                                let h := fresh "H" in 
-                                  let i' := fresh "i" in 
-                                    assert (h:(exists i':ILL_proof e g, Proof_eq.eq H i')) by (exists (ILL_proof_pre_morph _ _ _ heq H);
-                                      apply Proof_eq.sym;
-                                    apply Proof_eq.eq_pre_morph);
-          destruct h as [i' h];
-            rewrite exists_AtheseA_on_formula_proof_eq_compat with (h2:=i') (1:=h);
-              clear H h heq
-end
-end
-            | H: ?t == ?t', i: ?env⊢?f |- _ => 
-              match env with 
-                | context [ t ] => 
-                  let f_env := 
-                    match eval pattern t in env with
-                      | ?f _ => f
-                    end
-                    in
-                    let env'0 := constr:(f_env t')  in 
-                      let env' := eval cbv beta iota in env'0 in 
-                        let h := fresh "H" in 
-                          let i' := fresh "i" in 
-                            let heq := fresh "heq" in 
-                              assert (h:exists i': env'⊢f, Proof_eq.eq i i');[
-                                assert (heq:env'==env) by (rewrite H;reflexivity);
-                                  symmetry in heq;
-                                    exists (ILL_proof_pre_morph _ _ _ heq i);
-                                      apply Proof_eq.sym;apply Proof_eq.eq_pre_morph
-|
-  destruct h as [i' h];
-    rewrite exists_AtheseA_on_formula_proof_eq_compat with (h2:=i') (1:=h);clear i h;try (rewrite H in *;clear H)
-]
-end
-
-          end.
+  | H: _ ∈ _ |- _ => complete (vm_compute in H;discriminate)
+  | H: _ ∈ (add _ _) |- _ =>
+    destruct (mem_destruct _ _ _ H);clear H
+  (* | H : ?s == ?t |- _ =>  *)
+  (*   (complete (apply eq_bool_complete in H;vm_compute in H; *)
+  (*     discriminate))|| (progress repeat (rewrite H in * )) *)
+  | H : ?s == ?t |- _ =>
+    (progress repeat (rewrite H in * ))
+  | H: context C [ remove ?f ?env ] |- _ =>
+    match env with
+      context C' [ add f ?env' ] =>
+      let e := context C' [ env' ] in
+      setoid_replace (remove f env) with e in H by (apply eq_bool_correct;vm_compute;reflexivity)
+    end
+  | H:(?x ⊸ ?y) = _  |- _ =>
+    try discriminate H;injection H;clear H;intros;subst
+  | H: (_ ⊕ _) = _  |- _ =>
+    try discriminate H;injection H;clear H;intros;subst
+  | H:(_ ⊗ _) = _ |- _  =>
+    try discriminate H;injection H;clear H;intros;subst
+  | H: _  & _ = _  |- _  =>
+    try discriminate H;injection H;clear H;intros;subst
+  | H: _ = (?x ⊸ ?y) |- _ =>
+    try discriminate H;injection H;clear H;intros;subst
+  | H: _ = (_ ⊕ _) |- _ =>
+    try discriminate H;injection H;clear H;intros;subst
+  | H: _ = (_ ⊗ _) |- _  =>
+    try discriminate H;injection H;clear H;intros;subst
+  | H: _ = _  & _ |- _  =>
+    try discriminate H;injection H;clear H;intros;subst
+  | H: ?delta ⊢ _, H' : ?delta == ∅ |- _ =>
+    apply False_ind;rewrite H' in H;clear - H;clean H;finish
+  | H: ?env⊢?g |- _ =>
+    (* try complete var_not_in_env_tac H;  *)
+    match env with
+    | context C' [?env' \ ?f] =>
+      match env' with
+      | context C [add f ?env''] =>
+        let e' := context C [ env'' ] in
+        let e := context C' [ e' ] in
+        assert (heq: e == env) by (apply eq_bool_correct;vm_compute;reflexivity);
+        symmetry in heq;
+        let h := fresh "H" in
+        let i' := fresh "i" in
+        assert (h:(exists i':ILL_proof e g, Proof_eq.eq H i')) by (exists (ILL_proof_pre_morph _ _ _ heq H);
+                                                                          apply Proof_eq.sym;
+                                                                          apply Proof_eq.eq_pre_morph);
+        destruct h as [i' h];
+        rewrite exists_AtheseA_on_formula_proof_eq_compat with (h2:=i') (1:=h);
+        clear H h heq
+      end
+    end
+  | H: ?t == ?t', i: ?env⊢?f |- _ =>
+    match env with
+    | context [ t ] =>
+      let f_env := (match eval pattern t in env with
+                    | ?f _ => f
+                    end) in
+      let env'0 := constr:(f_env t')  in
+      let env' := (eval cbv beta iota in env'0) in
+      let h := fresh "H" in
+      let i' := fresh "i" in
+      let heq := fresh "heq" in
+      assert (h:exists i': env'⊢f, Proof_eq.eq i i');[
+        assert (heq:env'==env) by (rewrite H;reflexivity);
+        symmetry in heq;
+        exists (ILL_proof_pre_morph _ _ _ heq i);
+        apply Proof_eq.sym;apply Proof_eq.eq_pre_morph
+      | destruct h as [i' h];
+        rewrite exists_AtheseA_on_formula_proof_eq_compat with (h2:=i') (1:=h);
+        clear i h;try (rewrite H in *;clear H)
+      ]
+    end
+  end.
 
 
 
-Ltac one_step p :=   clean p; (repeat decomp);try finish;auto with proof;eauto 3 with proof.
+Ltac one_step p :=   clean p; (repeat decomp);try (complete finish);auto with proof;eauto 3 with proof.
 
-Ltac unusable_implies_tac n' f H := 
+Ltac unusable_implies_tac n' f H :=
   apply unusable_implies with (1:=H) (n:=n') (φ:=f);
     [
       vm_compute;reflexivity |
@@ -475,7 +473,7 @@ Ltac unusable_var_strong_tac n1 n2 H :=
 
 Lemma aux3 : all_proofs_of ({S}) (S ⊕ R).
 Proof.
-  intros p; one_step p.
+  intro p;one_step p.
 Qed.
 
 Lemma aux4 : no_proof_for ({G ⊸ S, B ⊸ S, G}) (S ⊕ R).
@@ -489,12 +487,20 @@ Proof.
   unusable_implies_tac 4 S p.
 Qed.
 
+
+(* fails here, the tactics re noing less things than before (v8.3 probably). *)
 Lemma aux2 : all_proofs_of ({B ⊸ S, G, (G ⊸ B) ⊕ (G ⊸ S)}) (S ⊕ R).
+Proof.
+  intro p.
+  clean p; (repeat decomp).
+  Focus 3.
+  rewrite H1 in i0.
+  rewrite H in i.
   intros p; one_step p.
-  apply aux3.
-  apply False_ind.
-  apply aux4.
-  assumption.
+  - apply aux3.
+  - apply False_ind.
+    apply aux4.
+    assumption.
 Qed.
 
 Lemma aux6 : no_proof_for ({G, (G ⊸ B) ⊕ (G ⊸ S)}) B.
@@ -683,7 +689,7 @@ Qed.
 Lemma aux6' : no_proof_for ({G, (G ⊸ B) ⊕ (G ⊸ S)}) (S⊕R).
 Proof.
   intros p. one_step p.
-  
+
   apply aux25. assumption.
 
   apply aux6''. assumption.
@@ -702,7 +708,7 @@ Lemma aux24 : no_proof_for ({1, G, (G ⊸ B) ⊕ (G ⊸ S)}) (S ⊕ R).
 
   apply aux6'. assumption.
   apply aux26. assumption.
-  
+
   apply aux24s. assumption.
 Qed.
 
@@ -713,7 +719,7 @@ Lemma aux1 : all_proofs_of ({(B ⊸ S) & (B ⊸ R), G, (G ⊸ B) ⊕ (G ⊸ S)})
 Qed.
 Lemma aux27r : no_proof_for ({G ⊸ S, G, ((B ⊸ S) & (B ⊸ R)) & 1}) R.
   intros p; one_step p.
-Qed.  
+Qed.
 
 Lemma aux31 : no_proof_for ({G, ((B ⊸ S) & (B ⊸ R)) & 1, (G ⊸ B) ⊕ (G ⊸ S)}) R.
   intros p.
@@ -727,7 +733,7 @@ Lemma aux29 : no_proof_for ({(B ⊸ S) & (B ⊸ R), S}) (S ⊕ R).
 Qed.
 Lemma aux30 : all_proofs_of ({1, S}) (S ⊕ R).
   intros p; one_step p.
-Qed.  
+Qed.
 Lemma aux28 : all_proofs_of ({S, ((B ⊸ S) & (B ⊸ R)) & 1}) (S ⊕ R).
   intros p; one_step p.
   apply False_ind. apply aux29. assumption.
@@ -741,7 +747,7 @@ Lemma aux32 : no_proof_for ({(B ⊸ S) & (B ⊸ R), G ⊸ S, G}) (S ⊕ R).
 Qed.
 
 Lemma aux34 : all_proofs_of ({G ⊸ S, G}) (S ⊕ R).
-  intros p; one_step p.  
+  intros p; one_step p.
 Qed.
 
 Lemma aux33 : all_proofs_of ({1, G ⊸ S, G}) (S ⊕ R).
@@ -761,12 +767,12 @@ Lemma final: all_proofs_of ({ G,((B⊸S)&(B⊸R))&1,(G⊸B)⊕(G⊸S)}) (S⊕R).
 Proof.
   intros p; one_step p.
 
-  apply aux1. 
+  apply aux1.
 
   rewrite aux27.
   destruct (exists_AtheseA_on_formula
-         (λ (e1 : env) (f1 : formula) (_ : e1 ⊢ f1), trueP) 
-         S R ({G ⊸ B, G, ((B ⊸ S) & (B ⊸ R)) & 1}) 
+         (λ (e1 : env) (f1 : formula) (_ : e1 ⊢ f1), trueP)
+         S R ({G ⊸ B, G, ((B ⊸ S) & (B ⊸ R)) & 1})
          (S ⊕ R) i0
     ); reflexivity.
 Qed.
