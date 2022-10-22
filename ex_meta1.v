@@ -10,7 +10,6 @@ Require Import ILL_equiv.
 
 Local Open Scope ILL_scope.
 Local Open Scope Emma.
-Require Import JMeq.
 
 Inductive boolP : Prop := trueP | falseP.
 
@@ -127,59 +126,24 @@ Lemma exists_AtheseA_on_formula_proof_eq_compat :
 Proof.
   intros f1 f2 Γ Γ' φ h1 h2 H.
   induction H;simpl.
-
-  Focus.
-  reflexivity.
-
-  Focus.
-  auto.
-
-  apply IHeq2.
-
-  Focus.
-  rewrite IHeq1;rewrite IHeq2;reflexivity.
-
-  Focus.
-  rewrite IHeq;reflexivity.
-
-  Focus.
-  reflexivity.
-
-  Focus.
-  rewrite IHeq;reflexivity.
-
-  Focus.
-  rewrite IHeq1;rewrite IHeq2;reflexivity.
-
-  Focus.
-  rewrite IHeq;reflexivity.
-
-  Focus.
-  rewrite IHeq;reflexivity.
-
-  Focus.
-  rewrite IHeq1;rewrite IHeq2;reflexivity.
-
-  Focus.
-  rewrite IHeq;reflexivity.
-
-  Focus.
-  rewrite IHeq;reflexivity.
-
-  Focus.
-  reflexivity.
-
-  Focus.
-  reflexivity.
-
-  Focus.
-  rewrite IHeq;reflexivity.
-
-  Focus.
-  rewrite IHeq;reflexivity.
-
-  Focus.
-  rewrite IHeq;reflexivity.
+  - reflexivity.
+  - auto.
+  - apply IHeq2.
+  - rewrite IHeq1;rewrite IHeq2;reflexivity.
+  - rewrite IHeq;reflexivity.
+  - reflexivity.
+  - rewrite IHeq;reflexivity.
+  - rewrite IHeq1;rewrite IHeq2;reflexivity.
+  - rewrite IHeq;reflexivity.
+  - rewrite IHeq;reflexivity.
+  - rewrite IHeq1;rewrite IHeq2;reflexivity.
+  - rewrite IHeq;reflexivity.
+  - rewrite IHeq;reflexivity.
+  - reflexivity.
+  - reflexivity.
+  - rewrite IHeq;reflexivity.
+  - rewrite IHeq;reflexivity.
+  - rewrite IHeq;reflexivity.
 Qed.
 
 Lemma exists_AtheseA_on_formula_proof_eq_pre_morph_compat :
@@ -208,7 +172,7 @@ Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
   and_l_2 (B ⊸ S) (B ⊸ R).
   weak_impl_l B R...
   apply Oplus_R_2...
- *)
+*)
 
   weak_impl_l G S...
   and_l_2 ((B ⊸ S) & (B ⊸ R)) 1.
@@ -225,7 +189,7 @@ Eval vm_compute in (exists_AtheseA_on_formula (fun _ _ _ => trueP) R S _ _ simpl
 Definition all_proofs_of env gamma := (forall (p:env⊢gamma), exists_AtheseA_on_formula (fun _ _ _ => trueP) S R _ _ p =trueP).
 
 Definition no_proof_for env gamma := (forall (p:env⊢gamma), False).
-Hint Unfold all_proofs_of no_proof_for : proof.
+#[local] Hint Unfold all_proofs_of no_proof_for : proof.
 
 Lemma all_proofs_of_pre_morph : forall φ Γ Γ',
   all_proofs_of Γ φ -> eq_bool Γ Γ' = true -> all_proofs_of Γ' φ.
@@ -239,7 +203,7 @@ Proof.
       destruct h as [p' h].
       rewrite exists_AtheseA_on_formula_proof_eq_compat with (h2:=p') (1:=h); auto.
 Qed.
-Hint Resolve all_proofs_of_pre_morph : proof.
+#[local] Hint Resolve all_proofs_of_pre_morph : proof.
 
 
 Lemma all_proofs_of_pre_morph' :
@@ -249,8 +213,8 @@ Proof.
   intros φ Γ Γ' H H0 p.
   eapply all_proofs_of_pre_morph;eassumption.
 Qed.
-Hint Resolve all_proofs_of_pre_morph' : proof.
-Hint Rewrite all_proofs_of_pre_morph' : proof.
+#[local] Hint Resolve all_proofs_of_pre_morph' : proof.
+#[local] Hint Rewrite all_proofs_of_pre_morph' : proof.
 Require Import Setoid.
 Add Morphism all_proofs_of with signature (eq ==> Logic.eq ==> iff) as
 all_proof_of_morph.
@@ -261,7 +225,7 @@ Proof.
   apply eq_bool_complete;symmetry;assumption.
 Qed.
 
-Hint Extern 0 ( _ ==  _ ) => apply eq_bool_correct;vm_compute;reflexivity : proof.
+#[local] Hint Extern 0 ( _ ==  _ ) => apply eq_bool_correct;vm_compute;reflexivity : proof.
 
 Tactic Notation "complete" tactic1(t) := t; fail.
 
@@ -287,8 +251,7 @@ elim unusable_var_in_env with (n:=n') (1:=H);
   vm_compute;reflexivity |
   vm_compute;reflexivity |
     intros;decompose_add;simpl in *;repeat split;try discriminate;reflexivity
-]
-.
+].
 
 Ltac var_not_in_env_tac_aux H env :=
   match env with
@@ -443,7 +406,7 @@ Ltac decomp :=
 
 
 
-Ltac one_step p :=   clean p; (repeat decomp);try (complete finish);auto with proof;eauto 3 with proof.
+Ltac one_step p := clean p; (repeat decomp);try (complete finish);auto with proof;eauto 3 with proof.
 
 Ltac unusable_implies_tac n' f H :=
   apply unusable_implies with (1:=H) (n:=n') (φ:=f);
@@ -487,15 +450,8 @@ Proof.
   unusable_implies_tac 4 S p.
 Qed.
 
-
-(* fails here, the tactics re noing less things than before (v8.3 probably). *)
 Lemma aux2 : all_proofs_of ({B ⊸ S, G, (G ⊸ B) ⊕ (G ⊸ S)}) (S ⊕ R).
 Proof.
-  intro p.
-  clean p; (repeat decomp).
-  Focus 3.
-  rewrite H1 in i0.
-  rewrite H in i.
   intros p; one_step p.
   - apply aux3.
   - apply False_ind.
@@ -668,10 +624,10 @@ Qed.
 
 
 
-Hint Resolve aux3 aux4 aux4' aux2 aux6 aux8 aux9 aux9' aux9's
+#[local] Hint Resolve aux3 aux4 aux4' aux2 aux6 aux8 aux9 aux9' aux9's
   aux10 aux11 aux12 aux7 aux5 aux13 aux16 aux15
   aux18 aux18s aux19 aux17 aux10' aux10's aux21
-  aux15s aux4's aux20 aux10'r aux22 aux14:proof.
+  aux15s aux4's aux20 aux10'r aux22 aux14 : proof.
 
 
 Lemma aux23 : no_proof_for ({(B ⊸ S) & (B ⊸ R), G, (G ⊸ B) ⊕ (G ⊸ S)}) R.
@@ -712,7 +668,7 @@ Lemma aux24 : no_proof_for ({1, G, (G ⊸ B) ⊕ (G ⊸ S)}) (S ⊕ R).
   apply aux24s. assumption.
 Qed.
 
-Hint Resolve aux23 aux25 aux6'' aux6'  aux26 aux24s aux24.
+#[local] Hint Resolve aux23 aux25 aux6'' aux6' aux26 aux24s aux24 : core.
 
 Lemma aux1 : all_proofs_of ({(B ⊸ S) & (B ⊸ R), G, (G ⊸ B) ⊕ (G ⊸ S)}) (S ⊕ R).
   intros p; one_step p.
@@ -740,7 +696,7 @@ Lemma aux28 : all_proofs_of ({S, ((B ⊸ S) & (B ⊸ R)) & 1}) (S ⊕ R).
   apply aux30.
 Qed.
 
-Hint Resolve aux27r aux31 aux29 aux30 aux28.
+#[local] Hint Resolve aux27r aux31 aux29 aux30 aux28 : core.
 
 Lemma aux32 : no_proof_for ({(B ⊸ S) & (B ⊸ R), G ⊸ S, G}) (S ⊕ R).
   intros p; one_step p.
@@ -761,7 +717,7 @@ Lemma aux27 : all_proofs_of ({G ⊸ S, G, ((B ⊸ S) & (B ⊸ R)) & 1}) (S ⊕ R
   apply aux33.
 Qed.
 
-Hint Resolve aux34 aux33 aux27.
+#[local] Hint Resolve aux34 aux33 aux27 : core.
 
 Lemma final: all_proofs_of ({ G,((B⊸S)&(B⊸R))&1,(G⊸B)⊕(G⊸S)}) (S⊕R).
 Proof.
@@ -773,7 +729,7 @@ Proof.
   destruct (exists_AtheseA_on_formula
          (λ (e1 : env) (f1 : formula) (_ : e1 ⊢ f1), trueP)
          S R ({G ⊸ B, G, ((B ⊸ S) & (B ⊸ R)) & 1})
-         (S ⊕ R) i0
+         (S ⊕ R) i1
     ); reflexivity.
 Qed.
 

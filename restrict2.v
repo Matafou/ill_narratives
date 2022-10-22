@@ -187,7 +187,7 @@ Ltac zap :=
 
 Lemma Grammar_Stable : ∀ Γ φ (h:Γ ⊢ φ), Contextall h → Istable Contextall h.
 Proof.
-  fix 3.
+  fix Grammar_Stable 3.
   destruct h; intros; try constructor;try (unfold Contextall in *;decompose [and] H;clear H); try split;intros; try solve [  repeat (zap;subst);apply H1;repeat zap
 ].
   Guarded.

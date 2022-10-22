@@ -15,7 +15,6 @@ Infix "AND" := andb (at level 70).
 
 Local Open Scope ILL_scope.
 Local Open Scope Emma.
-Require Import JMeq.
 Require Import Setoid.
 
 Generalizable All Variables.

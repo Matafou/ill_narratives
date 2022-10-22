@@ -12,6 +12,7 @@ ensuite il suffit de taper la commande latex correspondante.
 ⊤ \top
 ⊢ \vdash
 *)
+Require Import FunInd.
 Require Import multiset_spec.
 Require Import ILL_spec.
 Require Import OrderedType.
@@ -45,6 +46,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
   reflexivity proved by Vars.eq_refl
   symmetry proved by Vars.eq_sym
     transitivity proved by Vars.eq_trans as vars_eq_rel.
+  Declare Scope ILL_scope.
   Notation "A ⊸ B" := (Implies A B) : ILL_scope.
   Notation  "A ⊕ B" := (Oplus A B) : ILL_scope.
   Notation  "A ⊗ B" := (Otimes A B) : ILL_scope.
@@ -55,7 +57,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
   Notation  "⊤" := Top : ILL_scope.
   Set Printing Width 100.
   Open Scope ILL_scope.
-  
+
   Function eq (φ ψ:formula)  {struct φ}: Prop := 
     match φ,ψ with 
       | Proposition p,Proposition q => Vars.eq p q
@@ -70,12 +72,12 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
       | _,_ => False
     end
     .
-  
-  
+
+
   Module FormulaOrdered <: OrderedType with Definition t:= formula.
     Definition t := formula.
     Definition eq := eq.
-    Function compare' (phi rho:formula) { struct phi } : comparison := 
+    Function compare' (phi rho:formula) { struct phi } : comparison :=
       match phi,rho with 
         | Proposition p1,Proposition p2 =>
           match Vars.compare p1 p2 with 
@@ -163,13 +165,9 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
     Lemma eq_refl : forall φ, eq φ φ.
     Proof.
       intros φ;unfold eq.
-      induction φ;try now (simpl;split;assumption).
-
-      Focus 1.
-      apply Vars.eq_refl.
-
-      Focus 1.
-      simpl;assumption.
+      induction φ;try (simpl;split;assumption).
+      - apply Vars.eq_refl.
+      - simpl;assumption.
     Qed.
 
     Lemma eq_sym : forall φ ψ, eq φ ψ -> eq ψ φ.
@@ -178,304 +176,172 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
       unfold eq.
       functional induction (Make.eq φ ψ);simpl;try intuition.
     Qed.
-    
+
     Lemma eq_trans : forall φ ψ ρ, eq φ ψ -> eq ψ ρ -> eq φ ρ.
     Proof.
       unfold eq.
       intros φ ψ;functional induction (Make.eq φ ψ).
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto.
-      apply Vars.eq_trans.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto.
-      intuition eauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto.
-      intuition eauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto.
-      intuition eauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto.
-      intuition eauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto.
-      intuition eauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto.
-      intuition eauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto.
-
-      Focus 1.
-      tauto.
+      - intros ρ;destruct ρ;simpl;try tauto.
+        apply Vars.eq_trans.
+      - intros ρ;destruct ρ;simpl;try tauto.
+        intuition eauto.
+      - intros ρ;destruct ρ;simpl;try tauto.
+        intuition eauto.
+      - intros ρ;destruct ρ;simpl;try tauto.
+        intuition eauto.
+      - intros ρ;destruct ρ;simpl;try tauto.
+      - intuition eauto.
+      - intros ρ;destruct ρ;simpl;try tauto.
+        intuition eauto.
+      - intros ρ;destruct ρ;simpl;try tauto.
+        intuition eauto.
+      - intros ρ;destruct ρ;simpl;try tauto.
+      - tauto.
     Qed.
 
     Lemma lt_eq_trans : ∀ φ ψ ρ, lt φ ψ -> eq ψ ρ -> lt φ ρ.
     Proof.
       unfold eq.
       intros φ ψ;functional induction (lt φ ψ);try tauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto.
-      apply VarsFacts.lt_eq.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto.
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto;
-      intuition eauto.
-      right. 
-      split;[apply eq_trans with ψ1;assumption|eauto].
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto;
-      intuition eauto.
-      right. 
-      split;[apply eq_trans with ψ1;assumption|eauto].
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto;
-      intuition eauto.
-      right. 
-      split;[apply eq_trans with ψ1;assumption|eauto].
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto.
-      intuition eauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto.
-      intuition eauto.
-      right. 
-      split;[apply eq_trans with ψ1;assumption|eauto].
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
+      - intros ρ;destruct ρ;simpl;try tauto.
+        apply VarsFacts.lt_eq.
+      - intros ρ;destruct ρ;simpl;try tauto.
+        destruct ψ;simpl;try tauto.
+      - intros ρ;destruct ρ;simpl;try tauto.
+        intros ρ;destruct ρ;simpl;try tauto;
+        intuition eauto.
+        right.
+        split;[apply eq_trans with ψ1;assumption|eauto].
+      - intros ρ;destruct ρ;simpl;try tauto;
+        destruct ψ;simpl;try tauto.
+      - intros ρ;destruct ρ;simpl;try tauto;
+        intuition eauto.
+        right.
+        split;[apply eq_trans with ψ1;assumption|eauto].
+      - intros ρ;destruct ρ;simpl;try tauto;
+        destruct ψ;simpl;try tauto.
+      - intros ρ;destruct ρ;simpl;try tauto;
+        intuition eauto.
+        right.
+        split;[apply eq_trans with ψ1;assumption|eauto].
+      - intros ρ;destruct ρ;simpl;try tauto;
+        destruct ψ;simpl;try tauto.
+      - intros ρ;destruct ρ;simpl;try tauto;
+        destruct ψ;simpl;try tauto.
+      - intros ρ;destruct ρ;simpl;try tauto;
+        destruct ψ;simpl;try tauto.
+      - intros ρ;destruct ρ;simpl;try tauto.
+        intuition eauto.
+      - intros ρ;destruct ρ;simpl;try tauto;
+        destruct ψ;simpl;try tauto.
+      - intros ρ;destruct ρ;simpl;try tauto.
+        intuition eauto.
+        right.
+        split;[apply eq_trans with ψ1;assumption|eauto].
+      - intros ρ;destruct ρ;simpl;try tauto;
+        destruct ψ;simpl;try tauto.
     Qed.
 
     Lemma eq_lt_trans : ∀ φ ψ ρ, eq φ ψ -> lt ψ ρ -> lt φ ρ.
     Proof.
       unfold eq.
       intros φ ψ ρ;revert φ;functional induction (lt ψ ρ);try tauto.
-
-      Focus 1.
-      destruct φ;simpl;try tauto.
-      apply VarsFacts.eq_lt.
-
-      Focus 1.
-      intros φ;destruct φ;simpl;try tauto.
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros φ;destruct φ;simpl;try tauto.
-      intuition eauto.
-      right. 
-      split;[apply eq_trans with φ1;assumption|eauto].
-
-      Focus 1.
-      intros φ;destruct φ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros φ;destruct φ;simpl;try tauto.
-      intuition eauto.
-      right. 
-      split;[apply eq_trans with φ1;assumption|eauto].
-
-      Focus 1.
-      intros φ;destruct φ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros φ;destruct φ;simpl;try tauto;
-      intuition eauto.
-      right. 
-      split;[apply eq_trans with φ1;assumption|eauto].
-
-      Focus 1.
-      intros φ;destruct φ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros φ;destruct φ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros φ;destruct φ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros φ;destruct φ;simpl;try tauto;
-      intuition eauto.
-
-      Focus 1.
-      intros φ;destruct φ;simpl;try tauto.
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto;
-      intuition eauto.
-      right. 
-      split;[apply eq_trans with φ1;assumption|eauto].
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto.
-      destruct ψ;simpl;try tauto.
+      - destruct φ;simpl;try tauto.
+        apply VarsFacts.eq_lt.
+      - intros φ;destruct φ;simpl;try tauto.
+        destruct ψ;simpl;try tauto.
+      - intros φ;destruct φ;simpl;try tauto.
+        intuition eauto.
+        right.
+        split;[apply eq_trans with φ1;assumption|eauto].
+      - intros φ;destruct φ;simpl;try tauto;
+        destruct ψ;simpl;try tauto.
+      - intros φ;destruct φ;simpl;try tauto.
+        intuition eauto.
+        right.
+        split;[apply eq_trans with φ1;assumption|eauto].
+      - intros φ;destruct φ;simpl;try tauto;
+        destruct ψ;simpl;try tauto.
+      - intros φ;destruct φ;simpl;try tauto;
+        intuition eauto.
+        right.
+        split;[apply eq_trans with φ1;assumption|eauto].
+      - intros φ;destruct φ;simpl;try tauto;
+        destruct ψ;simpl;try tauto.
+      - intros φ;destruct φ;simpl;try tauto;
+        destruct ψ;simpl;try tauto.
+      - intros φ;destruct φ;simpl;try tauto;
+        destruct ψ;simpl;try tauto.
+      - intros φ;destruct φ;simpl;try tauto;
+        intuition eauto.
+      - intros φ;destruct φ;simpl;try tauto.
+        destruct ψ;simpl;try tauto.
+      - intros ρ;destruct ρ;simpl;try tauto;
+        intuition eauto.
+        right.
+        split;[apply eq_trans with φ1;assumption|eauto].
+      - intros ρ;destruct ρ;simpl;try tauto.
+        destruct ψ;simpl;try tauto.
     Qed.
 
 
     Lemma lt_trans : ∀ phi rho xi, lt phi rho -> lt rho xi -> lt phi xi.
     Proof.
       intros φ ψ;functional induction (lt φ ψ);try tauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto.
-      apply Vars.lt_trans.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto.
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto.
-      intuition eauto using lt_eq_trans,eq_lt_trans.
-      right;split;[apply eq_trans with ψ1;assumption|eauto].
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto. 
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto. 
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto.
-      intuition eauto using lt_eq_trans,eq_lt_trans.
-      right;split;[apply eq_trans with ψ1;assumption|eauto].
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto. 
-      intuition eauto using lt_eq_trans,eq_lt_trans.
-      right;split;[apply eq_trans with ψ1;assumption|eauto].
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto;
-      intuition eauto using lt_eq_trans,eq_lt_trans.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto. 
-      intuition eauto using lt_eq_trans,eq_lt_trans.
-      right;split;[apply eq_trans with ψ1;assumption|eauto].
-
-      Focus 1.
-      intros ρ;destruct ρ;simpl;try tauto;
-      destruct ψ;simpl;try tauto.
+      - intros ρ;destruct ρ;simpl;try tauto.
+        apply Vars.lt_trans.
+      - intros ρ;destruct ρ;simpl;try tauto.
+        destruct ψ;simpl;try tauto.
+      - intros ρ;destruct ρ;simpl;try tauto.
+        intuition eauto using lt_eq_trans,eq_lt_trans.
+        right;split;[apply eq_trans with ψ1;assumption|eauto].
+      - intros ρ;destruct ρ;simpl;try tauto.
+        + destruct ψ;simpl;try tauto.
+        + intros ρ;destruct ρ;simpl;try tauto.
+          destruct ψ;simpl;try tauto.
+      - intros ρ;destruct ρ;simpl;try tauto.
+        intuition eauto using lt_eq_trans,eq_lt_trans.
+        right;split;[apply eq_trans with ψ1;assumption|eauto].
+      - intros ρ;destruct ρ;simpl;try tauto;
+        destruct ψ;simpl;try tauto.
+      - intros ρ;destruct ρ;simpl;try tauto. 
+        intuition eauto using lt_eq_trans,eq_lt_trans.
+        right;split;[apply eq_trans with ψ1;assumption|eauto].
+      - intros ρ;destruct ρ;simpl;try tauto;
+        destruct ψ;simpl;try tauto.
+      - intros ρ;destruct ρ;simpl;try tauto;
+        destruct ψ;simpl;try tauto.
+      - intros ρ;destruct ρ;simpl;try tauto;
+        destruct ψ;simpl;try tauto.
+      - intros ρ;destruct ρ;simpl;try tauto;
+        intuition eauto using lt_eq_trans,eq_lt_trans.
+      - intros ρ;destruct ρ;simpl;try tauto;
+        destruct ψ;simpl;try tauto.
+      - intros ρ;destruct ρ;simpl;try tauto. 
+        intuition eauto using lt_eq_trans,eq_lt_trans.
+        right;split;[apply eq_trans with ψ1;assumption|eauto].
+      - intros ρ;destruct ρ;simpl;try tauto;
+        destruct ψ;simpl;try tauto.
     Qed.
-    
+
     Lemma lt_not_eq : ∀ x y, lt x y -> not (eq x y).
     Proof.
       intros φ ψ.
       unfold eq.
       functional induction (lt φ ψ); try tauto.
-
-      Focus 1.
-      apply Vars.lt_not_eq.
-
-      Focus 1.
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      simpl;intuition.
-
-      Focus 1.
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      simpl;intuition.
-
-      Focus 1.
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      simpl;intuition.
-    
-      Focus 1.
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      destruct ψ;simpl;try tauto.
-
-      Focus 1.
-      destruct ψ;simpl;try tauto.
-    
-      Focus 1.
-      simpl;intuition.
-    
-      Focus 1.
-      destruct ψ;simpl;try tauto.
+      - apply Vars.lt_not_eq.
+      - destruct ψ;simpl;try tauto.
+      - simpl;intuition.
+      - destruct ψ;simpl;try tauto.
+      - simpl;intuition.
+      - destruct ψ;simpl;try tauto.
+      - simpl;intuition.
+      - destruct ψ;simpl;try tauto.
+      - destruct ψ;simpl;try tauto.
+      - destruct ψ;simpl;try tauto.
+      - destruct ψ;simpl;try tauto.
+      - simpl;intuition.
+      - destruct ψ;simpl;try tauto.
     Qed.
 
     Lemma compare'_eq_correct : 
@@ -494,41 +360,20 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
     Proof.
       intros φ ψ.
       functional induction (compare' φ ψ);try discriminate;simpl;auto.
-
-      Focus 1.
-      destruct rho;simpl;tauto.
-
-      Focus 1.
-      intros.
-      right;auto using compare'_eq_correct.
-
-      Focus 1.
-      destruct rho;simpl;tauto.
-
-      Focus 1.
-      intros.
-      right;auto using compare'_eq_correct.
-
-      Focus 1.
-      destruct rho;simpl;tauto.
-
-
-      Focus 1.
-      intros.
-      right;auto using compare'_eq_correct.
-
-      Focus 1.
-      destruct rho;simpl;tauto.
-
-      Focus 1.
-      destruct rho;simpl;tauto.
-
-      Focus 1.
-      intros.
-      right;auto using compare'_eq_correct.
-
-      Focus 1.
-      destruct rho;simpl;tauto.
+      - destruct rho;simpl;tauto.
+      - intros.
+        right;auto using compare'_eq_correct.
+      - destruct rho;simpl;tauto.
+      - intros.
+        right;auto using compare'_eq_correct.
+      - destruct rho;simpl;tauto.
+      - intros.
+        right;auto using compare'_eq_correct.
+      - destruct rho;simpl;tauto.
+      - destruct rho;simpl;tauto.
+      - intros.
+        right;auto using compare'_eq_correct.
+      - destruct rho;simpl;tauto.
     Qed.
 
     Lemma compare'_gt_correct : 
@@ -537,41 +382,20 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
       assert (eq_sym:=eq_sym).
       intros φ ψ.
       functional induction (compare' φ ψ);try discriminate;simpl;auto.
-
-      Focus 1.
-      destruct phi;simpl;tauto.
-
-      Focus 1.
-      intros.
-      right;auto using compare'_eq_correct.
-      
-      Focus 1.
-      destruct phi;simpl;tauto.
-
-      Focus 1.
-      intros.
-      right;auto using compare'_eq_correct.
-
-      Focus 1.
-      destruct phi;simpl;tauto.
-
-
-      Focus 1.
-      intros.
-      right;auto using compare'_eq_correct.
-
-      Focus 1.
-      destruct phi;simpl;tauto.
-
-      Focus 1.
-      destruct phi;simpl;tauto.
-
-      Focus 1.
-      intros.
-      right;auto using compare'_eq_correct.
-
-      Focus 1.
-      destruct phi;simpl;tauto.
+      - destruct phi;simpl;tauto.
+      - intros.
+        right;auto using compare'_eq_correct.
+      - destruct phi;simpl;tauto.
+      - intros.
+        right;auto using compare'_eq_correct.
+      - destruct phi;simpl;tauto.
+      - intros.
+        right;auto using compare'_eq_correct.
+      - destruct phi;simpl;tauto.
+      - destruct phi;simpl;tauto.
+      - intros.
+        right;auto using compare'_eq_correct.
+      - destruct phi;simpl;tauto.
     Qed.
 
     Lemma compare : ∀ x y, Compare lt eq x y.
@@ -585,7 +409,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
       constructor 3.
       apply compare'_gt_correct;exact Heq.
     Defined.
-      
+
     Definition eq_dec : ∀ x y, {eq x y}+{~eq x y}.
     Proof.
       intros x y.

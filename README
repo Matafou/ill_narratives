@@ -1,6 +1,6 @@
 -*- outline -*-  
 
-* To compile you need coq-8.3.
+* To compile you need coq-8.14.
 
 ** To compile coq files:
 
