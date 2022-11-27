@@ -38,8 +38,7 @@ Require Import ILL.
     Hypothesis P_neq_R : not (Vars.eq vP vR).
     Hypothesis P_neq_S : not (Vars.eq vP vS).
     Hypothesis R_neq_S : not (Vars.eq vR vS).
-    Require Import Setoid.
- 
+
 
     Lemma Proof_from_figure_1:  {D, P & 1, R & 1, D ⊸ (((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)} ⊢ ((S ⊗ D) ⊕ D).
     Proof with (try complete (try constructor; prove_multiset_eq)).
@@ -69,7 +68,7 @@ Require Import ILL.
       times_r ({ P , P ⊸ S}) ({D})...
       impl_l ({P}) (∅) (P) (S)...
     Qed.
-    
+
     (* Same proof as above but with some more automation *)
     Lemma Copy_Proof_from_figure_1_with_weak_search:
     {D, P & 1, R & 1, D ⊸ (((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)} ⊢ ((S ⊗ D) ⊕ D).
@@ -92,16 +91,16 @@ Require Import ILL.
       impl_l ({P}) (∅) (P) (S)...
     Qed.
 
-    
+
     Lemma Copy_Proof_from_figure_1_with_stronger_search:
     {D, P & 1, R & 1, D ⊸ (((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)} ⊢ ((S ⊗ D) ⊕ D).
     Proof with try complete (finish_proof_strong || prove_multiset_eq).
       search_one_goal_strong ({D, (P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S))), P & 1, R & 1} ⊢ (S ⊗ D) ⊕ D).
       oplus_l (P ⊸ S) (R ⊸ (1 ⊕ (P ⊸ S))).
-      
+
       search_one_goal_strong ({P, P ⊸ S, D} ⊢ (S ⊗ D)).
       times_r ({P, (P ⊸ S) }) ({D})...
-      
+
       search_one_goal_strong ({1 ⊕ (P ⊸ S), D, P & 1} ⊢ (S ⊗ D) ⊕ D).
       oplus_l 1 (P ⊸ S)...
       search_one_goal_strong ( {P ⊸ S, D, P} ⊢ (S ⊗ D)).
@@ -194,14 +193,13 @@ Require Import ILL.
 End MakePaperProofs.
 *)
 Require Import String.
-
+Require Import Setoid.
 
 
 Module PaperProofsString.
   Module M := ILL_Make(VarsString).
   Import M.
   Import FormulaMultiSet.
-  Require Import Setoid.
   Include ILL_tactics_refl(VarsString)(M).
 
   (** Figure 1 de epsrc_case_for_support. *)
@@ -269,10 +267,10 @@ Module PaperProofsString.
   Proof with try now (finish_proof_strong || prove_multiset_eq).
     search_one_goal_strong ({D, (P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S))), P & 1, R & 1} ⊢ (S ⊗ D) ⊕ D).
     oplus_l (P ⊸ S) (R ⊸ (1 ⊕ (P ⊸ S))).
-    
+
     search_one_goal_strong ({P, P ⊸ S, D} ⊢ (S ⊗ D)).
     times_r ({P, (P ⊸ S) }) ({D})...
-    
+
     search_one_goal_strong ({1 ⊕ (P ⊸ S), D, P & 1} ⊢ (S ⊗ D) ⊕ D).
     oplus_l 1 (P ⊸ S)...
     search_one_goal_strong ( {P ⊸ S, D, P} ⊢ (S ⊗ D)).
@@ -357,7 +355,7 @@ Section figure_5.
       (((L ⊗ D₁) ⊸ (L ⊗ D₂)))...
       bang_d 
         (((L ⊗ D₁) ⊸ (L ⊗ D₂)))...
-Qed.  
+Qed.
 
 End figure_5.
 End PaperProofsString.

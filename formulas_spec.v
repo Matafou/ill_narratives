@@ -40,6 +40,7 @@ Module Type ILL_formulas(Vars : OrderedType).
   | Top : formula.
 
   (** Les notations classiques  *)
+  Declare Scope ILL_scope.
   Notation "A ⊸ B" := (Implies A B) : ILL_scope.
   Notation  "A ⊕ B" := (Oplus A B) : ILL_scope.
   Notation  "A ⊗ B" := (Otimes A B) : ILL_scope.

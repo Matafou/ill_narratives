@@ -19,10 +19,10 @@ Require Import ILL_spec.
 Require Import OrderedType.
 Require Import Utf8_core.
 Require Import vars.
+Require multiset.
 
 Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
   Include formulas.Make(Vars).
-  Require multiset.
   Module Import FormulaMultiSet := multiset.MakeList(FormulaOrdered).
 
   Reserved Notation "x ⊢ y" (at level 70, no associativity).
@@ -97,7 +97,7 @@ Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
   Proof.
     exact remove_morph_eq.
   Qed.
-  
+
   Add Relation formula FormulaOrdered.eq
   reflexivity proved by FormulaOrdered.eq_refl
   symmetry proved by FormulaOrdered.eq_sym
@@ -126,89 +126,57 @@ Module ILL_Make(Vars : OrderedType)<:ILL_sig(Vars).
   Proof.
     intros φ Γ Γ' Heq H.
     revert Γ' Heq.
-
     induction H;intros Γ' Heq.
-
     - constructor 1.
       rewrite <- Heq;assumption.
-
     - constructor 2.
       apply IHILL_proof.
       rewrite Heq;reflexivity.
-
-    - repeat rewrite Heq in *.
-      (*     rewrite Heq in H. *)
-      (*     rewrite Heq in H0. *)
-      econstructor; (now eauto).
-
-    - rewrite Heq in *.
+    - rewrite Heq in H.
+      rewrite Heq in H0.
+      econstructor; now eauto.
+    - rewrite Heq in H.
       econstructor; eassumption.
-
-    - rewrite ?Heq in H.
+    - rewrite Heq in H.
       econstructor 5. 
       + eexact H.
-      + apply IHILL_proof.
-        rewrite Heq.
-        reflexivity.
-
+      + apply IHILL_proof; rewrite Heq; reflexivity.
     - constructor 6.
       rewrite <-Heq;assumption.
-
     - rewrite Heq in H.
       econstructor 7.
       + eassumption.
-      + apply IHILL_proof.
-        rewrite Heq;reflexivity.
-
-    - econstructor ; (now eauto).     
-
+      + apply IHILL_proof; rewrite Heq; reflexivity.
+    - econstructor; now eauto.
     - econstructor 9.
-      + rewrite Heq in H;eexact H.
-      + apply IHILL_proof.
-        rewrite Heq;reflexivity.
-
+      + rewrite Heq in H; eexact H.
+      + apply IHILL_proof; rewrite Heq; reflexivity.
     - econstructor 10.
-      + rewrite Heq in H;eexact H.
-      + apply IHILL_proof. rewrite Heq;reflexivity.
-
+      + rewrite Heq in H; eexact H.
+      + apply IHILL_proof; rewrite Heq; reflexivity.
     - econstructor 11.
-      + rewrite Heq in H;eexact H.
-      + apply IHILL_proof1;rewrite Heq;reflexivity.
-      + apply IHILL_proof2;rewrite Heq;reflexivity.
-
-    - econstructor ; (now eauto). 
-
-    - constructor ; (now auto).
-
-    - constructor; fail.
-
+      + rewrite Heq in H; eexact H.
+      + apply IHILL_proof1; rewrite Heq; reflexivity.
+      + apply IHILL_proof2; rewrite Heq; reflexivity.
+    - econstructor; now eauto.
+    - constructor; now auto.
+    - now constructor.
     - constructor 15.
-      rewrite <- Heq;assumption.
-
+      rewrite <- Heq; assumption.
     - econstructor 16.
-      + rewrite Heq in H;eexact H.
-      + apply IHILL_proof;rewrite Heq;reflexivity.
-
+      + rewrite Heq in H; eexact H.
+      + apply IHILL_proof; rewrite Heq; reflexivity.
     - econstructor 17.
-      + rewrite Heq in H;eexact H.
-      + apply IHILL_proof;rewrite Heq;reflexivity.
-
+      + rewrite Heq in H; eexact H.
+      + apply IHILL_proof; rewrite Heq; reflexivity.
     - econstructor 18.
-      + rewrite Heq in H;eexact H.
-      + apply IHILL_proof;rewrite Heq;reflexivity.
-  Defined. 
-  
+      + rewrite Heq in H; eexact H.
+      + apply IHILL_proof; rewrite Heq; reflexivity.
+  Defined.
+
 
   (* On peut réécrire à l'intérieur d'un ⊢. *)
-  Add Morphism ILL_proof with signature (FormulaMultiSet.eq ==> Logic.eq ==> equivT) as ILL_proof_morph.
-  Proof.
-    intros Γ Γ' Heq φ;split;apply ILL_proof_pre_morph.
-    assumption.
-    symmetry;assumption.
-  Qed.
-
-
-  Add Morphism ILL_proof with signature (FormulaMultiSet.eq ==> Logic.eq ==> iff) as ILL_proof_morph_prop.
+  Add Morphism ILL_proof with signature (FormulaMultiSet.eq ==> Logic.eq ==> iff) as ILL_proof_morph.
   Proof.
     intros Γ Γ' Heq φ;split;apply ILL_proof_pre_morph.
     assumption.
@@ -387,7 +355,6 @@ Module ILL_tactics_refl(Vars:OrderedType)(M:ILL_sig(Vars)).
             (*     [search_one_goal g | prove_multiset_eq])|| fail 0 *)
           | context C [(add ( ?p' & ?q') ?env')] =>
             (and_l_1 p' q'; search_one_goal g ) || fail 0
-            
             (* let e := context C [ env' ] in   *)
             (*   (apply And_L_1 with (Γ:=e) (p:=p') (q:=q');  *)
             (*     [search_one_goal g | prove_multiset_eq])||fail 0 *)
@@ -438,7 +405,7 @@ Module ILL_tactics_refl(Vars:OrderedType)(M:ILL_sig(Vars)).
       | |- _ ⊢ ?p ⊕ ?q => 
         apply Oplus_R_2;search_one_goal_strong g
     end.
-  
+
   Ltac finish_proof_strong := search_one_goal_strong ({⊤}⊢⊤).
 
 End ILL_tactics_refl.

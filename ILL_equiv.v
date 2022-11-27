@@ -38,23 +38,23 @@ Module Proof_eq.
 
   Lemma refl : ∀ φ Γ (h:Γ ⊢ φ), eq h h.
   Proof.
-    fix 3.
+    fix refl 3.
     intros φ Γ h.
     case h;constructor;apply refl.
   Qed.
 
   Lemma sym : ∀ φ Γ Γ' (h1:Γ⊢φ) (h2:Γ'⊢φ), eq h1 h2 -> eq h2 h1.
-  Proof.    
-    fix 6.
+  Proof.
+    fix sym 6.
     intros φ Γ Γ' h1 h2 H.
-    case H;intros;try now (constructor; apply sym;assumption).
+    case H; intros; now (constructor; apply sym).
   Qed.
 
   Lemma eq_pre_morph : ∀ φ Γ (h:Γ ⊢ φ) Γ' (heqΓ: Γ == Γ') , eq (ILL_proof_pre_morph φ Γ Γ' heqΓ h) h.
   Proof.
-    fix 3.
+    fix eq_pre_morph 3.
     intros φ Γ h.
-    case h;intros;simpl; try solve [ constructor;try apply refl;try apply eq_pre_morph].
+    case h; intros; simpl; solve [ constructor; try apply refl; try apply eq_pre_morph].
   Qed.
 End Proof_eq.
 
@@ -73,7 +73,7 @@ Module nu_eq.
   Qed.
 
   Lemma sym : ∀ φ Γ Γ' (h1:Γ⊢φ) (h2:Γ'⊢φ), eq h1 h2 -> eq h2 h1.
-  Proof.    
+  Proof.
     intros φ Γ Γ' h1 h2.
     unfold eq.
     intros H.
@@ -83,12 +83,10 @@ Module nu_eq.
 
   Lemma eq_pre_morph : ∀ φ Γ (h:Γ ⊢ φ) Γ' (heqΓ: Γ == Γ') , eq (ILL_proof_pre_morph φ Γ Γ' heqΓ h) h.
   Proof.
-    fix 3.
+    fix eq_pre_morph 3.
     intros φ Γ h.
-    case h;intros;simpl;unfold eq in *;simpl;
-      try solve [reflexivity | setoid_rewrite eq_pre_morph; reflexivity].
+    case h; intros; simpl; unfold eq in *; simpl;
+      solve [reflexivity | setoid_rewrite eq_pre_morph; reflexivity].
   Qed.
 
 End nu_eq.
-  
-

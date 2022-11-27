@@ -1,3 +1,8 @@
+.*.aux
+.lia.cache
+.Makefile.d
 *.glob
 *.vo
+*.vos
+*.vok
 *.v.d

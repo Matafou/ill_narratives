@@ -114,7 +114,7 @@ Module Type ILL_sig(Vars : OrderedType).
   Parameter ILL_proof_pre_morph : forall φ Γ Γ', Γ == Γ' ->  (Γ⊢φ) -> (Γ'⊢φ).
 
   (* On peut réécrire à l'intérieur d'un ⊢. *)
-  Add Morphism ILL_proof with signature (FormulaMultiSet.eq ==> Logic.eq ==> equivT) as ILL_proof_morph.
+  Add Morphism ILL_proof with signature (FormulaMultiSet.eq ==> Logic.eq ==> iff) as ILL_proof_morph.
   Proof.
     intros Γ Γ' Heq φ;split;apply ILL_proof_pre_morph.
     assumption.
