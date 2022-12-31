@@ -174,7 +174,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
     Proof.
       intros φ ψ.
       unfold eq.
-      functional induction (Make.eq φ ψ);simpl;try intuition.
+      functional induction (Make.eq φ ψ); simpl; intuition (now symmetry).
     Qed.
 
     Lemma eq_trans : forall φ ψ ρ, eq φ ψ -> eq ψ ρ -> eq φ ρ.

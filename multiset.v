@@ -323,7 +323,7 @@ Module PreMake(X:OrderedType)(Maps:FMapInterface.S with Module E:=X) <: S(X).
     - auto.
     - unfold mem,add,add_multiple.
       intros neq.
-      destruct (Maps.find b ms); rewrite MapsPtes.F.add_neq_b by intuition; auto.
+      destruct (Maps.find b ms); rewrite MapsPtes.F.add_neq_b; auto with relations.
   Qed.
 
   Lemma mem_add_is_mem : forall a b ms, mem a ms = true -> mem a (add b ms) = true.
@@ -334,7 +334,7 @@ Module PreMake(X:OrderedType)(Maps:FMapInterface.S with Module E:=X) <: S(X).
     apply add_is_mem;assumption.
     unfold mem,add,add_multiple.
     intros n H.
-    now destruct (Maps.find b ms); rewrite MapsPtes.F.add_neq_b by intuition.
+    destruct (Maps.find b ms); rewrite MapsPtes.F.add_neq_b; auto with relations.
   Qed.
 
   Lemma add_multiple_comm :
@@ -1114,7 +1114,7 @@ Qed.
       destruct (Maps.find k a0).
       case (X.eq_dec a k);intros heq.
       now rewrite MapsPtes.F.add_eq_b.
-      rewrite MapsPtes.F.add_neq_b by intuition.
+      rewrite MapsPtes.F.add_neq_b by auto with relations.
       apply H2.
       red in H1.
       generalize (H1 a).
@@ -1125,16 +1125,16 @@ Qed.
       intros.
       rewrite <- H4.
       reflexivity.
-      intuition.
+      auto with relations.
       case (X.eq_dec a k);intros heq.
       now rewrite MapsPtes.F.add_eq_b.
-      rewrite MapsPtes.F.add_neq_b by intuition.
+      rewrite MapsPtes.F.add_neq_b by auto with relations.
       apply H2.
       red in H1.
       generalize (H1 a).
       rewrite (MapsFact.mem_find_b) in H3. 
       destruct (Maps.find a m'');try discriminate.
-      rewrite MapsPtes.F.add_neq_o by intuition.
+      rewrite MapsPtes.F.add_neq_o by auto with relations.
       rewrite MapsFact.mem_find_b.
       intros.
       rewrite <- H4.
@@ -1152,10 +1152,10 @@ Qed.
       destruct (Maps.find k a0).
       + case (X.eq_dec a k);intros heq.
         * now rewrite MapsPtes.F.add_eq_b.
-        * rewrite MapsPtes.F.add_neq_b by intuition; auto.
+        * rewrite MapsPtes.F.add_neq_b; auto with relations.
       + case ( X.eq_dec a k);intros.
         * now apply MapsPtes.F.add_eq_b.
-        * rewrite MapsPtes.F.add_neq_b by intuition; auto.
+        * rewrite MapsPtes.F.add_neq_b; auto with relations.
   Qed.
 
   Lemma mem_union_destruct : forall a ms ms', mem a (union ms ms') = true -> mem a ms = true \/mem a ms' = true.
@@ -1172,13 +1172,13 @@ Qed.
           rewrite MapsPtes.F.mem_find_b.
           rewrite H1.
           now rewrite MapsPtes.F.add_eq_o; auto.
-        * rewrite MapsPtes.F.add_neq_b in H3 by intuition.
+        * rewrite MapsPtes.F.add_neq_b in H3 by auto with relations.
           destruct (H2 H3);auto.
           left.
           red in H1.
           rewrite MapsPtes.F.mem_find_b.
           rewrite H1.
-          rewrite MapsPtes.F.add_neq_o by intuition.
+          rewrite MapsPtes.F.add_neq_o by auto with relations.
           now rewrite <- MapsPtes.F.mem_find_b.
       + intros H H0 H1 H2 H3.
         case (X.eq_dec a k);intros heq.
@@ -1186,13 +1186,13 @@ Qed.
           rewrite MapsPtes.F.mem_find_b.
           rewrite H1.
           now rewrite MapsPtes.F.add_eq_o; auto.
-        * rewrite MapsPtes.F.add_neq_b in H3 by intuition.
+        * rewrite MapsPtes.F.add_neq_b in H3 by auto with relations.
           destruct (H2 H3);auto.
           left.
           red in H1.
           rewrite MapsPtes.F.mem_find_b.
           rewrite H1.
-          rewrite MapsPtes.F.add_neq_o by intuition.
+          rewrite MapsPtes.F.add_neq_o by auto with relations.
           now rewrite <- MapsPtes.F.mem_find_b.
   Qed.
 
@@ -1204,8 +1204,8 @@ Qed.
     intros H.
     case (Maps.find b ms).
     intros [ | n].
-    now rewrite MapsPtes.F.remove_neq_b by intuition.
-    now rewrite MapsPtes.F.add_neq_b by intuition.
+    now rewrite MapsPtes.F.remove_neq_b by auto with relations.
+    now rewrite MapsPtes.F.add_neq_b by auto with relations.
     auto.
   Qed.
 
@@ -1217,13 +1217,13 @@ Qed.
     destruct n as [ | n].
     case (X.eq_dec a b);intros heq.
     now rewrite MapsPtes.F.remove_eq_b.
-    now rewrite MapsPtes.F.remove_neq_b by intuition.
+    now rewrite MapsPtes.F.remove_neq_b by auto with relations.
     case (X.eq_dec a b);intros heq.
     intros _.
     rewrite MapsPtes.F.mem_find_b.
     rewrite <- (@MapsPtes.F.find_o _ _ _  _ heq) in H.
     rewrite H;reflexivity.
-    now rewrite MapsPtes.F.add_neq_b by intuition.
+    now rewrite MapsPtes.F.add_neq_b by auto with relations.
     trivial.
   Qed.
 
