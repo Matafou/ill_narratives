@@ -1,0 +1,73 @@
+
+
+* Les formules
+
+#+INCLUDE: "./formulas_spec.v"
+#+begin_src coq
+  Inductive formula : Type := 
+  | Proposition : Vars.t -> formula (* atomic proposition *)
+  | Implies : formula -> formula -> formula 
+  | Otimes : formula -> formula -> formula 
+  | Oplus : formula -> formula -> formula 
+  | One : formula 
+  | Zero : formula 
+  | Bang : formula -> formula
+  | And : formula -> formula  -> formula 
+  | Top : formula.
+
+  Declare Scope ILL_scope.
+  Notation "A ⊸ B" := (Implies A B) : ILL_scope.
+  Notation  "A ⊕ B" := (Oplus A B) : ILL_scope.
+  Notation  "A ⊗ B" := (Otimes A B) : ILL_scope.
+  Notation "1" := One : ILL_scope.
+  Notation "0" := Zero : ILL_scope.
+  Notation  "! A" := (Bang A) : ILL_scope.
+  Notation  "A & B" := (And A B) : ILL_scope.
+  Notation  "⊤" := Top : ILL_scope.
+#+end_src
+
+* Les preuves
+- jugements Γ ⊢ h: φ représenté par: " h: Γ ⊢ φ "
+
+#+INCLUDE: "./ILL_spec.v"
+
+#+begin_src coq
+    Inductive ILL_proof Γ: formula → Prop :=
+      Id : ∀ φ, Γ == {φ} → Γ ⊢ φ
+    ...
+    | Impl_L : ∀ Δ Δ' φ ψ r, φ ⊸ ψ ∈ Γ → Γ \ φ ⊸ ψ == Δ ∪ Δ'
+                         → Δ ⊢ φ → ψ::Δ' ⊢ r → Γ ⊢ r
+    ...
+    | And_L_1 : ∀ φ ψ r , φ & ψ ∈ Γ →  φ:: (Γ \ φ & ψ) ⊢ r → Γ ⊢ r
+    ...
+#+end_src
+
+* Les sous-ensemble des formules considérés
+
+#+INCLUDE: "restrict2.v"
+- propriété inductive générique =(Istable pred h)= qui signifie: pred
+  est vrai pour tous les sous-arbres de la preuve h.
+- prédicat =Act: formula -> Prop= mutuellement défini:
+
+#+begin_src coq
+Inductive Act : formula -> Prop := (* Act *)
+| A1: Act 1
+| A2:∀ φ₁ φ₂, Cres φ₁ → Context φ₂ → Act (φ₁ ⊸ φ₂)
+| A3: ∀ φ₁ φ₂, Act φ₁ → Act φ₂ → Act (φ₁ ⊕ φ₂)
+| A4: ∀ φ₁ φ₂, Act φ₁ → Act φ₂ → Act (φ₁ & φ₂)
+| A5: ∀ φ, Act φ → Act (! φ)
+with Cres: formula -> Prop:= (* CRes *)
+| Cres1: Cres 1
+| Cres2: ∀ n, Cres (Proposition n)
+| Cres3: ∀ φ₁ φ₂, Cres φ₁ → Cres φ₂ → Cres (φ₁ ⊗ φ₂)
+with Context: formula -> Prop:= (* Context *)
+| Context1:∀ φ, Act φ → Context φ
+| Context2:∀ φ, Res φ → Context φ
+| Context3: ∀ φ₁ φ₂, Context φ₁ → Context φ₂ → Context (φ₁ ⊗ φ₂)
+with Res: formula -> Prop:= (* Res *)I
+  R1: Res 1
+| R2: ∀ n, Res (Proposition n)
+| R3: ∀ φ, Res φ → Res (!φ)
+| R4: ∀ φ₁ φ₂, Res φ₁ → Res φ₂ → Res (φ₁ ⊗ φ₂)
+| R5: ∀ φ₁ φ₂, Res φ₁ → Res φ₂ → Res (φ₁ & φ₂).
+#+end_src
