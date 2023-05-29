@@ -48,34 +48,34 @@ Module Type ILL_sig(Vars : OrderedType).
   Definition env := FormulaMultiSet.t.
 
   Inductive ILL_proof Γ: formula → Prop :=
-    Id : ∀ p, Γ == {p} -> Γ ⊢ p
-(*   | Cut : ∀ Δ p q, Γ ⊢ p → p::Δ ⊢ q → Δ ∪ Γ ⊢ q  *)
-  | Impl_R : ∀ p q, p::Γ ⊢ q → Γ ⊢ p ⊸ q
-  | Impl_L : ∀ Δ Δ' p q r, p ⊸ q ∈ Γ -> Γ \ p⊸q == Δ ∪ Δ' ->  Δ ⊢ p → q::Δ' ⊢ r → Γ ⊢ r
-  | Times_R : ∀ Δ Δ' p q , Γ == Δ ∪ Δ' -> Δ ⊢ p → Δ' ⊢ q → Γ ⊢ p ⊗ q
-  | Times_L : ∀ p q r , p ⊗ q ∈ Γ -> q :: p :: (Γ \ p⊗q) ⊢ r → Γ ⊢ r
+    Id : ∀ φ, Γ == {φ} -> Γ ⊢ φ
+(*   | Cut : ∀ Δ p ψ, Γ ⊢ p → p::Δ ⊢ ψ → Δ ∪ Γ ⊢ ψ  *)
+  | Impl_R : ∀ φ ψ, φ::Γ ⊢ ψ → Γ ⊢ φ ⊸ ψ
+  | Impl_L : ∀ Δ Δ' φ ψ r, φ ⊸ ψ ∈ Γ -> Γ \ φ⊸ψ == Δ ∪ Δ' ->  Δ ⊢ φ → ψ::Δ' ⊢ r → Γ ⊢ r
+  | Times_R : ∀ Δ Δ' φ ψ , Γ == Δ ∪ Δ' -> Δ ⊢ φ → Δ' ⊢ ψ → Γ ⊢ φ ⊗ ψ
+  | Times_L : ∀ φ ψ r , φ ⊗ ψ ∈ Γ -> ψ :: φ :: (Γ \ φ⊗ψ) ⊢ r → Γ ⊢ r
   | One_R : Γ == ∅ -> Γ ⊢ 1
-  | One_L : ∀ p , 1 ∈ Γ -> Γ \ 1 ⊢ p → Γ ⊢ p
-  | And_R : ∀ p q , Γ ⊢ p → Γ ⊢ q → Γ ⊢ p & q
-  | And_L_1 : ∀ p q r , p&q ∈ Γ ->  p:: (Γ \ p&q) ⊢ r → Γ ⊢ r
-  | And_L_2 : ∀ p q r , p&q ∈ Γ ->  q::(Γ \ p&q) ⊢ r → Γ ⊢ r
-  | Oplus_L : ∀ p q r , p⊕q ∈ Γ ->  p :: (Γ \ p⊕q) ⊢ r → q :: (Γ \ p⊕q) ⊢ r → Γ ⊢ r
-  | Oplus_R_1 : ∀ p q , Γ ⊢ p → Γ ⊢ p ⊕ q
-  | Oplus_R_2 : ∀ p q , Γ ⊢ q → Γ ⊢ p ⊕ q 
+  | One_L : ∀ φ , 1 ∈ Γ -> Γ \ 1 ⊢ φ → Γ ⊢ φ
+  | And_R : ∀ φ ψ , Γ ⊢ φ → Γ ⊢ ψ → Γ ⊢ φ & ψ
+  | And_L_1 : ∀ φ ψ r , φ&ψ ∈ Γ ->  φ:: (Γ \ φ&ψ) ⊢ r → Γ ⊢ r
+  | And_L_2 : ∀ φ ψ r , φ&ψ ∈ Γ ->  ψ::(Γ \ φ&ψ) ⊢ r → Γ ⊢ r
+  | Oplus_L : ∀ φ ψ r , φ⊕ψ ∈ Γ ->  φ :: (Γ \ φ⊕ψ) ⊢ r → ψ :: (Γ \ φ⊕ψ) ⊢ r → Γ ⊢ r
+  | Oplus_R_1 : ∀ φ ψ , Γ ⊢ φ → Γ ⊢ φ ⊕ ψ
+  | Oplus_R_2 : ∀ φ ψ , Γ ⊢ ψ → Γ ⊢ φ ⊕ ψ 
   | T_ : Γ ⊢ ⊤
-  | Zero_ : ∀ p , 0 ∈ Γ → Γ ⊢ p
-  | Bang_D : ∀ p q , !p∈Γ -> p :: (Γ \ !p) ⊢ q → Γ ⊢ q
-  | Bang_C : ∀ p q , !p∈Γ -> !p :: Γ ⊢ q →  Γ ⊢ q
-  | Bang_W : ∀ p q , !p∈Γ -> Γ \ !p ⊢ q →  Γ ⊢ q
+  | Zero_ : ∀ φ , 0 ∈ Γ → Γ ⊢ φ
+  | Bang_D : ∀ φ ψ , !φ∈Γ -> φ :: (Γ \ !φ) ⊢ ψ → Γ ⊢ ψ
+  | Bang_C : ∀ φ ψ , !φ∈Γ -> !φ :: Γ ⊢ ψ →  Γ ⊢ ψ
+  | Bang_W : ∀ φ ψ , !φ∈Γ -> Γ \ !φ ⊢ ψ →  Γ ⊢ ψ
   (* Syntax defined simutaneously. *)
     where " x ⊢ y " := (ILL_proof x y) : ILL_scope.
 
 
-  (** Morphismes. Les morphismes déclar&és ci-dessous permettront d'utiliser les
-      tactiques de réécriture pour prouver les égalité sur les environnements et
+  (** Morphismes. Les morphismes déclarés ci-dessous permettront d'utiliser les
+      tactiques de réécriture pour prouver les égalités sur les environnements et
       sur les formules.*)
 
-  Add Relation t eq
+  Add Relation t FormulaMultiSet.eq
   reflexivity proved by eq_refl
   symmetry proved by eq_sym
     transitivity proved by eq_trans as eq_rel.

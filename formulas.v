@@ -29,6 +29,7 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
   Reserved Notation "! x" (at level 40, no associativity).
   Reserved Notation "x & y" (at level 51, no associativity).
   Reserved Notation "⊤" (at level 10, no associativity).
+  Reserved Notation "f =φ?= y" (at level 70, no associativity).
 
   (** Le type des formules, les atomes sont dénotés par [Proposition]. *)
   Inductive formula : Type := 
@@ -423,5 +424,8 @@ Module Make(Vars : OrderedType)<:ILL_formulas(Vars).
       apply lt_not_eq.
       apply compare'_gt_correct;exact H.
     Defined.
+
+    Notation "X =φ?= Y" := (eq_dec X Y) (at level 70): ILL_scope.
+
   End FormulaOrdered.
 End Make.

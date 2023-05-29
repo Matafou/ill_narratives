@@ -1,4 +1,4 @@
-Require Import Utf8_core.
+Require Import Utf8_core basic.
 Require ILLVarInt. (* Don't want import it. *)
 Import ILLVarInt.MILL. (* only this *)
 Import FormulaMultiSet. (* and this *)
@@ -19,7 +19,7 @@ Section Stability.
   | IId: ∀ Γ p heq, Istable (Id Γ p heq)
   | IImpl_R: ∀ Γ p q h, pred h → Istable h → Istable (Impl_R Γ p q h)
   | IImpl_L: ∀ Γ Δ Δ' p q r hin heq h h',
-    pred h → pred h' →  Istable h → Istable h' → Istable (Impl_L Γ Δ Δ' p q r hin heq h h')
+      pred h → pred h' →  Istable h → Istable h' → Istable (Impl_L Γ Δ Δ' p q r hin heq h h')
   | ITimes_R: ∀ Γ Δ Δ' p q heq h h', pred h → pred h' → Istable h → Istable h' → Istable (Times_R Γ Δ Δ' p q heq h h')
   | ITimes_L: ∀ Γ p q r hin h, pred h → Istable h → Istable (Times_L Γ p q r hin h)
   | IOne_R: ∀ Γ heq, Istable (One_R Γ heq)
@@ -38,6 +38,8 @@ Section Stability.
 
 End Stability.
 
+Local Open Scope type_scope.
+Local Open Scope ILL_scope.
 (** The predicate that we want to check on all
     nodes is that formula belong to the following
     grammar. *)
@@ -55,8 +57,8 @@ with Context: formula -> Prop:= (* Context *)
 | Context1:∀ φ, Act φ → Context φ
 | Context2:∀ φ, Res φ → Context φ
 | Context3: ∀ φ₁ φ₂, Context φ₁ → Context φ₂ → Context (φ₁ ⊗ φ₂)
-with Res: formula -> Prop:= (* Res *)
-  R1: Res 1
+with Res: formula -> Prop := (* Res *)
+  R1: Res One
 | R2: ∀ n, Res (Proposition n)
 | R3: ∀ φ, Res φ → Res (!φ)
 | R4: ∀ φ₁ φ₂, Res φ₁ → Res φ₂ → Res (φ₁ ⊗ φ₂)

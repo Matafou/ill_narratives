@@ -1,6 +1,6 @@
 Require Import Setoid.
 Require Import SetoidClass.
-Open Scope type_scope.
+Local Open Scope type_scope.
 
 Inductive andT (A B:Type) : Prop :=
   conjT : A -> B -> andT A B.
@@ -32,4 +32,6 @@ Add  Relation Type equivT
   symmetry proved by equivT_sym
   transitivity proved by equivT_trans 
 as toto.
+
+Declare Scope ILL_scope.
 

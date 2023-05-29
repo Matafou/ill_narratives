@@ -7,10 +7,20 @@ Require Import restrict2.
 
 Inductive narrative : Prop :=
   Leaf: narrative
-| Impl: formula → narrative
-| Next: narrative → narrative → narrative
-| Paral: narrative → narrative → narrative
-| Branch: narrative → narrative → narrative.
+| Impl: formula → narrative (* An atom, the formula should be of the form A ⊸ B *)
+| Next: narrative → narrative → narrative  (* precedence relationship: ν1 ≻ ν_action ≻ ν2 is a
+                                              narrative where the narrative ν1 precedes the
+                                              narrative action νaction which precedes the narrative
+                                              ν2. *)
+| Paral: narrative → narrative → narrative   (* concurrency relationship: ν1 || ν2 is a narrative
+                                                consisting of both ν1 and ν2 where the two
+                                                sub-narratives will be unfolded concurrently and
+                                                independently *)
+| Branch: narrative → narrative → narrative. (* branching: ν1 ⋈ ν2 is a narrative where both
+                                                sub-narratives ν1 and ν2 are possible, but only one
+                                                will actually be unfolded, depending on an external
+                                                event in an open-world assumption (such as user
+                                                interaction for instance) *)
 
 Notation "∅" := Leaf.
 Notation "a ≻ b" := (Next a b) (at level 90, right associativity).
@@ -18,7 +28,7 @@ Notation "a ⋈ b" := (Branch a b) (at level 91, right associativity).
 Notation "a ∣∣ b" := (Paral a b) (at level 92, right associativity).
 Notation "[ a ]" := (Impl a) (at level 89, right associativity).
 
-Show Obligation Tactic.
+(* Show Obligation Tactic. *)
 Local Obligation Tactic :=
   try solve [intuition; discriminate] ;  Tactics.program_simpl.
 
@@ -31,7 +41,7 @@ Definition simpl_narr b e p q :=
   end.
 
 Program Fixpoint ν Γ φ (h: Γ ⊢ φ) {struct h}: narrative := 
-match h with
+  match h with
   | Id _ _ p => ∅
   | Impl_R _ p q x => ν _ _ x
   | Impl_L _ Δ Δ' p q r _ _ x x0 =>  simpl_narr (ν Δ p x) (ν (q::Δ') r x0) p q
@@ -50,8 +60,7 @@ match h with
   | Bang_D _ p q _ x => ν _ _ x
   | Bang_C _ p q _ x => ν _ _ x
   | Bang_W _ p q _ x => ν _ _ x
-end.
-
+  end.
 
 Eval vm_compute in (ν _ _ originelle).
 

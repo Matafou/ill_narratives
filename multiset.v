@@ -4,7 +4,7 @@ Require Import FMapFacts.
 Require Import FMapAVL.
 Require Import OrderedType.
 Require Import FunInd.
-Require Import multiset_spec.
+Require Import basic multiset_spec.
 Module PreMake(X:OrderedType)(Maps:FMapInterface.S with Module E:=X) <: S(X).
   Module MapsFact := WFacts(Maps).
 
@@ -703,7 +703,7 @@ Module PreMake(X:OrderedType)(Maps:FMapInterface.S with Module E:=X) <: S(X).
     rewrite add_add_add.
     unfold add_multiple.
     rewrite Heq in Heq1;rewrite Heq1.
-    replace ((S(e0 + e) + n)) with (e0 + (S (e + n))) by lia.
+    replace ((S(e0 + e) + n))%nat with (e0 + (S (e + n)))%nat by lia.
     reflexivity.
     reflexivity.
     rewrite add_add_add.
@@ -1239,7 +1239,6 @@ Qed.
   Reserved Notation "∪" (at level 60, right associativity).
   Reserved Notation "∅" (at level 10, no associativity).
 
-  Declare Scope ILL_scope.
   Infix "∪" := union (at level 65, right associativity) : ILL_scope.
   Notation " a :: b " := (add a b) (at level 60, right associativity) : ILL_scope.
   Notation "{ a , .. , b }" := (add a .. (add b empty) ..) (at level 40): ILL_scope.
@@ -1251,7 +1250,7 @@ Qed.
   Notation " x ∈ F " := (mem x F = true) (at level 55): ILL_scope.
 
   Notation " b '\' a " := (remove a b) (at level 64, right associativity) : ILL_scope.
-  Open Scope ILL_scope.
+  Local Open Scope ILL_scope.
 
   Lemma multiset_ind : forall (P:t -> Type), (forall Γ Γ', Γ==Γ' -> P Γ -> P Γ') -> P empty -> (forall x Γ, P Γ -> P (x::Γ)) -> forall Γ, P Γ.
   Proof.

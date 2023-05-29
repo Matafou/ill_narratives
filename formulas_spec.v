@@ -40,18 +40,7 @@ Module Type ILL_formulas(Vars : OrderedType).
   | Top : formula.
 
   (** Les notations classiques  *)
-  Declare Scope ILL_scope.
   Notation "A ⊸ B" := (Implies A B) : ILL_scope.
-  Notation  "A ⊕ B" := (Oplus A B) : ILL_scope.
-  Notation  "A ⊗ B" := (Otimes A B) : ILL_scope.
-  Notation "1" := One : ILL_scope.
-  Notation "0" := Zero : ILL_scope.
-  Notation  "! A" := (Bang A) : ILL_scope.
-  Notation  "A & B" := (And A B) : ILL_scope.
-  Notation  "⊤" := Top : ILL_scope.
-  Set Printing Width 100.
-
-    Notation "A ⊸ B" := (Implies A B) : ILL_scope.
   Notation  "A ⊕ B" := (Oplus A B) : ILL_scope.
   Notation  "A ⊗ B" := (Otimes A B) : ILL_scope.
   Notation "1" := One : ILL_scope.
