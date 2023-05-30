@@ -7,10 +7,10 @@ Open Scope ILL_scope.
 
 (* Declaration of basic propositions. *)
 Declare Scope Emma.
-Notation "'P'" := (Proposition 1%nat):Emma.
-Notation "'R'" := (Proposition 2%nat):Emma. (* Meets Rodolph *)
-Notation "'G'" := (Proposition 3%nat):Emma.
-Notation "'B'" := (Proposition 4%nat):Emma.
+Notation "'P'" := (Proposition 1%nat):Emma. (* Poison *)
+Notation "'R'" := (Proposition 2%nat):Emma. (* discussion with Rodolph *)
+Notation "'G'" := (Proposition 3%nat):Emma. (* discussion with Guillaumin *)
+Notation "'B'" := (Proposition 4%nat):Emma. (* discussion with Binet *)
 Notation "'V'" := (Proposition 5%nat) (only parsing):Emma.
 Notation "'S'" := (Proposition 5%nat):Emma.
 Notation "'A'" := (Proposition 6%nat):Emma.

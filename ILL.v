@@ -193,7 +193,7 @@ Module ILL_tactics_refl(Vars:OrderedType)(M:ILL_sig(Vars)).
   (** Tactiques *)
   Ltac prove_multiset_eq := apply eq_bool_correct;vm_compute;reflexivity.
 
-
+  Ltac id := apply Id; prove_multiset_eq.
 
   Ltac prove_is_in := vm_compute;reflexivity.
       (* repeat (first [apply add_is_mem|apply mem_add_comm]). *)

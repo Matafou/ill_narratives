@@ -1,6 +1,8 @@
 
 
 * Les formules
+- logic linéaire intuitionniste
+- connecteurs ⅋, ⊥ et ? retirés
 
 #+INCLUDE: "./formulas_spec.v"
 #+begin_src coq
@@ -26,28 +28,45 @@
   Notation  "⊤" := Top : ILL_scope.
 #+end_src
 
-* Les preuves
-- jugements Γ ⊢ h: φ représenté par: " h: Γ ⊢ φ "
+En position "Hypothèse/ressource":
+- φ1 ⊕ φ2 = la preuve doit fournir deux preuves
+            - chaque preuve consomme une seule des deux
+            = choix externe (ex: choix du joueur)
+- φ1 & φ2 = la preuve garantit qu'un seul des deux sera consommé
+            choix narratif (i.e. interne), quelle preuve?
+            quels branchements possibles?
+- φ1 ⊸ φ2 = on peut produire la ressource φ2 en consommant φ1
+- φ1 ⊗ φ2 = une preuve consomme les deux.
 
-#+INCLUDE: "./ILL_spec.v"
+Comment exprimer que φ1 et φ2 sont un choix externe ou
+interne en fonction du déroulment?
+Réponse: on garde ceci (φ1 ⊕ φ2) & (φ1 & φ2) jusqu'à ce
+qu'on décide si c'est interne ou externe.
 
-#+begin_src coq
-    Inductive ILL_proof Γ: formula → Prop :=
-      Id : ∀ φ, Γ == {φ} → Γ ⊢ φ
-    ...
-    | Impl_L : ∀ Δ Δ' φ ψ r, φ ⊸ ψ ∈ Γ → Γ \ φ ⊸ ψ == Δ ∪ Δ'
-                         → Δ ⊢ φ → ψ::Δ' ⊢ r → Γ ⊢ r
-    ...
-    | And_L_1 : ∀ φ ψ r , φ & ψ ∈ Γ →  φ:: (Γ \ φ & ψ) ⊢ r → Γ ⊢ r
-    ...
-#+end_src
+
+En position "Conclusion"
+- φ1 ⊗ φ2 = consommer φ1 ou φ2 consomme les deux (ex: ).
+- φ1 ⊕ φ2 = 
 
 * Les sous-ensemble des formules considérés
-
 #+INCLUDE: "restrict2.v"
-- propriété inductive générique =(Istable pred h)= qui signifie: pred
-  est vrai pour tous les sous-arbres de la preuve h.
-- prédicat =Act: formula -> Prop= mutuellement défini:
+
+Le séquent inital doit avoir la forme:
+
+   Res,Act ⊢ Goal
+
+où Res contient les ressources et les conditions initales, et Act les
+*actions narratives* possibles.
+
+plus précisément:
+
+Res ::= 1 | atom | Res & Res | Res ⊗ Res | ! Res
+Act ::= 1 | CRes ⊸ Context | Act ⊕ Act | Act & Act | !Act
+Goal ::= 1 | atom | Goal ⊗ Goal | Goal ⊕ Goal | Goal & Goal
+CRes ::= 1 | atom | CRes ⊗ CRes
+Context ::= Res | Act | Context ⊗ Context
+
+*** En Coq
 
 #+begin_src coq
 Inductive Act : formula -> Prop := (* Act *)
@@ -70,4 +89,104 @@ with Res: formula -> Prop:= (* Res *)I
 | R3: ∀ φ, Res φ → Res (!φ)
 | R4: ∀ φ₁ φ₂, Res φ₁ → Res φ₂ → Res (φ₁ ⊗ φ₂)
 | R5: ∀ φ₁ φ₂, Res φ₁ → Res φ₂ → Res (φ₁ & φ₂).
+#+end_src
+
+** Exemple dans Emma Bovary:
+
+ Goal = A ⊕ D   Emma survit (Alive) ou bien Emma meurt (Dead). 
+
+ Res = R, G, B & 1, P & 1
+
+Signifie que 
+- R (discution avec Rodolphe) et
+- G (avec Guillaumin)
+*doivent* être "consommées" par l'histoire (la preuve), alors que
+- P (ingérer le poison) et
+- B (discussion avec Binet)
+sont des ressources optionnelle.
+
+ Act = (S ⊸ A), Emma se vend pour se sauver
+       (E ⊸ A) & 1, choix narratif: Emma s'enfuit avec Rodolphe
+       (P ⊸ D) & 1, choix narratif: Emma boit le poison (et meurt), ou pas.
+       (G ⊸ 1) ⊕ (G ⊸ S) conversation avec Guillaumin obligatoire mais issue
+                         dépend du choix (externe) d'Emma de se vendre ou pas.
+       (R ⊸ 1) & (R ⊸ E), conv. avec Rodolphe obligatoire, issue = choix narratif.
+       1 ⊕ ((B ⊸ S) & (B ⊸ 1)) conv. avec Binet optionnelle (choix externe).
+                               si oui: issue = choix narratif.
+
+* Définition des preuves
+#+INCLUDE: "./ILL_spec.v"
+- règles d'inférences définies pour tout ILL
+- jugements Γ ⊢ h: φ représenté par: " h: Γ ⊢ φ "
+
+-----------Ax
+  φ ⊢ φ
+
+#+begin_src coq
+Inductive ILL_proof Γ: formula → Prop :=
+    Id : ∀ φ, Γ == {φ}  →  Γ ⊢ φ
+#+end_src
+
+
+  Δ ⊢ φ     Δ', ψ ⊢ χ
+---------------------- Impl_L
+  Δ, Δ', φ ⊸ ψ ⊢ χ
+
+#+begin_src coq
+  | Impl_L : ∀ Δ Δ' φ ψ r,
+     φ ⊸ ψ ∈ Γ  →  Γ \ φ ⊸ ψ == Δ ∪ Δ'  →  Δ ⊢ φ   →   ψ::Δ' ⊢ χ  →  Γ ⊢ χ
+#+end_src
+note: "::" == multiset.add) 
+note: "\" == multiset.remove, retire *une* occurrence
+
+
+    φ, Γ ⊢ ψ
+-------------------Impl_R
+    Γ ⊢ φ ⊸ ψ
+
+  #+begin_src coq
+  | Impl_R : ∀ φ ψ, φ::Γ ⊢ ψ  →  Γ ⊢ φ ⊸ ψ
+  #+end_src
+
+
+
+      Γ, φ ⊢ χ
+---------------------- And_L_1
+     Γ, φ & ψ ⊢ χ
+
+#+begin_src coq
+    | And_L_1 : ∀ φ ψ χ , φ & ψ ∈ Γ  →  φ:: (Γ \ φ & ψ) ⊢ χ  →  Γ ⊢ χ
+#+end_src
+
+* "Stabilité" du sous-ensemble
+- propriété inductive générique =Istable pred h= qui signifie: pred
+  est vrai pour tous les sous-arbres (stricts) de la preuve h.
+  Reprends les constructeurs de ILL_proof.
+
+  #+begin_src coq
+    Inductive Istable: ∀ {e} {f} (h: e ⊢ f) , Prop := 
+    | IId: ∀ Γ p heq, Istable (Id Γ p heq)
+    | IImpl_R: ∀ Γ p q h, pred h  →  Istable h  →  Istable (Impl_R Γ p q h)
+    | IImpl_L: ∀ Γ Δ Δ' p q r hin heq h h',
+        pred h  →  pred h'  →  Istable h  →  Istable h'
+        → Istable (Impl_L Γ Δ Δ' p q r hin heq h h')
+    | ITimes_R: ∀ Γ Δ Δ' p q heq h h',
+        pred h  →  pred h'  →  Istable h  →  Istable h'
+        → Istable (Times_R Γ Δ Δ' p q heq h h')
+    ...  
+  #+end_src
+
+
+#+begin_src coq
+Inductive Goal : formula → Prop :=
+| G1: Goal 1
+| G2:  ∀ n, Goal (Proposition n)
+| G3: ∀ φ₁ φ₂, Goal φ₁ → Goal φ₂ → Goal (φ₁ ⊗ φ₂)
+| G4: ∀ φ₁ φ₂, Goal φ₁ → Goal φ₂ → Goal (φ₁ ⊕ φ₂)
+| G5: ∀ φ₁ φ₂, Goal φ₁ → Goal φ₂ → Goal (φ₁ & φ₂).
+
+(** Contextall Γ f h means: all formulas of a Γ are in Context and f is in Goal. *)
+Definition Contextall Γ f (_:Γ⊢f):Prop := Goal f /\ ∀g:formula, g ∈ Γ  → Context g.
+
+Lemma Grammar_Stable : ∀ Γ φ (h:Γ ⊢ φ), Contextall h → Istable Contextall h.
 #+end_src

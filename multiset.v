@@ -46,6 +46,7 @@ Module PreMake(X:OrderedType)(Maps:FMapInterface.S with Module E:=X) <: S(X).
     reflexivity.
   Qed.
 
+  (* remove a ms retire UNE occurrence de a dans ms *)
   Definition remove : A -> t -> t := 
     fun a ms => 
       match Maps.find a ms with 

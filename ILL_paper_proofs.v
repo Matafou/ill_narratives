@@ -210,40 +210,39 @@ Module PaperProofsString.
   Local Notation "'R'":= (Proposition "R"%string).
   Local Notation "'S'" := (Proposition "S"%string).
 
+  (* Ltac impl_l Γ' Δ p q ::=  *)
+  (*   apply Impl_L with Γ' Δ p q;[prove_is_in|prove_multiset_eq| | ]. *)
+
+
   Lemma Copy_Proof_from_figure_1:
   {D, P & 1, R & 1, D ⊸ (((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)} ⊢ ((S ⊗ D) ⊕ D).
-  Proof with (try now (try constructor; prove_multiset_eq)).
-      impl_l ({D}) ({(P&1) , (R&1) })
-        (D) ((((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D))...
-    (* search_one_goal ({D, (P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S))), P & 1, R & 1} ⊢ (S ⊗ D) ⊕ D). *)
+  Proof with (try solve [id]).
+      impl_l ({D}) ({(P&1) , (R&1) }) (D) ((((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D))...
       times_l ((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) D.
       oplus_l (P ⊸ S) (R ⊸ (1 ⊕ (P ⊸ S))).
-    (* search_one_goal    ({P, P ⊸ S, D, R & 1} ⊢ (S ⊗ D) ⊕ D). *)
-      and_l_1 P 1.
-    (* search_one_goal ({1, P, P ⊸ S, D} ⊢ (S ⊗ D) ⊕ D). *)
-      and_l_2 R 1.
-    (* search_one_goal ({P, P ⊸ S, D} ⊢ (S ⊗ D) ⊕ D). *)
-      one_l.
-      apply Oplus_R_1.
-      times_r ({P, (P ⊸ S) }) ({D})...
-      impl_l  ({P}) (∅) (P) (S)...
-      and_l_1 R 1.
-      impl_l({R}) ({D, P & 1 }) (R) ((1 ⊕ (P ⊸ S)))...
-      oplus_l 1 (P ⊸ S).
-      one_l.
-      and_l_2 P 1.
-      one_l.
-      apply Oplus_R_2...
-      and_l_1 (P) 1.
-      apply Oplus_R_1.
-      times_r ({ P , P ⊸ S}) ({D})...
-      impl_l ({P}) (∅) (P) (S)...
+      - and_l_1 P 1.
+        and_l_2 R 1.
+        one_l.
+        apply Oplus_R_1.
+        times_r ({P, (P ⊸ S) }) ({D})...
+        impl_l  ({P}) (∅) (P) (S)...
+      - and_l_1 R 1.
+        impl_l({R}) ({D, P & 1 }) (R) ((1 ⊕ (P ⊸ S)))...
+        oplus_l 1 (P ⊸ S).
+        + one_l.
+          and_l_2 P 1.
+          one_l.
+          apply Oplus_R_2...
+        + and_l_1 (P) 1.
+          apply Oplus_R_1.
+          times_r ({ P , P ⊸ S}) ({D})...
+          impl_l ({P}) (∅) (P) (S)...
     Qed.
 
   (* Same proof as above but with some more automation *)
   Lemma Copy_Proof_from_figure_1_with_weak_search:
   {D, P & 1, R & 1, D ⊸ (((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)} ⊢ ((S ⊗ D) ⊕ D).
-  Proof with (try now (try constructor; prove_multiset_eq)).
+  Proof with try now id.
     impl_l  ({D}) ({(P&1) , (R&1) }) (D) ((((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D))...
     search_one_goal ({D, (P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S))), P & 1, R & 1} ⊢ (S ⊗ D) ⊕ D).
     oplus_l (P ⊸ S) (R ⊸ (1 ⊕ (P ⊸ S))).
@@ -264,17 +263,15 @@ Module PaperProofsString.
 
   Lemma Copy_Proof_from_figure_1_with_stronger_search:
     {D, P & 1, R & 1, D ⊸ (((P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S)))) ⊗ D)} ⊢ ((S ⊗ D) ⊕ D).
-  Proof with try now (finish_proof_strong || prove_multiset_eq).
+  Proof with try solve [ id | finish_proof_strong]. (* (finish_proof_strong || prove_multiset_eq).*)
     search_one_goal_strong ({D, (P ⊸ S) ⊕ (R ⊸ (1 ⊕ (P ⊸ S))), P & 1, R & 1} ⊢ (S ⊗ D) ⊕ D).
     oplus_l (P ⊸ S) (R ⊸ (1 ⊕ (P ⊸ S))).
-
-    search_one_goal_strong ({P, P ⊸ S, D} ⊢ (S ⊗ D)).
-    times_r ({P, (P ⊸ S) }) ({D})...
-
-    search_one_goal_strong ({1 ⊕ (P ⊸ S), D, P & 1} ⊢ (S ⊗ D) ⊕ D).
-    oplus_l 1 (P ⊸ S)...
-    search_one_goal_strong ( {P ⊸ S, D, P} ⊢ (S ⊗ D)).
-    times_r  ({ P , P ⊸ S}) ({D})...
+    - search_one_goal_strong ({P, P ⊸ S, D} ⊢ (S ⊗ D)).
+      times_r ({P, (P ⊸ S) }) ({D})...
+    - search_one_goal_strong ({1 ⊕ (P ⊸ S), D, P & 1} ⊢ (S ⊗ D) ⊕ D).
+      oplus_l 1 (P ⊸ S)...
+      search_one_goal_strong ( {P ⊸ S, D, P} ⊢ (S ⊗ D)).
+      times_r  ({ P , P ⊸ S}) ({D})...
   Qed.
 End figure_1.
 
