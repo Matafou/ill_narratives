@@ -1,9 +1,9 @@
 
 
 * Les formules
-- logic linéaire intuitionniste
-- connecteurs ⅋, ⊥ et ? retirés
+- logic linéaire intuitionniste: connecteurs ⅋, ⊥ et ? retirés
 
+** Coq
 #+INCLUDE: "./formulas_spec.v"
 #+begin_src coq
   Inductive formula : Type := 
@@ -28,20 +28,6 @@
   Notation  "⊤" := Top : ILL_scope.
 #+end_src
 
-En position "Hypothèse/ressource":
-- φ1 ⊕ φ2 = la preuve doit fournir deux preuves
-            - chaque preuve consomme une seule des deux
-            = choix externe (ex: choix du joueur)
-- φ1 & φ2 = la preuve garantit qu'un seul des deux sera consommé
-            choix narratif (i.e. interne), quelle preuve?
-            quels branchements possibles?
-- φ1 ⊸ φ2 = on peut produire la ressource φ2 en consommant φ1
-- φ1 ⊗ φ2 = une preuve consomme les deux.
-
-Comment exprimer que φ1 et φ2 sont un choix externe ou
-interne en fonction du déroulment?
-Réponse: on garde ceci (φ1 ⊕ φ2) & (φ1 & φ2) jusqu'à ce
-qu'on décide si c'est interne ou externe.
 
 
 En position "Conclusion"
@@ -117,7 +103,10 @@ sont des ressources optionnelle.
 * Définition des preuves
 #+INCLUDE: "./ILL_spec.v"
 - règles d'inférences définies pour tout ILL
+- sous-ensemble défini a posteriori.
 - jugements Γ ⊢ h: φ représenté par: " h: Γ ⊢ φ "
+
+** Ex 1: Ax
 
 -----------Ax
   φ ⊢ φ
@@ -127,6 +116,14 @@ Inductive ILL_proof Γ: formula → Prop :=
     Id : ∀ φ, Γ == {φ}  →  Γ ⊢ φ
 #+end_src
 
+*Interprétation narrative*: Pour prouver un axiome il faut que
+celui-ci soit la *seule* ressource. L'idée est qu'une preuve doit
+consommer *toutes* les ressources. Narratif: une ressource dans Γ
+(sauf explictement rendu optionnelle) = evènement/choix/action
+narrative est *nécessairement* effectués dans toute histoire
+résultante du narratif.
+
+** Ex 2: Impl_L
 
   Δ ⊢ φ     Δ', ψ ⊢ χ
 ---------------------- Impl_L
@@ -139,24 +136,55 @@ Inductive ILL_proof Γ: formula → Prop :=
 note: "::" == multiset.add) 
 note: "\" == multiset.remove, retire *une* occurrence
 
+*Interprétation narrative*: Pour prouver φ ⊸ ψ il faut prouver qu'avec
+une partie des ressources ont peut produire φ, et avec le reste + φ on
+peut produire ψ. Notion de splitting de l'environnement.
 
-    φ, Γ ⊢ ψ
--------------------Impl_R
-    Γ ⊢ φ ⊸ ψ
+** Ex 4: Impl_1 et 2
 
-  #+begin_src coq
-  | Impl_R : ∀ φ ψ, φ::Γ ⊢ ψ  →  Γ ⊢ φ ⊸ ψ
-  #+end_src
-
-
-
-      Γ, φ ⊢ χ
----------------------- And_L_1
-     Γ, φ & ψ ⊢ χ
+      Γ, φ ⊢ χ                         Γ, ψ ⊢ χ                  
+---------------------- And_L_1   ---------------------- And_L_2  
+     Γ, φ & ψ ⊢ χ                     Γ, φ & ψ ⊢ χ               
 
 #+begin_src coq
-    | And_L_1 : ∀ φ ψ χ , φ & ψ ∈ Γ  →  φ:: (Γ \ φ & ψ) ⊢ χ  →  Γ ⊢ χ
+  | And_L_1 : ∀ φ ψ χ , φ & ψ ∈ Γ  →  φ :: (Γ \ φ & ψ) ⊢ χ  →  Γ ⊢ χ
+  | And_L_2 : ∀ φ ψ χ , φ & ψ ∈ Γ  →  ψ :: (Γ \ φ & ψ) ⊢ χ  →  Γ ⊢ χ
 #+end_src
+
+*** interprétation narrative
+
+φ1 & φ2 en position "ressource" = la preuve garantit qu'un seul des
+deux sera consommé. Lequel? Choix narratif (i.e. interne). La preuve
+détermine quand certains choix sont "forcés" par l'histoire. Mais ils
+peuvent dépendre d'autre évènements précédents.
+
+
+** interprétation narrative des ressources (dans Γ)
+
+φ1 ⊕ φ2 = consommer cette ressource signfie s'adapter à ce qui va
+arriver pendant l'histoire. la preuve doit donc fournir le moyen de
+réagir à φ1 ou à φ2. Sachant que seule l'une des deux pourra être
+consommer dans une histoire donnée.
+= choix externe (ex: choix du joueur)
+
+φ1 & φ2 = consommer cette ressource signifie imposer un choix entre φ1
+et φ2
+= choix interne (choix imposer par la narration)
+
+φ1 ⊸ φ2 = on doit produire la ressource φ2 en consommant φ1, il faudra
+ensuite consommer φ2.
+= action narative (il se passe quelque-chose dans l'histoire).
+
+φ1 ⊗ φ2 = toute histoire devra consommer φ1 et φ2, sachant que les
+ressources consommées pour l'une ne pourront pas servir pour l'autre.
+
+
+Comment exprimer que φ1 et φ2 sont un choix externe ou interne en
+fonction du déroulement? Réponse: on garde ceci (φ1 ⊕ φ2) & (φ1 & φ2)
+jusqu'à ce qu'on décide si c'est interne ou externe. Si on veut
+exprimer que cela dépend d'autres ressources, on peut par exemple
+écrire (ψ ⊸ (φ1 ⊕ φ2)) & (ψ' ⊸ (φ1 & φ2)).
+
 
 * "Stabilité" du sous-ensemble
 - propriété inductive générique =Istable pred h= qui signifie: pred
