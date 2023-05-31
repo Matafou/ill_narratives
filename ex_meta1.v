@@ -30,43 +30,44 @@ Module MetaProp1.
    for which predicate test returns true. In practice we will use the
    predicate that is always true because we just want to check the
    *presence* of such a node (cf. exist_oplus below). *)
-    Program Fixpoint ex_subprf {e:env} {f:formula} (h: e ⊢ f) {struct h}: boolP :=
+    Program Fixpoint ex_oplusr_test {e:env} {f:formula} (h: e ⊢ f) {struct h}: boolP :=
       match h with
       | Oplus_R_1 _ p q x =>
-          if p =φ?= φl then if q =φ?= φr then test x else  ex_subprf x
-          else  ex_subprf x
+          if p =φ?= φl then if q =φ?= φr then test x else  ex_oplusr_test x
+          else  ex_oplusr_test x
       | Oplus_R_2 _ q p x =>
-          if p =φ?= φl then if q =φ?= φr then test x else  ex_subprf x
-          else  ex_subprf x
+          if p =φ?= φl then if q =φ?= φr then test x else  ex_oplusr_test x
+          else  ex_oplusr_test x
       | Id _ _ p => falseP
-      | Impl_R _ p q x =>  ex_subprf x
-      | Impl_L _ Δ Δ' p q r _ _ x x0 =>  ex_subprf x0
-      | Times_R _ Δ p q _ _ x x0 =>  orP ( ex_subprf x) ( ex_subprf x0)
-      | Times_L _ p q r _ x =>  ex_subprf x
+      | Impl_R _ p q x =>  ex_oplusr_test x
+      | Impl_L _ Δ Δ' p q r _ _ x x0 =>  ex_oplusr_test x0
+      | Times_R _ Δ p q _ _ x x0 =>  orP ( ex_oplusr_test x) ( ex_oplusr_test x0)
+      | Times_L _ p q r _ x =>  ex_oplusr_test x
       | One_R _ _ => falseP
-      | One_L _ p _ x =>  ex_subprf x
-      | And_R _ p q x x0 => orP ( ex_subprf x) ( ex_subprf x0)
-      | And_L_1 _ p q r _ x =>  ex_subprf x
-      | And_L_2 _ p q r _ x =>  ex_subprf x
-      | Oplus_L _ p q r _ x x0 => orP ( ex_subprf x) ( ex_subprf x0)
+      | One_L _ p _ x =>  ex_oplusr_test x
+      | And_R _ p q x x0 => orP ( ex_oplusr_test x) ( ex_oplusr_test x0)
+      | And_L_1 _ p q r _ x =>  ex_oplusr_test x
+      | And_L_2 _ p q r _ x =>  ex_oplusr_test x
+      | Oplus_L _ p q r _ x x0 => orP ( ex_oplusr_test x) ( ex_oplusr_test x0)
       | T_ _ => falseP
       | Zero_ _ p x => falseP
-      | Bang_D _ p q _ x =>  ex_subprf x
-      | Bang_C _ p q _ x =>  ex_subprf x
-      | Bang_W _ p q _ x =>  ex_subprf x
+      | Bang_D _ p q _ x =>  ex_oplusr_test x
+      | Bang_C _ p q _ x =>  ex_oplusr_test x
+      | Bang_W _ p q _ x =>  ex_oplusr_test x
       end.
 
   End funs.
-  Eval vm_compute in  ex_subprf Ptrue A M originelle.
-  Eval vm_compute in  ex_subprf Ptrue A M simpl_ex.
+  (* Emma either lives or dies in every story, i.e. (A ⊕ D) is consumed. *)
+  Eval vm_compute in  ex_oplusr_test Ptrue A D originelle.
+  Eval vm_compute in  ex_oplusr_test Ptrue A D simpl_ex.
 
 End MetaProp1.
 Include MetaProp1.
 
-Definition exist_oplus :=  ex_subprf Ptrue.
+Definition exist_oplus :=  ex_oplusr_test Ptrue.
 Arguments exist_oplus φl φr {e f} h.
 
-Lemma  ex_subprf_proof_eq_compat : ∀ f1 f2 Γ Γ' φ (h1:Γ⊢φ) (h2:Γ'⊢φ),
+Lemma  ex_oplusr_test_proof_eq_compat : ∀ f1 f2 Γ Γ' φ (h1:Γ⊢φ) (h2:Γ'⊢φ),
     h1 ≡≡ h2 ->
     exist_oplus f1 f2 h1 = exist_oplus f1 f2 h2.
 Proof.
@@ -76,13 +77,13 @@ Proof.
                                     end;auto.
 Qed.
 
-Lemma  ex_subprf_proof_eq_pre_morph_compat :
+Lemma  ex_oplusr_test_proof_eq_pre_morph_compat :
   ∀ f1 f2 Γ Γ' φ (h1:Γ⊢φ) (h2:Γ==Γ'),
     exist_oplus f1 f2 h1
     = exist_oplus f1 f2 (ILL_proof_pre_morph φ Γ Γ' h2 h1).
 Proof.
   intros f1 f2 Γ Γ' φ h1 h2.
-  apply  ex_subprf_proof_eq_compat.
+  apply  ex_oplusr_test_proof_eq_compat.
   apply Proof_eq.sym;apply Proof_eq.eq_pre_morph.
 Qed.
 
@@ -109,7 +110,7 @@ Proof with try solve [ apply Id;reflexivity | prove_multiset_eq].
 Defined.
 
 
-Eval vm_compute in exist_oplus A M originelle.
+Eval vm_compute in exist_oplus A D originelle.
 Eval vm_compute in exist_oplus S R originelle.
 Eval vm_compute in (exist_oplus S R simple).
 Eval vm_compute in (exist_oplus R S simple).
@@ -129,7 +130,7 @@ Proof.
   symmetry in Heq; exists (ILL_proof_pre_morph _ _ _ Heq p).
   apply Proof_eq.sym;apply Proof_eq.eq_pre_morph.
   destruct h as [p' h].
-  rewrite  ex_subprf_proof_eq_compat with (h2:=p') (1:=h); auto.
+  rewrite  ex_oplusr_test_proof_eq_compat with (h2:=p') (1:=h); auto.
 Qed.
 #[local] Hint Resolve all_proofs_of_pre_morph : proof.
 
@@ -305,7 +306,7 @@ Ltac decomp :=
                                                                        apply Proof_eq.sym;
                                                                        apply Proof_eq.eq_pre_morph);
               destruct h as [i' h];
-              rewrite  ex_subprf_proof_eq_compat with (h2:=i') (1:=h);
+              rewrite  ex_oplusr_test_proof_eq_compat with (h2:=i') (1:=h);
               clear H h heq
           end
       end
@@ -326,7 +327,7 @@ Ltac decomp :=
               exists (ILL_proof_pre_morph _ _ _ heq i);
               apply Proof_eq.sym;apply Proof_eq.eq_pre_morph
             | destruct h as [i' h];
-              rewrite  ex_subprf_proof_eq_compat with (h2:=i') (1:=h);
+              rewrite  ex_oplusr_test_proof_eq_compat with (h2:=i') (1:=h);
               clear i h;try (rewrite H in *;clear H)
             ]
       end
@@ -364,7 +365,7 @@ Ltac unusable_var_strong_tac n1 n2 H :=
 
 Lemma aux3 : all_proofs_of ({S}) (S ⊕ R).
 Proof.
-  intro p;one_step p.
+  intro p. one_step p.
 Qed.
 
 Lemma aux4 : no_proof_for ({G ⊸ S, B ⊸ S, G}) (S ⊕ R).
@@ -658,4 +659,4 @@ Proof.
 Qed.
 
 
-(* {G,G -o S,R, R -o E, !(S -o A), (E -o A) & 1, ...} |- A ++ M *)
+(* {G,G -o S,R, R -o E, !(S -o A), (E -o A) & 1, ...} |- A ++ D *)

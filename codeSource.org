@@ -1,9 +1,10 @@
+*Cadre général*
+
+- logic linéaire intuitionniste: connecteurs ⅋, ⊥ et ? retirés
+- + restrictions sur les séquents
 
 
 * Les formules
-- logic linéaire intuitionniste: connecteurs ⅋, ⊥ et ? retirés
-
-** Coq
 #+INCLUDE: "./formulas_spec.v"
 #+begin_src coq
   Inductive formula : Type := 
@@ -27,81 +28,11 @@
   Notation  "A & B" := (And A B) : ILL_scope.
   Notation  "⊤" := Top : ILL_scope.
 #+end_src
-
-
-
-En position "Conclusion"
-- φ1 ⊗ φ2 = consommer φ1 ou φ2 consomme les deux (ex: ).
-- φ1 ⊕ φ2 = 
-
-* Les sous-ensemble des formules considérés
-#+INCLUDE: "restrict2.v"
-
-Le séquent inital doit avoir la forme:
-
-   Res,Act ⊢ Goal
-
-où Res contient les ressources et les conditions initales, et Act les
-*actions narratives* possibles.
-
-plus précisément:
-
-Res ::= 1 | atom | Res & Res | Res ⊗ Res | ! Res
-Act ::= 1 | CRes ⊸ Context | Act ⊕ Act | Act & Act | !Act
-Goal ::= 1 | atom | Goal ⊗ Goal | Goal ⊕ Goal | Goal & Goal
-CRes ::= 1 | atom | CRes ⊗ CRes
-Context ::= Res | Act | Context ⊗ Context
-
-*** En Coq
-
-#+begin_src coq
-Inductive Act : formula -> Prop := (* Act *)
-| A1: Act 1
-| A2:∀ φ₁ φ₂, Cres φ₁ → Context φ₂ → Act (φ₁ ⊸ φ₂)
-| A3: ∀ φ₁ φ₂, Act φ₁ → Act φ₂ → Act (φ₁ ⊕ φ₂)
-| A4: ∀ φ₁ φ₂, Act φ₁ → Act φ₂ → Act (φ₁ & φ₂)
-| A5: ∀ φ, Act φ → Act (! φ)
-with Cres: formula -> Prop:= (* CRes *)
-| Cres1: Cres 1
-| Cres2: ∀ n, Cres (Proposition n)
-| Cres3: ∀ φ₁ φ₂, Cres φ₁ → Cres φ₂ → Cres (φ₁ ⊗ φ₂)
-with Context: formula -> Prop:= (* Context *)
-| Context1:∀ φ, Act φ → Context φ
-| Context2:∀ φ, Res φ → Context φ
-| Context3: ∀ φ₁ φ₂, Context φ₁ → Context φ₂ → Context (φ₁ ⊗ φ₂)
-with Res: formula -> Prop:= (* Res *)I
-  R1: Res 1
-| R2: ∀ n, Res (Proposition n)
-| R3: ∀ φ, Res φ → Res (!φ)
-| R4: ∀ φ₁ φ₂, Res φ₁ → Res φ₂ → Res (φ₁ ⊗ φ₂)
-| R5: ∀ φ₁ φ₂, Res φ₁ → Res φ₂ → Res (φ₁ & φ₂).
-#+end_src
-
-** Exemple dans Emma Bovary:
-
- Goal = A ⊕ D   Emma survit (Alive) ou bien Emma meurt (Dead). 
-
- Res = R, G, B & 1, P & 1
-
-Signifie que 
-- R (discution avec Rodolphe) et
-- G (avec Guillaumin)
-*doivent* être "consommées" par l'histoire (la preuve), alors que
-- P (ingérer le poison) et
-- B (discussion avec Binet)
-sont des ressources optionnelle.
-
- Act = (S ⊸ A), Emma se vend pour se sauver
-       (E ⊸ A) & 1, choix narratif: Emma s'enfuit avec Rodolphe
-       (P ⊸ D) & 1, choix narratif: Emma boit le poison (et meurt), ou pas.
-       (G ⊸ 1) ⊕ (G ⊸ S) conversation avec Guillaumin obligatoire mais issue
-                         dépend du choix (externe) d'Emma de se vendre ou pas.
-       (R ⊸ 1) & (R ⊸ E), conv. avec Rodolphe obligatoire, issue = choix narratif.
-       1 ⊕ ((B ⊸ S) & (B ⊸ 1)) conv. avec Binet optionnelle (choix externe).
-                               si oui: issue = choix narratif.
-
+ 
 * Définition des preuves
 #+INCLUDE: "./ILL_spec.v"
+#+INCLUDE: "./emma_orig.v"
+
 - règles d'inférences définies pour tout ILL
 - sous-ensemble défini a posteriori.
 - jugements Γ ⊢ h: φ représenté par: " h: Γ ⊢ φ "
@@ -140,7 +71,7 @@ note: "\" == multiset.remove, retire *une* occurrence
 une partie des ressources ont peut produire φ, et avec le reste + φ on
 peut produire ψ. Notion de splitting de l'environnement.
 
-** Ex 4: Impl_1 et 2
+** Ex 3: And_L_1 et 2
 
       Γ, φ ⊢ χ                         Γ, ψ ⊢ χ                  
 ---------------------- And_L_1   ---------------------- And_L_2  
@@ -151,33 +82,29 @@ peut produire ψ. Notion de splitting de l'environnement.
   | And_L_2 : ∀ φ ψ χ , φ & ψ ∈ Γ  →  ψ :: (Γ \ φ & ψ) ⊢ χ  →  Γ ⊢ χ
 #+end_src
 
-*** interprétation narrative
-
+*interprétation narrative*
 φ1 & φ2 en position "ressource" = la preuve garantit qu'un seul des
 deux sera consommé. Lequel? Choix narratif (i.e. interne). La preuve
 détermine quand certains choix sont "forcés" par l'histoire. Mais ils
 peuvent dépendre d'autre évènements précédents.
 
+** Ex 4: Oplus_L
+
+ Γ, φ ⊢ χ    Γ, ψ ⊢ χ
+---------------------- Oplus_L
+     Γ, φ ⊕ ψ ⊢ χ
+
+#+begin_src coq
+ | Oplus_L: ∀ φ ψ χ, φ ⊕ ψ ∈ Γ →  φ :: (Γ \ φ⊕ψ) ⊢ χ →  ψ :: (Γ \ φ⊕ψ) ⊢ χ →  Γ ⊢ χ
+#+end_src
+
+*interprétation narrative*
+φ1 ⊕ φ2 en position "ressource" = la preuve garantit qu'un seul des
+deux sera consommé. Lequel? Choix laissé au lecteur/joueur (i.e.
+externe). La preuve doit donc prévoir les deux cas.
+
 
 ** interprétation narrative des ressources (dans Γ)
-
-φ1 ⊕ φ2 = consommer cette ressource signfie s'adapter à ce qui va
-arriver pendant l'histoire. la preuve doit donc fournir le moyen de
-réagir à φ1 ou à φ2. Sachant que seule l'une des deux pourra être
-consommer dans une histoire donnée.
-= choix externe (ex: choix du joueur)
-
-φ1 & φ2 = consommer cette ressource signifie imposer un choix entre φ1
-et φ2
-= choix interne (choix imposer par la narration)
-
-φ1 ⊸ φ2 = on doit produire la ressource φ2 en consommant φ1, il faudra
-ensuite consommer φ2.
-= action narative (il se passe quelque-chose dans l'histoire).
-
-φ1 ⊗ φ2 = toute histoire devra consommer φ1 et φ2, sachant que les
-ressources consommées pour l'une ne pourront pas servir pour l'autre.
-
 
 Comment exprimer que φ1 et φ2 sont un choix externe ou interne en
 fonction du déroulement? Réponse: on garde ceci (φ1 ⊕ φ2) & (φ1 & φ2)
@@ -185,36 +112,138 @@ jusqu'à ce qu'on décide si c'est interne ou externe. Si on veut
 exprimer que cela dépend d'autres ressources, on peut par exemple
 écrire (ψ ⊸ (φ1 ⊕ φ2)) & (ψ' ⊸ (φ1 & φ2)).
 
+*** Résumé de la preuve
+
+#+INCLUDE: "./narrative.v"
+
+#+begin_src coq
+Inductive narrative : Prop :=
+  Leaf: narrative
+| Impl: formula → narrative (* An atom, the formula should be of the form A ⊸ B *)
+| Next: narrative → narrative → narrative  (* ν1 ≻ ν2 = narrative where ν1 precedes ν2. *)
+| Paral: narrative → narrative → narrative   (* ν1 || ν2 = narrative where ν1 and ν2 are indepently unfolded *)
+| Branch: narrative → narrative → narrative. (* ν1 ⋈ ν2 = ν1 and ν2 are possible, mutually excluded and chosen externally *)
+
+Notation "∅" := Leaf.
+Notation "a ≻ b" := (Next a b) (at level 90, right associativity).
+Notation "a ⋈ b" := (Branch a b) (at level 91, right associativity).
+Notation "a ∣∣ b" := (Paral a b) (at level 92, right associativity).
+Notation "[ a ]" := (Impl a) (at level 89, right associativity).
+
+Program Fixpoint ν Γ φ (h: Γ ⊢ φ) {struct h}: narrative := 
+  match h with
+  | Id _ _ p => ∅
+  | Impl_R _ p q x => ν _ _ x
+  | ...
+  | Oplus_L _ p q r _ x x0 => (ν _ _ x) ⋈ (ν _ _ x0)
+#+end_src
+
+** tactiques pour Γ
+
+* Les sous-ensemble des jugements considérés
+#+INCLUDE: "restrict2.v"
+
+Le séquent inital doit avoir la forme:
+
+   Res,Act ⊢ Goal
+
+où Res contient les ressources et les conditions initales, et Act les
+*actions narratives* possibles.
+
+plus précisément:
+
+Res ::= 1 | atom | Res & Res | Res ⊗ Res | ! Res
+Act ::= 1 | CRes ⊸ Context | Act ⊕ Act | Act & Act | !Act
+Goal ::= 1 | atom | Goal ⊗ Goal | Goal ⊕ Goal | Goal & Goal
+CRes ::= 1 | atom | CRes ⊗ CRes
+Context ::= Res | Act | Context ⊗ Context
+
+*Definition:* Γ ⊢ G is well formed iff if G ∈ Goal and ∀φ ∈ Γ, φ ∈ Context.
+
+*** En Coq
+
+#+begin_src coq
+  Inductive Act : formula -> Prop :=
+  | A1: Act 1
+  | A2:∀ φ₁ φ₂, Cres φ₁ → Context φ₂ → Act (φ₁ ⊸ φ₂)
+  | A3: ∀ φ₁ φ₂, Act φ₁ → Act φ₂ → Act (φ₁ ⊕ φ₂)
+  | A4: ∀ φ₁ φ₂, Act φ₁ → Act φ₂ → Act (φ₁ & φ₂)
+  | A5: ∀ φ, Act φ → Act (! φ)
+  with Cres: formula -> Prop:=
+  | Cres1: Cres 1
+  | Cres2: ∀ n, Cres (Proposition n)
+  | Cres3: ∀ φ₁ φ₂, Cres φ₁ → Cres φ₂ → Cres (φ₁ ⊗ φ₂)
+  with Context: formula -> Prop:=
+  | Context1:∀ φ, Act φ → Context φ
+  | Context2:∀ φ, Res φ → Context φ
+  | Context3: ∀ φ₁ φ₂, Context φ₁ → Context φ₂ → Context (φ₁ ⊗ φ₂)
+  with Res: formula -> Prop:=
+    R1: Res 1
+  | R2: ∀ n, Res (Proposition n)
+  | R3: ∀ φ, Res φ → Res (!φ)
+  | R4: ∀ φ₁ φ₂, Res φ₁ → Res φ₂ → Res (φ₁ ⊗ φ₂)
+  | R5: ∀ φ₁ φ₂, Res φ₁ → Res φ₂ → Res (φ₁ & φ₂).
+
+  Inductive Goal : formula → Prop :=
+  | G1: Goal 1
+  | G2:  ∀ n, Goal (Proposition n)
+  | G3: ∀ φ₁ φ₂, Goal φ₁ → Goal φ₂ → Goal (φ₁ ⊗ φ₂)
+  | G4: ∀ φ₁ φ₂, Goal φ₁ → Goal φ₂ → Goal (φ₁ ⊕ φ₂)
+  | G5: ∀ φ₁ φ₂, Goal φ₁ → Goal φ₂ → Goal (φ₁ & φ₂).
+
+  Definition Contextall Γ f (_:Γ ⊢ f):Prop := Goal f /\ ∀g:formula, g ∈ Γ  → Context g.
+#+end_src
+
+** Exemple dans Emma Bovary:
+
+ Goal = A ⊕ D   Emma survit (Alive) ou bien Emma meurt (Dead). 
+
+ Res = R, G, B & 1, P & 1
+
+Signifie que 
+- R (discution avec Rodolphe) et
+- G (avec Guillaumin)
+*doivent* être "consommées" par l'histoire (la preuve), alors que
+- P (ingérer le poison) et
+- B (discussion avec Binet)
+sont des ressources optionnelles.
+
+ Act = (S ⊸ A), Emma se vend pour se sauver
+       (E ⊸ A) & 1, choix narratif: Emma s'enfuit avec Rodolphe, ou pas.
+       (P ⊸ D) & 1, choix narratif: Emma boit le poison (et meurt), ou pas.
+       (G ⊸ 1) ⊕ (G ⊸ S) conversation avec Guillaumin obligatoire mais issue
+                         dépend du choix (externe) d'Emma de se vendre ou pas.
+       (R ⊸ 1) & (R ⊸ E), conv. avec Rodolphe obligatoire, issue = choix narratif.
+       1 ⊕ ((B ⊸ S) & (B ⊸ 1)) conv. avec Binet optionnelle (choix externe).
+                               si oui: issue = choix narratif.
 
 * "Stabilité" du sous-ensemble
+#+INCLUDE: "restrict2.v"
 - propriété inductive générique =Istable pred h= qui signifie: pred
   est vrai pour tous les sous-arbres (stricts) de la preuve h.
   Reprends les constructeurs de ILL_proof.
 
   #+begin_src coq
-    Inductive Istable: ∀ {e} {f} (h: e ⊢ f) , Prop := 
-    | IId: ∀ Γ p heq, Istable (Id Γ p heq)
-    | IImpl_R: ∀ Γ p q h, pred h  →  Istable h  →  Istable (Impl_R Γ p q h)
-    | IImpl_L: ∀ Γ Δ Δ' p q r hin heq h h',
-        pred h  →  pred h'  →  Istable h  →  Istable h'
-        → Istable (Impl_L Γ Δ Δ' p q r hin heq h h')
-    | ITimes_R: ∀ Γ Δ Δ' p q heq h h',
-        pred h  →  pred h'  →  Istable h  →  Istable h'
-        → Istable (Times_R Γ Δ Δ' p q heq h h')
-    ...  
-  #+end_src
+  Inductive Istable: ∀ {e} {f} (h: e ⊢ f) , Prop := 
+  | IId: ∀ Γ p heq, Istable (Id Γ p heq)
+  | IImpl_R: ∀ Γ p q h, pred h  →  Istable h  →  Istable (Impl_R Γ p q h)
+  | IImpl_L: ∀ Γ Δ Δ' p q r hin heq h h',
+      pred h  →  pred h'  →  Istable h  →  Istable h'
+      → Istable (Impl_L Γ Δ Δ' p q r hin heq h h')
+  | ITimes_R: ∀ Γ Δ Δ' p q heq h h',
+      pred h  →  pred h'  →  Istable h  →  Istable h'
+      → Istable (Times_R Γ Δ Δ' p q heq h h')
+    ....
+  .
 
-
-#+begin_src coq
-Inductive Goal : formula → Prop :=
-| G1: Goal 1
-| G2:  ∀ n, Goal (Proposition n)
-| G3: ∀ φ₁ φ₂, Goal φ₁ → Goal φ₂ → Goal (φ₁ ⊗ φ₂)
-| G4: ∀ φ₁ φ₂, Goal φ₁ → Goal φ₂ → Goal (φ₁ ⊕ φ₂)
-| G5: ∀ φ₁ φ₂, Goal φ₁ → Goal φ₂ → Goal (φ₁ & φ₂).
-
-(** Contextall Γ f h means: all formulas of a Γ are in Context and f is in Goal. *)
-Definition Contextall Γ f (_:Γ⊢f):Prop := Goal f /\ ∀g:formula, g ∈ Γ  → Context g.
-
-Lemma Grammar_Stable : ∀ Γ φ (h:Γ ⊢ φ), Contextall h → Istable Contextall h.
+  Lemma Grammar_Stable : ∀ Γ φ (h:Γ ⊢ φ), Contextall h → Istable Contextall h.
 #+end_src
+
+* Preuve sur les preuves
+#+INCLUDE: "./ex_meta1.v"
+- Même principe que pour la stabilité: prédicat sur les sous-arbres
+- Preuve purement exhaustive (automatisation possible): =destruct= sur
+  la preuve
+  + chaque étage de la preuve = un lemme
+  + réutilisation des lemmes sur les buts indentiques
+   

@@ -4,81 +4,77 @@ Import Utf8_core.
 Import ILLVarInt.MILL. (* only this *)
 Import ILLVarInt.Tacs. (* only this *)
 Require Import unprove.
-Import FormulaMultiSet. (* and this *)
+(* Import FormulaMultiSet. (* and this *) *)
 Require Import ILL_equiv.
-(* Require Import boolP. *)
+Require Import boolP.
 
-Infix "?=" := Bool.eqb (at level 80).
+(* Infix "?=" := Bool.eqb (at level 80). *)
 
-Infix "OR" := orb (at level 70).
-Infix "AND" := andb (at level 70).
+Infix "OR" := orP (at level 70).
+Infix "AND" := andP (at level 70).
 
 Local Open Scope ILL_scope.
 Local Open Scope Emma.
 Require Import Setoid.
 
-Generalizable All Variables.
+(* Generalizable All Variables. *)
 
-Implicit Arguments Oplus_R_1.
+(* Implicit Arguments Oplus_R_1. *)
 
-Program Fixpoint exist
-  (cont: forall {e1} {f1} (h1: e1 ⊢ f1),bool)
-  `(h: e ⊢ f) {struct h}: bool := 
+Fixpoint exist (cont: forall e1 f1 (h1: e1 ⊢ f1),boolP) {e f} (h: e ⊢ f) {struct h}: boolP := 
   match h with
-    | Oplus_R_1 _ _ h' => cont _ _ h OR exist cont h'
-    | Oplus_R_2 _ _ h' => cont _ _ h OR exist cont h'
-    | Id _ p => cont _ _ h
-    | Impl_R _ _ h' => cont _ _ h OR exist cont h'
-    | Impl_L _ _ _ _ _ _ _ h' h'0 => cont _ _ h (*OR exist cont h' *) OR exist cont h'0
-    | Times_R _ _ _ _ _ h' h'0 => cont _ _ h OR exist cont h' OR exist cont h'0
-    | Times_L _ _ _ _ h' => cont _ _ h OR exist cont h'
-    | One_R _ => cont _ _ h
-    | One_L p _ h' => cont _ _ h OR exist cont h'
-    | And_R _ _ h' h'0 => cont _ _ h OR exist cont h' OR exist cont h'0
-    | And_L_1 _ _ _ _ h' => cont _ _ h OR exist cont h'
-    | And_L_2 _ _ _ _ h' => cont _ _ h OR exist cont h'
-    | Oplus_L _ _ _ _ h' h'0 => cont _ _ h OR exist cont h' OR exist cont h'0
-    | T_ => cont _ _ h
-    | Zero_ p h' => cont _ _ h
-    | Bang_D _ _ _ h' => cont _ _ h OR exist cont h'
-    | Bang_C _ _ _ h' => cont _ _ h OR exist cont h'
-    | Bang_W _ _ _ h' => cont _ _ h OR exist cont h'
+    | Oplus_R_1 _ _ _ h' => cont _ _ h OR exist cont h'
+    | Oplus_R_2 _ _ _ h' => cont _ _ h OR exist cont h'
+    | Id _ _ p => cont _ _ h
+    | Impl_R _ _ _ h' => cont _ _ h OR exist cont h'
+    | Impl_L _ _ _ _ _ _ _ _ h' h'0 => cont _ _ h (*OR exist cont h' *) OR exist cont h'0
+    | Times_R _ _ _ _ _ _ h' h'0 => cont _ _ h OR exist cont h' OR exist cont h'0
+    | Times_L _ _ _ _ _ h' => cont _ _ h OR exist cont h'
+    | One_R _ _ => cont _ _ h
+    | One_L _ p _ h' => cont _ _ h OR exist cont h'
+    | And_R _ _ _ h' h'0 => cont _ _ h OR exist cont h' OR exist cont h'0
+    | And_L_1 _ _ _ _ _ h' => cont _ _ h OR exist cont h'
+    | And_L_2 _ _ _ _ _ h' => cont _ _ h OR exist cont h'
+    | Oplus_L _ _ _ _ _ h' h'0 => cont _ _ h OR exist cont h' OR exist cont h'0
+    | T_ _ => cont _ _ h
+    | Zero_ _ p h' => cont _ _ h
+    | Bang_D _ _ _ _ h' => cont _ _ h OR exist cont h'
+    | Bang_C _ _ _ _ h' => cont _ _ h OR exist cont h'
+    | Bang_W _ _ _ _ h' => cont _ _ h OR exist cont h'
   end.
 
 
-Program Fixpoint for_all
-  (cont: forall (e1:env) (f1:formula) (h1: e1 ⊢ f1),bool)
-  `(h: e ⊢ f) {struct h}: bool := 
+Program Fixpoint for_all (cont: forall (e1:env) (f1:formula) (h1: e1 ⊢ f1),boolP) {e f} (h: e ⊢ f) {struct h}: boolP := 
   match h with
-    | Oplus_R_1 _ _ h' => cont _ _ h OR for_all cont h'
-    | Oplus_R_2 _ _ h' => cont _ _ h OR for_all cont h'
-    | Id _ p => cont _ _ h
-    | Impl_R _ _ h' => cont _ _ h OR for_all cont h'
-    | Impl_L _ _ _ _ _ _ _ h' h'0 => cont _ _ h OR for_all cont h'
-    | Times_R _ _ _ _ _ h' h'0 => cont _ _ h OR (for_all cont h' AND for_all cont h'0)
-    | Times_L _ _ _ _ h' => cont _ _ h OR for_all cont h'
-    | One_R _ => cont _ _ h
-    | One_L p _ h' => cont _ _ h OR for_all cont h'
-    | And_R _ _ h' h'0 => cont _ _ h OR (for_all cont h' AND for_all cont h'0)
-    | And_L_1 _ _ _ _ h' => cont _ _ h OR for_all cont h'
-    | And_L_2 _ _ _ _ h' => cont _ _ h OR for_all cont h'
-    | Oplus_L _ _ _ _ h' h'0 => cont _ _ h OR (for_all cont h' AND for_all cont h'0)
-    | T_ => cont _ _ h
-    | Zero_ p h' => cont _ _ h
-    | Bang_D _ _ _ h' => cont _ _ h OR for_all cont h'
-    | Bang_C _ _ _ h' => cont _ _ h OR for_all cont h'
-    | Bang_W _ _ _ h' => cont _ _ h OR for_all cont h'
+    | Oplus_R_1 _ _ _ h' => cont _ _ h OR for_all cont h'
+    | Oplus_R_2 _ _ _ h' => cont _ _ h OR for_all cont h'
+    | Id _ _ p => cont _ _ h
+    | Impl_R _ _ _ h' => cont _ _ h OR for_all cont h'
+    | Impl_L _ _ _ _ _ _ _ _ h' h'0 => cont _ _ h OR for_all cont h'
+    | Times_R _ _ _ _ _ _ h' h'0 => cont _ _ h OR (for_all cont h' AND for_all cont h'0)
+    | Times_L _ _ _ _ _ h' => cont _ _ h OR for_all cont h'
+    | One_R _ _ => cont _ _ h
+    | One_L _ p _ h' => cont _ _ h OR for_all cont h'
+    | And_R _ _ _ h' h'0 => cont _ _ h OR (for_all cont h' AND for_all cont h'0)
+    | And_L_1 _ _ _ _ _ h' => cont _ _ h OR for_all cont h'
+    | And_L_2 _ _ _ _ _ h' => cont _ _ h OR for_all cont h'
+    | Oplus_L _ _ _ _ _ h' h'0 => cont _ _ h OR (for_all cont h' AND for_all cont h'0)
+    | T_ _ => cont _ _ h
+    | Zero_ _ p h' => cont _ _ h
+    | Bang_D _ _ _ _ h' => cont _ _ h OR for_all cont h'
+    | Bang_C _ _ _ _ h' => cont _ _ h OR for_all cont h'
+    | Bang_W _ _ _ _ h' => cont _ _ h OR for_all cont h'
   end.
 
 Definition eq_formula_bool e f := 
-  if FormulaOrdered.eq_dec e f then true else false.
+  if FormulaOrdered.eq_dec e f then trueP else falseP.
 
 Infix "?=?" := eq_formula_bool (at level 60).
 
 Definition choices_between_A_and_M e f `{h: e ⊢ f} := 
   match h with
-    | Oplus_L p q _ _ x x0 => p ?=? A AND q ?=? M
-    | _ => false
+    | Oplus_L _ p q _ _ x x0 => p ?=? A AND q ?=? M
+    | _ => falseP
   end.
 
 Definition choices_between_S_and_R e f `{h: e ⊢ f} := 
