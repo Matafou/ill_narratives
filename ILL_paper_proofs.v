@@ -290,7 +290,7 @@ Section figure_5.
 
   Local Notation "'ρ'" := ({ H,F,L,D₂, G⊸(!(H⊸(H⊗M))) }).
   Local Notation "'μ'" := ({ !((D₁⊗M)⊸D₀),!((D₂⊗M)⊸D₁)}).
-  Local Notation "'λ'" := ({ !((L⊗D₀)⊸(L⊗D₁)),!((L⊗D₁)⊸(L⊗D₂))}).
+  Local Notation "'λ'" := ({ !((L⊗D₀)⊸(L⊗D₁)),!((L⊗D₁)⊸(L⊗D₂))}) (at level 10).
 
   (* Ltac bang_c  p'   :=  *)
   (*   match goal with  *)
